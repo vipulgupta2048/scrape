@@ -17,6 +17,6 @@ for count in range(1 , pages+1):
         linksContainer = et.xpath("//ul[@class='newsListfull']/li[@class='p_news']/div[@class='content']/h3[@class='title']/a/@href")
         timeContainer = et.xpath("//span[@class='deskTime']/text()")
         for image,title,link,time in zip(imagesContainer,titlesContainer,linksContainer,timeContainer):
-            newsData.append({'image': image, 'title': title, 'link': link, 'time': time });
+            newsData.append({'image': image, 'title': title, 'link': link, 'time': time })
         with open ('data/indiatvnews.json','a') as f:
             f.write(json.dumps(newsData))
