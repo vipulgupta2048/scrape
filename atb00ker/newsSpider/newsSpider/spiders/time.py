@@ -10,6 +10,7 @@ import json
 class TimeSpider(scrapy.Spider):
     name = 'time'
     start_urls = ''
+
     def __init__(self):
         pages = eval(input("Enter the number of pages you want to scrape: "))
         self.driver = webdriver.Firefox(executable_path= str(os.getcwd()) + '/geckodriver')
@@ -19,13 +20,13 @@ class TimeSpider(scrapy.Spider):
             next.click()
             time.sleep(5)
         response = self.driver.page_source
-        self.driver.close()
-        # Used for bug fixing!
+        # # Used for bug fixing!
         # with open ('savedCopy.html','w+') as f:
         #     f.write(response)
         # with open ('savedCopy.html','r') as f:
         #     response = f.read()
         return self.parseNews(response)
+
 
     def parseNews(self, response):
         linksContainer = []
@@ -39,24 +40,71 @@ class TimeSpider(scrapy.Spider):
             link = 'http://time.com' + str(link)
             linksContainer.append(link)
             try:
-                linkData = requests.get(link, headers= {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
-                linkData = linkData.text
+                linkData = requests.get(link, headers= {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}).text
                 et = html.fromstring(linkData)
-                pageTime = et.xpath('//div[@class="row text font-accent size-1x-small color-darker-gray"]/text()')
-                pageImage = et.xpath('//picture/img/@src')
-                # if not pageImage:
-                #     pageGImage = et.xpath("//*[@id='vjs_video_3']/div[2]")
-                #     # pageImage = pageImage.split('"')
-                #     print (pageGImage)
+                pageTimeList = et.xpath('//div[contains(@class,"color-darker-gray")]/text()')
+                pageImageList = et.xpath('//picture/img/@src')
+                if pageImageList and pageTimeList:
+                    pageTime = pageTimeList[0]
+                    pageImage = pageImageList[0]
+                else:
+                    self.driver.get(link)
+                    infoPage = html.fromstring(self.driver.page_source)
+                    if not pageTimeList and not pageImageList:
+                        pageTime = self.getPageTime(infoPage)
+                        pageImage = self.getPageImage(infoPage)
+                    elif not pageImageList:
+                        pageTime = pageTimeList[0]
+                        pageImage = self.getPageImage(infoPage)
+                    elif not pageTimeList:
+                        pageTime = self.getPageTime(infoPage)
+                        pageImage = pageImageList[0]
+                    else:
+                        print ('Unexpected Error occured for values: \nTime: ', pageTimeList, "\nImage: ", pageImageList)
                 timeContainer.append(pageTime)
                 imagesContainer.append(pageImage)
-                # print (pageTime)
             except:
-                print ("Error 101: Problem while fetching article date.")
-                timeContainer.append('Error in Loading')
-                imagesContainer.append('Error in Loading')
+                print ("Error 101: Problem while fetching article data;")
+                timeContainer.append('Error!')
+                imagesContainer.append('Error!')
+        self.driver.close()
         for image,title,link,date in zip(imagesContainer,titlesContainer,linksContainer,timeContainer):
             newsData.append({'image': image, 'title': title, 'link': link, 'time': date })
         with open ('time.json','w+') as f:
             f.write(json.dumps(newsData))
             os.rename('time.json','../data/time.json')
+
+
+    def getPageTime(self, timePage):
+        try:
+            pageTime = timePage.xpath('//div[contains(@class,"timestamp")]/text()')
+        except:
+            print ("Error 103: Problem while storing time", pageTime)
+            with open ('metaTime.html','w+') as fa:
+                fa.write(timePage)
+            pageTime = 'Error!'
+        finally:
+            return pageTime
+
+
+    def getPageImage(self, videoPage):
+        try:
+            pageImageStyle = videoPage.xpath("//div[@class='vjs-poster']/@style")
+            pageImageContainer = str(pageImageStyle).split('"')
+            pageImage = pageImageContainer[1]
+        except:
+            try:
+                pageImageStyle = videoPage.xpath("//div[@class='ytp-cued-thumbnail-overlay-image']/@style")
+                pageImageContainer = str(pageImageStyle).split('"')
+                pageImage = pageImageContainer[1]
+            except:
+                try:
+                    pageImageContainer = videoPage.xpath("//div[contains(@class,'_5ihbkgAj')]/img/@src")
+                    pageImage = pageImageContainer[0]
+                except:
+                    print ("Error 102: Problem while storing image", pageImageContainer)
+                    with open ('metaImage.html','w+') as fa:
+                        fa.write(videoPage)
+                    pageImage = "Error!"
+        finally:
+            return pageImage
