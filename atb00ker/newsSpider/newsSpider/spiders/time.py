@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
+# This is an Incomplete code and i am leaving it at this state, it will generate incorrect data every now and then!
+# It takes forever to run and isn't even async, a shame even after using the awesome scrapy!
+
 import scrapy
 import requests
 import os.path
 import time
 from selenium import webdriver
+from selenium.webdriver.remote.remote_connection import LOGGER
 from lxml import html
 from lxml import etree
 import json
+import logging
+
 class TimeSpider(scrapy.Spider):
     name = 'time'
     start_urls = ''
@@ -14,17 +20,14 @@ class TimeSpider(scrapy.Spider):
     def __init__(self):
         pages = eval(input("Enter the number of pages you want to scrape: "))
         self.driver = webdriver.Firefox(executable_path= str(os.getcwd()) + '/geckodriver')
+        LOGGER.setLevel(logging.WARNING)
+        self.driver.set_page_load_timeout(100)
         self.driver.get('http://time.com/section/tech/')
         for counter in range(1,pages):
             next = self.driver.find_element_by_xpath('//button[@class="mdl_R80l"]')
             next.click()
             time.sleep(5)
         response = self.driver.page_source
-        # # Used for bug fixing!
-        # with open ('savedCopy.html','w+') as f:
-        #     f.write(response)
-        # with open ('savedCopy.html','r') as f:
-        #     response = f.read()
         return self.parseNews(response)
 
 
@@ -64,7 +67,7 @@ class TimeSpider(scrapy.Spider):
                 timeContainer.append(pageTime)
                 imagesContainer.append(pageImage)
             except:
-                print ("Error 101: Problem while fetching article data;")
+                print ("Error 101: Problem while fetching article data.")
                 timeContainer.append('Error!')
                 imagesContainer.append('Error!')
         self.driver.close()
@@ -79,9 +82,7 @@ class TimeSpider(scrapy.Spider):
         try:
             pageTime = timePage.xpath('//div[contains(@class,"timestamp")]/text()')
         except:
-            print ("Error 103: Problem while storing time", pageTime)
-            with open ('metaTime.html','w+') as fa:
-                fa.write(timePage)
+            print ("Error 103: Problem while storing time.", pageTime)
             pageTime = 'Error!'
         finally:
             return pageTime
@@ -94,17 +95,10 @@ class TimeSpider(scrapy.Spider):
             pageImage = pageImageContainer[1]
         except:
             try:
-                pageImageStyle = videoPage.xpath("//div[@class='ytp-cued-thumbnail-overlay-image']/@style")
-                pageImageContainer = str(pageImageStyle).split('"')
-                pageImage = pageImageContainer[1]
+                pageImageContainer = videoPage.xpath("//div[contains(@class,'_5ihbkgAj')]/img/@src")
+                pageImage = pageImageContainer[0]
             except:
-                try:
-                    pageImageContainer = videoPage.xpath("//div[contains(@class,'_5ihbkgAj')]/img/@src")
-                    pageImage = pageImageContainer[0]
-                except:
-                    print ("Error 102: Problem while storing image", pageImageContainer)
-                    with open ('metaImage.html','w+') as fa:
-                        fa.write(videoPage)
-                    pageImage = "Error!"
+                print ("Error 102: Problem while storing image.", pageImageContainer)
+                pageImage = 'Error!'
         finally:
             return pageImage
