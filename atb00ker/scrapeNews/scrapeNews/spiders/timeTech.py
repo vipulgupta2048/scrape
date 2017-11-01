@@ -6,7 +6,7 @@ from scrapeNews.items import ScrapenewsItem
 
 class TimetechSpider(scrapy.Spider):
     name = 'timeTech'
-    allowed_domains = ['http://time.com/wp-json/ti-api/v1/posts']
+    allowed_domains = ['time.com/wp-json/ti-api/v1/posts']
     def start_requests(self):
         params = '?time_section_slug=time-section-tech&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=30'
         start_url = 'http://time.com/wp-json/ti-api/v1/posts/' + params

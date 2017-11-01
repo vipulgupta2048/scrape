@@ -14,3 +14,10 @@ class ScrapenewsItem(scrapy.Item):
     date = scrapy.Field()
     content = scrapy.Field()
     image = scrapy.Field()
+
+
+# item['title']
+# item['link']
+# item['date']
+# item['content']
+# item['image']
