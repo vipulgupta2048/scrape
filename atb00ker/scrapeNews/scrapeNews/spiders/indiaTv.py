@@ -19,6 +19,7 @@ class IndiatvSpider(scrapy.Spider):
             item['content'] = self.getPageContent(newsBox)
             item['date'] = self.getPageDate(newsBox)
             item['link'] = self.getPageLink(newsBox)
+            item['source'] = 'India TV'
             yield item
 
 

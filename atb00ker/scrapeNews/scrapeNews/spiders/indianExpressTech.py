@@ -22,6 +22,7 @@ class IndianexpresstechSpider(scrapy.Spider):
         item['content'] = self.getPageContent(response)
         item['date'] = self.getPageDate(response)
         item['link'] = self.getPageLink(response)
+        item['source'] = 'Indian Express'
         yield item
 
 
