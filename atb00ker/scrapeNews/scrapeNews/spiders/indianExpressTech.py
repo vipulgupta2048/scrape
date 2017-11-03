@@ -59,10 +59,10 @@ class IndianexpresstechSpider(scrapy.Spider):
 
     def getPageDate(self, response):
         try:
-             data = str((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Published:')[1]).split("'")[0]) #Relax, This line Will parse the date and remove unnecessary details out of the string provided!
+             data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Published:')[1]).split("'")[0]) #Relax, This line Will parse the date and remove unnecessary details out of the string provided!
         except IndexError:
             try:
-                data = str((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Updated: ')[1]).split("'")[0]) #Relax, This line Will parse the date and remove unnecessary details out of the string provided!
+                data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Updated: ')[1]).split("'")[0]) #Relax, This line Will parse the date and remove unnecessary details out of the string provided!
             except IndexError:
                 print('Error 105: ',response.url)
                 data = 'Error'
