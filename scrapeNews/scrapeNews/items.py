@@ -22,3 +22,4 @@ class ScrapenewsItem(scrapy.Item):
 # item['date']
 # item['content']
 # item['image']
+# item['source']

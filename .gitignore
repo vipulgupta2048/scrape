@@ -1,12 +1,12 @@
 # Ignore python environment
 venv/
 
-# Ignore data files in atb00ker
-atb00ker/data/
+# Ignore data files[Maybe Useful for local development]
+data/
 
 #Ignore scraper's compiled files 
-atb00ker/scrapeNews/scrapeNews/__pycache__/
+scrapeNews/scrapeNews/__pycache__/
 
 #Ignore spiders' complied files
-atb00ker/scrapeNews/scrapeNews/spiders/__pycache__/
+scrapeNews/scrapeNews/spiders/__pycache__/
 
