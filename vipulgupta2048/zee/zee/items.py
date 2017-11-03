@@ -15,4 +15,4 @@ class ZeeItem(scrapy.Item):
     datetime = scrapy.Field()
     headline = scrapy.Field()
     link = scrapy.Field()
-    pass
+ 

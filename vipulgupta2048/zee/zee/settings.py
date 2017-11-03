@@ -22,7 +22,7 @@ NEWSPIDER_MODULE = 'zee.spiders'
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 64
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
@@ -72,12 +72,12 @@ COOKIES_ENABLED = False
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-AUTOTHROTTLE_START_DELAY = 0
+#AUTOTHROTTLE_START_DELAY = 0
 # The maximum download delay to be set in case of high latencies
-AUTOTHROTTLE_MAX_DELAY = 60
+#AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-AUTOTHROTTLE_TARGET_CONCURRENCY = 3.0
+AUTOTHROTTLE_TARGET_CONCURRENCY = 10
 # Enable showing throttling stats for every response received:
 AUTOTHROTTLE_DEBUG = True
 # Enable and configure HTTP caching (disabled by default)

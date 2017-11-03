@@ -1,11 +1,10 @@
 from urllib.request import urlopen
-from bs4            import BeautifulSoup
+from bs4        import BeautifulSoup
 import json
 
 url = "https://en.wikipedia.org/wiki/List_of_state_and_union_territory_capitals_in_India"
 page = urlopen(url)
 soup = BeautifulSoup(page)
-
 right = soup.find_all("table", class_='wikitable sortable plainrowheaders')
 
 #Generate lists
@@ -28,7 +27,6 @@ for row in right[0].find_all('tr'):
         E.append(cells[3].find(text=True))
         F.append(cells[4].find(text=True))
         G.append(cells[5].find(text=True))
-        #print (A+B+C+D+E+F+G)
         
         dick_table = {
 			"Serial No." : A,
@@ -38,9 +36,6 @@ for row in right[0].find_all('tr'):
 			"JCapital"   : E,
 			"Year"       : F,
 			"FormerC"    : G
-		}
-
-        
-        
+		}        
 with open("table_wikipedia_data.json", "w") as writeJSON:
 	json.dump(dick_table, writeJSON)
