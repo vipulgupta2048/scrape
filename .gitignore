@@ -4,9 +4,11 @@ venv/
 # Ignore data files[Maybe Useful for local development]
 data/
 
-#Ignore scraper's compiled files 
+#Ignore scraper's compiled files
 scrapeNews/scrapeNews/__pycache__/
 
 #Ignore spiders' complied files
 scrapeNews/scrapeNews/spiders/__pycache__/
 
+#Deprecated, please remove
+vipulgupta2048/Data

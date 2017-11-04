@@ -13,7 +13,7 @@ class zeespider(scrapy.Spider):
             link = x.xpath('.//@href').extract_first()  #extracts URL for the articles recursively   
             yield response.follow(link, callback = self.parse_news)        
         
-        #For scraping the links on the next page of the website    
+        #For scraping the links on the next page of the website
         next_page = response.xpath('//link[@rel = "next"]/@href').extract_first()   
         if next_page is not None:
            yield response.follow(next_page, callback = self.parse)
