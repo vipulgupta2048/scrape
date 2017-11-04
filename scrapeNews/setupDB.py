@@ -1,34 +1,25 @@
-## Enter the Details Here
-PASSWORD = 'simple'
-
-SPIDER_DETAILS = [
-#{'site_id':'','site_name':'','site_url':''}
-{'site_id':101,'site_name':'Indian Express','site_url':'http://indianexpress.com/section/technology/'},
-{'site_id':102,'site_name':'India TV','site_url':'http://www.indiatvnews.com/business/tech/'},
-{'site_id':103,'site_name':'Time','site_url':'http://time.com/section/tech/'}
-]
-
 # Setting Up Database with imformation as given above
 import psycopg2
+import envConfig
 
 class setupDB:
 
-    def createDatabase(PASSWORD):
+    def createDatabase(USERNAME, PASSWORD):
         try:
-            connection = psycopg2.connect(host='localhost', user='scrapeuser', database='postgres', password=PASSWORD)
+            connection = psycopg2.connect(host='localhost', user=USERNAME, database='postgres', password=PASSWORD)
             cursor = connection.cursor()
             connection.autocommit = True
             cursor.execute('CREATE DATABASE scraped_news')
             cursor.close()
             connection.close()
-            setupDB.createTables(PASSWORD)
+            setupDB.createTables(USERNAME, PASSWORD)
         except psycopg2.ProgrammingError as Error:
-            setupDB.createTables(PASSWORD)
+            setupDB.createTables(USERNAME, PASSWORD)
         except Exception as Error:
             print ("Error 101: ", Error)
 
 
-    def createTables(PASSWORD):
+    def createTables(USERNAME, PASSWORD):
         commands = (
             """
             CREATE TABLE IF NOT EXISTS site_table (
@@ -50,21 +41,21 @@ class setupDB:
             """
             )
         try:
-            connection = psycopg2.connect(host='localhost', user='scrapeuser', database='scraped_news', password=PASSWORD)
+            connection = psycopg2.connect(host='localhost', user=USERNAME, database='scraped_news', password=PASSWORD)
             cursor = connection.cursor()
             for command in commands:
                 cursor.execute(command)
                 connection.commit()
             cursor.close()
             connection.close()
-            setupDB.insertSpiderRecords(PASSWORD, *SPIDER_DETAILS)
+            setupDB.insertSpiderRecords(USERNAME, PASSWORD, *SPIDER_DETAILS)
         except Exception as Error:
             print ("Error 102: ", Error)
 
 
-    def insertSpiderRecords(PASSWORD, *SPIDER_DETAILS):
+    def insertSpiderRecords(USERNAME, PASSWORD, *SPIDER_DETAILS):
         try:
-            connection = psycopg2.connect(host='localhost', user='scrapeuser', database='scraped_news', password=PASSWORD)
+            connection = psycopg2.connect(host='localhost', user=USERNAME, database='scraped_news', password=PASSWORD)
             cursor = connection.cursor()
             for command in SPIDER_DETAILS:
                 try:
@@ -74,10 +65,17 @@ class setupDB:
                 connection.commit()
             cursor.close()
             connection.close()
+            print ("\nDatabase setup successfully completed!\n")
         except Exception as Error:
             print ("Error 103: ", Error)
 
 
 
 if __name__ == '__main__':
-    setupDB.createDatabase(PASSWORD)
+    # Setting up local variables USERNAME, PASSWORD & SPIDER_DETAILS
+    USERNAME = envConfig.USERNAME
+    PASSWORD = envConfig.PASSWORD
+    SPIDER_DETAILS = envConfig.SPIDER_DETAILS
+
+    # Called to begin Database Setup
+    setupDB.createDatabase(USERNAME, PASSWORD)

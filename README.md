@@ -42,23 +42,31 @@ ITEM_PIPELINES = {
 
 - Make User:
 	- `sudo -i -u postgres`
-	- `createuser scrapeuser --interactive --pwprompt`
-	- Enter name of role to add: `scrapeuser`
+	- `createuser YOUR_ROLE_NAME/YOUR_USERNAME --interactive --pwprompt`
 
 - Setup Database:
-	- Insert your password.
-	- Insert your spider details.
-	- Run: `python3 setupDB.py`
+    - Create file a scrapeNews/envConfig.py; Inside it, Write:
+    ```
+    USERNAME = 'YOUR_ROLE_NAME/YOUR_USERNAME'
+    PASSWORD = 'YOUR_PASSWORD'
+    SPIDER_DETAILS = [
+    # Add your Spiders in the following format.
+    # {'site_id':'YOUR_SPIDER_ID','YOUR_SPIDER_NAME':'','site_url':'YOUR_SPIDER_URL'},
+    {'site_id':101,'site_name':'Indian Express','site_url':'http://indianexpress.com/section/technology/'},
+    {'site_id':102,'site_name':'India TV','site_url':'http://www.indiatvnews.com/business/tech/'},
+    {'site_id':103,'site_name':'Time','site_url':'http://time.com/section/tech/'}
+    ]
+    ```
 
+    - Run setupDB.py
 ## Run Spiders
 **Note: Navigate to the folder containing scrapy.cfg**
 ```
-scrapy crawl SPIDER_NAME -o DATA_FILE.json
+scrapy crawl SPIDER_NAME
 ```
-
 - SPIDER_NAME List:
 	1. indianExpressTech
-	2. indiaTv
+	2. indiaTv  
 	3. timeTech
 
 Happy collaborating !!   
