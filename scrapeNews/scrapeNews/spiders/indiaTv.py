@@ -17,16 +17,16 @@ class IndiatvSpider(scrapy.Spider):
             item['image']  = self.getPageImage(newsBox)
             item['title'] = self.getPageTitle(newsBox)
             item['content'] = self.getPageContent(newsBox)
-            item['date'] = self.getPageDate(newsBox)
+            item['newsDate'] = self.getPageDate(newsBox)
             item['link'] = self.getPageLink(newsBox)
-            item['source'] = 'India TV'
+            item['source'] = 102
             yield item
 
 
     def getPageTitle(self, newsBox):
         data = newsBox.xpath("div[@class='content']/h3[@class='title']/a/text()").extract_first()
         if (data is None):
-            print('Error 101: ',newsBox.extract())
+            print('Error 301: ',newsBox.extract())
             data = 'Error'
         return data
 
@@ -34,7 +34,7 @@ class IndiatvSpider(scrapy.Spider):
     def getPageLink(self, newsBox):
         data =  newsBox.xpath("a[@class='thumb']/@href").extract_first()
         if (data is None):
-            print('Error 102: ',newsBox.extract())
+            print('Error 302: ',newsBox.extract())
             data = 'Error'
         return data
 
@@ -42,7 +42,7 @@ class IndiatvSpider(scrapy.Spider):
     def getPageImage(self, newsBox):
         data = newsBox.xpath("a[@class='thumb']/img/@data-original").extract_first()
         if (data is None):
-            print('Error 103: ',newsBox.extract())
+            print('Error 303: ',newsBox.extract())
             data = 'Error'
         return data
 
@@ -51,7 +51,7 @@ class IndiatvSpider(scrapy.Spider):
         try:
             data = newsBox.xpath("div[@class='content']/span[@class='deskTime']/text()").extract_first().split('|')[1]# Split Used to Spit Data in Correct format!
         except IndexError:
-            print('Error 104: ',newsBox.extract())
+            print('Error 304: ',newsBox.extract())
             data = 'Error'
         finally:
             return data
@@ -64,6 +64,6 @@ class IndiatvSpider(scrapy.Spider):
                 et = html.fromstring(newsPage)
                 data = ' '.join(str(et.xpath("//div[@class='content']/p/text()")).split(' ')[:30]) #Relax, This takes in all the paragraphs from the page and spit out first 30 words in a string!
             except Exception as Error:
-                print('Error 105: ',Error)
+                print('Error 305: ',Error)
                 data = 'Error'
         return data

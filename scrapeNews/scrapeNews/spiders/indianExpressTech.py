@@ -20,16 +20,16 @@ class IndianexpresstechSpider(scrapy.Spider):
         item['image']  = self.getPageImage(response)
         item['title'] = self.getPageTitle(response)
         item['content'] = self.getPageContent(response)
-        item['date'] = self.getPageDate(response)
+        item['newsDate'] = self.getPageDate(response)
         item['link'] = self.getPageLink(response)
-        item['source'] = 'Indian Express'
+        item['source'] = 101
         yield item
 
 
     def getPageContent(self, response):
         data = response.xpath('//h2[@class="synopsis"]/text()').extract_first()
         if (data is None):
-            print('Error 101: ',response.url)
+            print('Error 201: ',response.url)
             data = 'Error'
         return data
 
@@ -37,7 +37,7 @@ class IndianexpresstechSpider(scrapy.Spider):
     def getPageTitle(self, response):
         data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
         if (data is None):
-            print('Error 102: ',response.url)
+            print('Error 202: ',response.url)
             data = 'Error'
         return data
 
@@ -45,7 +45,7 @@ class IndianexpresstechSpider(scrapy.Spider):
     def getPageLink(self, response):
         data = response.url
         if (data is None):
-            print('Error 103: ',response.url)
+            print('Error 203: ',response.url)
             data = 'Error'
         return data
 
@@ -53,7 +53,7 @@ class IndianexpresstechSpider(scrapy.Spider):
     def getPageImage(self, response):
         data = response.xpath('//span[@class="custom-caption"]/img/@data-lazy-src').extract_first()
         if (data is None):
-            print('Error 104: ',response.url)
+            print('Error 204: ',response.url)
             data = 'Error'
         return data
 
@@ -65,7 +65,7 @@ class IndianexpresstechSpider(scrapy.Spider):
             try:
                 data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Updated: ')[1]).split("'")[0]) #Relax, This line Will parse the date and remove unnecessary details out of the string provided!
             except IndexError:
-                print('Error 105: ',response.url)
+                print('Error 205: ',response.url)
                 data = 'Error'
         finally:
             return data

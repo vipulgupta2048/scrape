@@ -8,17 +8,20 @@ import psycopg2
 from scrapeNews.items import ScrapenewsItem
 
 class ScrapenewsPipeline(object):
-    def __init__(self):
-        self.connection = psycopg2.connect(host='localhost', database='scrapeNews', user='postgres')
+
+    def open_spider(self, spider):
+        self.connection = psycopg2.connect(host='localhost', user='scrapeuser', database='scraped_news', password='simple')
         self.cursor = self.connection.cursor()
+        self.connection.autocommit = True
 
-
+    def close_spider(self, spider):
+        self.cursor.close()
+        self.connection.close()
     def process_item(self, item, spider):
         try:
-            self.cursor.execute("""INSERT INTO news (title, content, image, link, newsDate) VALUES(%s, %s, %s, %s, %s, %s, %s)""", (item.get('title'), item.get('content'), item.get('image'), item.get('link'), item.get('newsDate'),))
+            self.cursor.execute("""INSERT INTO news_table (title, content, image, link, newsDate, site_id) VALUES (%s, %s, %s, %s, %s, %s)""" , (item.get('title'), item.get('content'), item.get('image'), item.get('link'), item.get('newsDate'), item.get('source')))
             self.connection.commit()
-            self.cursor.fetchall()
-        except psycopg2.DatabaseError, Error:
-            print ("Error: ",Error)
+        except Exception as Error:
+            print ("Error 103: ", Error)
         finally:
             return item
