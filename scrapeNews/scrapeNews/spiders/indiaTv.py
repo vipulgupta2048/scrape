@@ -49,7 +49,7 @@ class IndiatvSpider(scrapy.Spider):
 
     def getPageDate(self, newsBox):
         try:
-            data = newsBox.xpath("div[@class='content']/span[@class='deskTime']/text()").extract_first().split('|')[1]# Split Used to Spit Data in Correct format!
+            data = newsBox.xpath("div[@class='content']/span[@class='deskTime']/text()").extract_first().split('|')[1].rsplit(' ',1)[0] # Split Used to Spit Data in Correct format!
         except IndexError:
             print('Error 304: ',newsBox.extract())
             data = 'Error'
