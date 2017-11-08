@@ -11,13 +11,15 @@ import scrapy
 class ScrapenewsItem(scrapy.Item):
     title = scrapy.Field()
     link = scrapy.Field()
-    date = scrapy.Field()
+    newsDate = scrapy.Field()
     content = scrapy.Field()
     image = scrapy.Field()
+    source = scrapy.Field()
 
 
 # item['title']
 # item['link']
-# item['date']
+# item['newsDate']
 # item['content']
 # item['image']
+# item['source']

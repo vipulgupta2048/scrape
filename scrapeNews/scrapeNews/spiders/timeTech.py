@@ -18,7 +18,8 @@ class TimetechSpider(scrapy.Spider):
         for newsBox in newsBoxList:
             item['title'] = newsBox['title']['rendered'],
             item['link'] = newsBox['link'],
-            item['date'] = newsBox['modified'],
+            item['newsDate'] = newsBox['modified'],
             item['content'] = ' '.join(str(newsBox['content']['plain']).split(' ')[:30]), #Relax, This line Takes the entire content (string), converts it to a list of first 30 words and joins them with white space to make it back to a string!
             item['image'] = newsBox['_embedded']['fortune:featured'][0]['image']['src']['square']
+            item['source'] = 103
             yield item
