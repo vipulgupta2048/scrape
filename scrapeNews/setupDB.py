@@ -28,18 +28,18 @@ class setupDB:
             """
             CREATE TABLE IF NOT EXISTS site_table (
                 id SMALLINT PRIMARY KEY,
-                site_name VARCHAR(255) NOT NULL,
-                site_url VARCHAR(255) NOT NULL
+                site_name VARCHAR NOT NULL,
+                site_url VARCHAR NOT NULL
                 )
             """,
             """
             CREATE TABLE IF NOT EXISTS news_table (
                 id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
-                content VARCHAR(255) NOT NULL,
-                link VARCHAR(255) NOT NULL,
-                image VARCHAR(255) NOT NULL,
-                newsDate VARCHAR(255) NOT NULL,
+                title VARCHAR NOT NULL,
+                content VARCHAR NOT NULL,
+                link VARCHAR NOT NULL,
+                image VARCHAR NOT NULL,
+                newsDate VARCHAR NOT NULL,
                 site_id SMALLINT NOT NULL REFERENCES site_table (id)
             )
             """

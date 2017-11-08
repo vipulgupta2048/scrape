@@ -51,5 +51,4 @@ class ScrapperSpider(scrapy.Spider):
                 'content': news.css('div[itemprop*=articleBody]::text').extract_first(),
                 'link' : news.css('div.read-more>a::attr(href)')
             }
-
             yield item
