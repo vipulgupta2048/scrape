@@ -2,7 +2,8 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 from requests import get as parsePage
-from lxml import etree,html
+from lxml import etree, html
+
 
 class IndiatvSpider(scrapy.Spider):
     name = 'indiaTv'
@@ -13,8 +14,8 @@ class IndiatvSpider(scrapy.Spider):
         newsContainer = response.xpath('//div[contains(@class,"topNews")]/ul[@class="newsListfull"]/li')
 
         for newsBox in newsContainer:
-            item = ScrapenewsItem() #Scraper Items
-            item['image']  = self.getPageImage(newsBox)
+            item = ScrapenewsItem()  # Scraper Items
+            item['image'] = self.getPageImage(newsBox)
             item['title'] = self.getPageTitle(newsBox)
             item['content'] = self.getPageContent(newsBox)
             item['newsDate'] = self.getPageDate(newsBox)
@@ -22,36 +23,33 @@ class IndiatvSpider(scrapy.Spider):
             item['source'] = 102
             yield item
 
-
     def getPageTitle(self, newsBox):
         data = newsBox.xpath("div[@class='content']/h3[@class='title']/a/text()").extract_first()
         if (data is None):
-            print('Error 301: ',newsBox.extract())
+            print('Error 301: ', newsBox.extract())
             data = 'Error'
         return data
-
 
     def getPageLink(self, newsBox):
-        data =  newsBox.xpath("a[@class='thumb']/@href").extract_first()
+        data = newsBox.xpath("a[@class='thumb']/@href").extract_first()
         if (data is None):
-            print('Error 302: ',newsBox.extract())
+            print('Error 302: ', newsBox.extract())
             data = 'Error'
         return data
-
 
     def getPageImage(self, newsBox):
         data = newsBox.xpath("a[@class='thumb']/img/@data-original").extract_first()
         if (data is None):
-            print('Error 303: ',newsBox.extract())
+            print('Error 303: ', newsBox.extract())
             data = 'Error'
         return data
 
-
     def getPageDate(self, newsBox):
         try:
-            data = newsBox.xpath("div[@class='content']/span[@class='deskTime']/text()").extract_first().split('|')[1]# Split Used to Spit Data in Correct format!
+            # split & rsplit Used to Spit Data in Correct format!
+            data = newsBox.xpath("div[@class='content']/span[@class='deskTime']/text()").extract_first().split('|')[1].rsplit(' ', 1)[0]
         except IndexError:
-            print('Error 304: ',newsBox.extract())
+            print('Error 304: ', newsBox.extract())
             data = 'Error'
         finally:
             return data
@@ -62,8 +60,10 @@ class IndiatvSpider(scrapy.Spider):
             try:
                 newsPage = parsePage(self.getPageLink(newsBox)).text
                 et = html.fromstring(newsPage)
-                data = ' '.join(str(et.xpath("//div[@class='content']/p/text()")).split(' ')[:30]) #Relax, This takes in all the paragraphs from the page and spit out first 30 words in a string!
+                # Relax, This takes in all the paragraphs from the page and
+                # spit out first 30 words in a string!
+                data = ' '.join(str(et.xpath("//div[@class='content']/p/text()")).split(' ')[:30])
             except Exception as Error:
-                print('Error 305: ',Error)
+                print('Error 305: ', Error)
                 data = 'Error'
         return data

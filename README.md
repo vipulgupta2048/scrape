@@ -41,6 +41,7 @@ ITEM_PIPELINES = {
 	- port:   `5432`
 
 - Make User:
+	**Note: Your USERNAME and PASSWORD must contain only smallcase characters.**
 	- `sudo -i -u postgres`
 	- `createuser YOUR_ROLE_NAME/YOUR_USERNAME --interactive --pwprompt`
 
