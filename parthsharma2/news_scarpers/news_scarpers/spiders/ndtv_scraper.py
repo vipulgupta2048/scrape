@@ -2,6 +2,7 @@
 import scrapy
 from news_scarpers.items import NewsScarpersItem
 import time
+import logging
 
 
 class NdtvScraperSpider(scrapy.Spider):
@@ -44,5 +45,5 @@ class NdtvScraperSpider(scrapy.Spider):
                     'image': news.css('div.new_storylising_img>a>img::attr(src)').extract_first(),
                 }
             except AttributeError:
-                pass
+                logging.debug('Skipping a News Item, possibly an Advertisment')
             yield item
