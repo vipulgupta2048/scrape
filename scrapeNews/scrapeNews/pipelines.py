@@ -62,7 +62,7 @@ class ScrapenewsPipeline(object):
                 print("Error 106: ", Error)
         elif spiderName is 'indiaTv':
             try:
-                return (datetime.strptime(itemDate," %B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
+                return (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
                 print("Error 107: ", Error)
         else:
