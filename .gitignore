@@ -25,3 +25,6 @@ vipulgupta2048/Data
 
 #ignore any __pycache__
 **/__pycache__
+
+#ignore .sh files
+*.sh
