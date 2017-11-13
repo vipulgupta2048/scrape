@@ -21,7 +21,7 @@ class IndiatvSpider(scrapy.Spider):
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
         item['link'] = self.getPageLink(response)
-        item['source'] = 101
+        item['source'] = 102
         yield item
 
     def getPageTitle(self, response):
