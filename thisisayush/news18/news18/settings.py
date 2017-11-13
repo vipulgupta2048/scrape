@@ -9,10 +9,9 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 import logging
+import os
 
 BOT_NAME = 'news18'
-site_name = "News 18"
-site_url = "https://www.news18.com"
 SPIDER_MODULES = ['news18.spiders']
 NEWSPIDER_MODULE = 'news18.spiders'
 
@@ -93,14 +92,18 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+try:
+    DB_INFO = {
+        "host": os.environ['SCRAPER_DB_HOST'],
+        "name": os.environ['SCRAPER_DB_NAME'],
+        "user": os.environ['SCRAPER_DB_USER'],
+        "password": os.environ['SCRAPER_DB_PASS']
+    }
+except KeyError as e:
+    logging.critical("KEYError: "+str(e) + " not found")
+    exit()
 
-DB_INFO = {
-    "host":"localhost",
-    "name":"newsdb",
-    "user": "postgres",
-    "password": "password"
-}
-
+#Logger Configuration
 logger = logging.getLogger("news18")
 handler = logging.FileHandler('news18.log')
 formatter = logging.Formatter(
