@@ -1,0 +1,175 @@
+2017-11-14 02:46:43,062 news18       DEBUG    news18.pipelines[SPIDER_STARTED]News18Spider
+2017-11-14 02:46:43,068 news18       INFO     news18.db Connected to Database
+2017-11-14 02:46:43,069 news18       DEBUG    news18.db Searching Database for News18
+2017-11-14 02:46:43,074 news18       INFO     news18.db Connected to Database
+2017-11-14 02:46:43,076 news18       DEBUG    Found News18 at id: 19
+2017-11-14 02:46:43,076 news18       INFO     Site News18 exists in database with id 19
+2017-11-14 02:46:43,082 news18       INFO     news18.db Connected to Database
+2017-11-14 02:46:52,660 news18       DEBUG    news18.pipelines[SPIDER_STARTED]News18Spider
+2017-11-14 02:46:52,666 news18       INFO     news18.db Connected to Database
+2017-11-14 02:46:52,667 news18       DEBUG    news18.db Searching Database for News18
+2017-11-14 02:46:52,672 news18       INFO     news18.db Connected to Database
+2017-11-14 02:46:52,674 news18       DEBUG    Found News18 at id: 19
+2017-11-14 02:46:52,675 news18       INFO     Site News18 exists in database with id 19
+2017-11-14 02:46:52,680 news18       INFO     news18.db Connected to Database
+2017-11-14 02:47:49,370 news18       DEBUG    news18.pipelines[SPIDER_STARTED]News18Spider
+2017-11-14 02:47:49,376 news18       INFO     news18.db Connected to Database
+2017-11-14 02:47:49,377 news18       DEBUG    news18.db Searching Database for News18
+2017-11-14 02:47:49,383 news18       INFO     news18.db Connected to Database
+2017-11-14 02:47:49,386 news18       DEBUG    Found News18 at id: 19
+2017-11-14 02:47:49,386 news18       INFO     Site News18 exists in database with id 19
+2017-11-14 02:47:49,394 news18       INFO     news18.db Connected to Database
+2017-11-14 02:48:17,393 news18       DEBUG    news18.pipelines[SPIDER_STARTED]News18Spider
+2017-11-14 02:48:17,399 news18       INFO     news18.db Connected to Database
+2017-11-14 02:48:17,400 news18       DEBUG    news18.db Searching Database for News18
+2017-11-14 02:48:17,405 news18       INFO     news18.db Connected to Database
+2017-11-14 02:48:17,407 news18       DEBUG    Found News18 at id: 19
+2017-11-14 02:48:17,408 news18       INFO     Site News18 exists in database with id 19
+2017-11-14 02:48:17,416 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:34,821 news18       DEBUG    news18.pipelines[SPIDER_STARTED]News18Spider
+2017-11-14 02:50:34,831 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:34,832 news18       DEBUG    news18.db Searching Database for News18
+2017-11-14 02:50:34,837 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:34,839 news18       DEBUG    Found News18 at id: 19
+2017-11-14 02:50:34,839 news18       INFO     Site News18 exists in database with id 19
+2017-11-14 02:50:34,845 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:36,606 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u"Fancy hitting the town in the latest Dior dress with an outrageously expensive Louis Vuitton bag on your arm -- but haven't the cash to afford even the clasp?",
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/09/Yves-Saint-Laurent-Spring-Summer-2018-ready-to-wear-fashion-collection.jpg',
+ 'title': u'Fashion Rental Offers Top Labels For Price Of Pizza',
+ 'url': 'http://www.news18.com/news/lifestyle/fashion-rental-offers-top-labels-for-price-of-pizza-1575461.html'}
+2017-11-14 02:50:36,612 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:36,613 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:36,661 news18       INFO     Added Item #0 :: {'description': u"Fancy hitting the town in the latest Dior dress with an outrageously expensive Louis Vuitton bag on your arm -- but haven't the cash to afford even the clasp?",
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/09/Yves-Saint-Laurent-Spring-Summer-2018-ready-to-wear-fashion-collection.jpg',
+ 'title': u'Fashion Rental Offers Top Labels For Price Of Pizza',
+ 'url': 'http://www.news18.com/news/lifestyle/fashion-rental-offers-top-labels-for-price-of-pizza-1575461.html'}
+2017-11-14 02:50:36,718 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'Federal transportation safety officials headed to Las Vegas to investigate a collision this week between a self-driving shuttle bus on its first day of service and a truck, which was blamed on human error.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/The-first-public-self-driving-shuttle-launched-as-a-pilot-project-sponsored-by-AAA-and-Keolis-is-shown-in-downtown-Las-Vegas.jpg',
+ 'title': u'U.S. Safety Board to Probe Self-Driving Shuttle Crash in Las Vegas',
+ 'url': 'http://www.news18.com/news/auto/u-s-safety-board-to-probe-self-driving-shuttle-crash-in-las-vegas-1575423.html'}
+2017-11-14 02:50:36,725 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:36,726 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:36,745 news18       INFO     Added Item #0 :: {'description': u'Federal transportation safety officials headed to Las Vegas to investigate a collision this week between a self-driving shuttle bus on its first day of service and a truck, which was blamed on human error.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/The-first-public-self-driving-shuttle-launched-as-a-pilot-project-sponsored-by-AAA-and-Keolis-is-shown-in-downtown-Las-Vegas.jpg',
+ 'title': u'U.S. Safety Board to Probe Self-Driving Shuttle Crash in Las Vegas',
+ 'url': 'http://www.news18.com/news/auto/u-s-safety-board-to-probe-self-driving-shuttle-crash-in-las-vegas-1575423.html'}
+2017-11-14 02:50:36,757 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/04/European-Union-Flag.jpg',
+ 'title': u'European Union Readies Sanctions on Venezuela, Approves Arms Embargo',
+ 'url': 'http://www.news18.com/news/world/european-union-readies-sanctions-on-venezuela-approves-arms-embargo-1575457.html'}
+2017-11-14 02:50:36,764 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:36,764 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:36,778 news18       INFO     Added Item #0 :: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/04/European-Union-Flag.jpg',
+ 'title': u'European Union Readies Sanctions on Venezuela, Approves Arms Embargo',
+ 'url': 'http://www.news18.com/news/world/european-union-readies-sanctions-on-venezuela-approves-arms-embargo-1575457.html'}
+2017-11-14 02:50:36,786 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'Toshiba Digital Solutions and Tech Mahindra today announced a strategic partnership to work in the area of a smart factory. This partnership aims to leverage strengths of both sides and offer a one-stop solution for manufacturer customers with the latest IoT technologies and system integration capabilities from both sides, a company statement said. "Toshiba Digital Solutions is known for their leadership across various industrial segments, domain expertise and special manufacturing processing knowledge. This coupled with Tech Mahindras system integration, consulting and expertise across IoT and Factory of the Future ensure that we are able to bring the best of breed solution for the customers," Karthikeyan Natarajan, Senior VP and Global Head, Integrated Engineering Solutions at Tech Mahindra said.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2016/12/toshiba.jpg',
+ 'title': u'Toshiba, Tech Mahindra Partner to Build Smart Factories',
+ 'url': 'http://www.news18.com/news/tech/toshiba-tech-mahindra-partner-to-build-smart-factories-1575435.html'}
+2017-11-14 02:50:36,791 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:36,791 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:36,800 news18       INFO     Added Item #0 :: {'description': u'Toshiba Digital Solutions and Tech Mahindra today announced a strategic partnership to work in the area of a smart factory. This partnership aims to leverage strengths of both sides and offer a one-stop solution for manufacturer customers with the latest IoT technologies and system integration capabilities from both sides, a company statement said. "Toshiba Digital Solutions is known for their leadership across various industrial segments, domain expertise and special manufacturing processing knowledge. This coupled with Tech Mahindras system integration, consulting and expertise across IoT and Factory of the Future ensure that we are able to bring the best of breed solution for the customers," Karthikeyan Natarajan, Senior VP and Global Head, Integrated Engineering Solutions at Tech Mahindra said.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2016/12/toshiba.jpg',
+ 'title': u'Toshiba, Tech Mahindra Partner to Build Smart Factories',
+ 'url': 'http://www.news18.com/news/tech/toshiba-tech-mahindra-partner-to-build-smart-factories-1575435.html'}
+2017-11-14 02:50:36,807 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/04/pregnant-getty-images-875.jpg',
+ 'title': u'Amid Traffic Restrictions, MP Cop Helps Pregnant Woman Reach Hospital in Time',
+ 'url': 'http://www.news18.com/news/india/amid-traffic-restrictions-mp-cop-helps-pregnant-woman-reach-hospital-in-time-1575419.html'}
+2017-11-14 02:50:36,814 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:36,815 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:36,857 news18       INFO     Added Item #0 :: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/04/pregnant-getty-images-875.jpg',
+ 'title': u'Amid Traffic Restrictions, MP Cop Helps Pregnant Woman Reach Hospital in Time',
+ 'url': 'http://www.news18.com/news/india/amid-traffic-restrictions-mp-cop-helps-pregnant-woman-reach-hospital-in-time-1575419.html'}
+2017-11-14 02:50:36,879 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'Lenovo-owned Motorola has launched the fourth-generation Moto X smartphone in the form of the Moto X4. The new Moto X4 comes with 3GB of RAM and 32GB of internal storage for Rs 20,999 while the 4GB RA and 64GB storage variant costs Rs 22,999. Both the versions offer dual-SIM/microSD hybrid card slot and supports up to 2TB of additional storage.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/Motorola-Moto-X4-launch.jpg',
+ 'title': u'Motorola Moto X4 With Dual-lens Camera Launched For Rs 20,999',
+ 'url': 'http://www.news18.com/news/tech/motorola-moto-x4-with-dual-lens-camera-launched-for-rs-20999-1575441.html'}
+2017-11-14 02:50:36,890 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:36,892 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:36,950 news18       INFO     Added Item #0 :: {'description': u'Lenovo-owned Motorola has launched the fourth-generation Moto X smartphone in the form of the Moto X4. The new Moto X4 comes with 3GB of RAM and 32GB of internal storage for Rs 20,999 while the 4GB RA and 64GB storage variant costs Rs 22,999. Both the versions offer dual-SIM/microSD hybrid card slot and supports up to 2TB of additional storage.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/Motorola-Moto-X4-launch.jpg',
+ 'title': u'Motorola Moto X4 With Dual-lens Camera Launched For Rs 20,999',
+ 'url': 'http://www.news18.com/news/tech/motorola-moto-x4-with-dual-lens-camera-launched-for-rs-20999-1575441.html'}
+2017-11-14 02:50:36,978 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/08/CASH-875.gif',
+ 'title': u'Inflows in Equity MFs Surges to Rs 2.86 Lakh Crore After Note Ban',
+ 'url': 'http://www.news18.com/news/business/inflows-in-equity-mfs-surges-to-rs-2-86-lakh-crore-after-note-ban-1575447.html'}
+2017-11-14 02:50:37,002 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:37,004 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:37,024 news18       INFO     Added Item #0 :: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/08/CASH-875.gif',
+ 'title': u'Inflows in Equity MFs Surges to Rs 2.86 Lakh Crore After Note Ban',
+ 'url': 'http://www.news18.com/news/business/inflows-in-equity-mfs-surges-to-rs-2-86-lakh-crore-after-note-ban-1575447.html'}
+2017-11-14 02:50:37,046 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/09/North-Korea-Flag.jpg',
+ 'title': u'North Korean Soldier Shot While Defecting to South Korea: Seoul',
+ 'url': 'http://www.news18.com/news/world/north-korean-soldier-shot-while-defecting-to-south-korea-seoul-1575455.html'}
+2017-11-14 02:50:37,066 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:37,068 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:37,079 news18       INFO     Added Item #0 :: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/09/North-Korea-Flag.jpg',
+ 'title': u'North Korean Soldier Shot While Defecting to South Korea: Seoul',
+ 'url': 'http://www.news18.com/news/world/north-korean-soldier-shot-while-defecting-to-south-korea-seoul-1575455.html'}
+2017-11-14 02:50:37,096 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2016/11/paes_1911getty_875.jpg',
+ 'title': u'First Title for Paes-Raja Team at Knoxville Challenger',
+ 'url': 'http://www.news18.com/news/sports/first-title-for-paes-raja-team-at-knoxville-challenger-1575445.html'}
+2017-11-14 02:50:37,104 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:37,105 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:37,112 news18       INFO     Added Item #0 :: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2016/11/paes_1911getty_875.jpg',
+ 'title': u'First Title for Paes-Raja Team at Knoxville Challenger',
+ 'url': 'http://www.news18.com/news/sports/first-title-for-paes-raja-team-at-knoxville-challenger-1575445.html'}
+2017-11-14 02:50:37,121 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u"Austria's sports bike maker KTM plans to roll out Husqvarna brand in India by 2020 and production at partner Bajaj Auto's Chakan plan is expected to begin in late 2019. The company will use Bajaj Auto's Chakan plant to roll out the brand in the country. KTM already has an installed capacity to produce 1 lakh KTM bikes at Chakan. It plans to add another capacity of 1 lakh units for Husqvarna brand, taking the total capacity to 2 lakh units per annum for both KTM and Husqvarna brands.",
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2016/11/KTM-Logo.jpg',
+ 'title': u'KTM to Roll Out Husqvarna Brand in India by 2020',
+ 'url': 'http://www.news18.com/news/auto/ktm-to-roll-out-husqvarna-brand-in-india-by-2020-1575433.html'}
+2017-11-14 02:50:37,128 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:37,129 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:37,134 news18       INFO     Added Item #0 :: {'description': u"Austria's sports bike maker KTM plans to roll out Husqvarna brand in India by 2020 and production at partner Bajaj Auto's Chakan plan is expected to begin in late 2019. The company will use Bajaj Auto's Chakan plant to roll out the brand in the country. KTM already has an installed capacity to produce 1 lakh KTM bikes at Chakan. It plans to add another capacity of 1 lakh units for Husqvarna brand, taking the total capacity to 2 lakh units per annum for both KTM and Husqvarna brands.",
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2016/11/KTM-Logo.jpg',
+ 'title': u'KTM to Roll Out Husqvarna Brand in India by 2020',
+ 'url': 'http://www.news18.com/news/auto/ktm-to-roll-out-husqvarna-brand-in-india-by-2020-1575433.html'}
+2017-11-14 02:50:37,146 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/CURRENCY-875.gif',
+ 'title': u'Govt Seeks Hefty Dividends From State Firms as Its Revenues Falter',
+ 'url': 'http://www.news18.com/news/business/govt-seeks-hefty-dividends-from-state-firms-as-its-revenues-falter-1575427.html'}
+2017-11-14 02:50:37,153 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:37,154 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:37,167 news18       INFO     Added Item #0 :: {'description': u'',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/CURRENCY-875.gif',
+ 'title': u'Govt Seeks Hefty Dividends From State Firms as Its Revenues Falter',
+ 'url': 'http://www.news18.com/news/business/govt-seeks-hefty-dividends-from-state-firms-as-its-revenues-falter-1575427.html'}
+2017-11-14 02:50:37,204 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'Even as Portuguese captain and Real Madrid\u2019s star forward Cristiano Ronaldo celebrates the birth of his fourth child, reports about his polygamous ways have emerged in United Kingdom.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/RonaldovsSpurs1.jpg',
+ 'title': u"Real Madrid's Cristiano Ronaldo Cheated on Girlfriend Claims TV Star: Report",
+ 'url': 'http://www.news18.com/news/sports/real-madrids-cristiano-ronaldo-cheated-on-girlfriend-claims-tv-star-report-1575453.html'}
+2017-11-14 02:50:37,212 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:37,213 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:37,223 news18       INFO     Added Item #0 :: {'description': u'Even as Portuguese captain and Real Madrid\u2019s star forward Cristiano Ronaldo celebrates the birth of his fourth child, reports about his polygamous ways have emerged in United Kingdom.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/RonaldovsSpurs1.jpg',
+ 'title': u"Real Madrid's Cristiano Ronaldo Cheated on Girlfriend Claims TV Star: Report",
+ 'url': 'http://www.news18.com/news/sports/real-madrids-cristiano-ronaldo-cheated-on-girlfriend-claims-tv-star-report-1575453.html'}
+2017-11-14 02:50:37,229 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'The government on Monday launched Phase II of BharatNet project through which it aims to provide high-speed broadband connections to all panchayats by the end of 2019. Major telecom players like Reliance Jio, Bharti Airtel, Idea Cellular and Vodafone India have given cheques to the government to hire infrastructure in gram panchayats (GPs) to provide broadband services. Jio has given over Rs 13.19 crore, Airtel Rs 5 crore, Idea Cellular Rs 5 lakh and Vodafone Rs 11 lakh to take connectivity to villages in rural India.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/08/640x640-1.jpg',
+ 'title': u'Government Launches BharatNet Phase II, Telcos Give Cheques to Participate in Project',
+ 'url': 'http://www.news18.com/news/tech/government-launches-bharatnet-phase-ii-telcos-give-cheques-to-participate-in-project-1575359.html'}
+2017-11-14 02:50:37,236 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:37,237 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:37,245 news18       INFO     Added Item #0 :: {'description': u'The government on Monday launched Phase II of BharatNet project through which it aims to provide high-speed broadband connections to all panchayats by the end of 2019. Major telecom players like Reliance Jio, Bharti Airtel, Idea Cellular and Vodafone India have given cheques to the government to hire infrastructure in gram panchayats (GPs) to provide broadband services. Jio has given over Rs 13.19 crore, Airtel Rs 5 crore, Idea Cellular Rs 5 lakh and Vodafone Rs 11 lakh to take connectivity to villages in rural India.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/08/640x640-1.jpg',
+ 'title': u'Government Launches BharatNet Phase II, Telcos Give Cheques to Participate in Project',
+ 'url': 'http://www.news18.com/news/tech/government-launches-bharatnet-phase-ii-telcos-give-cheques-to-participate-in-project-1575359.html'}
+2017-11-14 02:50:37,252 news18       DEBUG    news18.pipelines Cleaned Item: {'description': u'Ford is looking for small tech startups to help it develop innovative app-based solutions to simplifying carpooling, journey planning and even in-car entertainment as the company looks to capitalize on growing digital trends.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/istock_64357051.11617081846.original.jpg',
+ 'title': u'Ford Looking for Small Tech Startups to Develop Innovative Solutions for Carpooling',
+ 'url': 'http://www.news18.com/news/auto/ford-looking-for-small-tech-startups-to-develop-innovative-solutions-for-carpooling-1575281.html'}
+2017-11-14 02:50:37,258 news18       INFO     news18.db Connected to Database
+2017-11-14 02:50:37,259 news18       DEBUG    news18.pipelines Received Item for SITE_ID 19
+2017-11-14 02:50:37,267 news18       INFO     Added Item #0 :: {'description': u'Ford is looking for small tech startups to help it develop innovative app-based solutions to simplifying carpooling, journey planning and even in-car entertainment as the company looks to capitalize on growing digital trends.',
+ 'image': u'http://img01.ibnlive.in/ibnlive/uploads/2017/11/istock_64357051.11617081846.original.jpg',
+ 'title': u'Ford Looking for Small Tech Startups to Develop Innovative Solutions for Carpooling',
+ 'url': 'http://www.news18.com/news/auto/ford-looking-for-small-tech-startups-to-develop-innovative-solutions-for-carpooling-1575281.html'}

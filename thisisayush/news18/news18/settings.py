@@ -8,9 +8,10 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+import logging
+import os
 
 BOT_NAME = 'news18'
-
 SPIDER_MODULES = ['news18.spiders']
 NEWSPIDER_MODULE = 'news18.spiders'
 
@@ -64,9 +65,12 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'news18.pipelines.News18Pipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'news18.pipelines.News18Pipeline': 101,
+    'news18.pipelines.DuplicatesPipeline': 102,
+    'news18.pipelines.DataFilterPipeline': 103,
+    'news18.pipelines.PostgresPipeline': 104
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,3 +92,22 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+try:
+    DB_INFO = {
+        "host": os.environ['SCRAPER_DB_HOST'],
+        "name": os.environ['SCRAPER_DB_NAME'],
+        "user": os.environ['SCRAPER_DB_USER'],
+        "password": os.environ['SCRAPER_DB_PASS']
+    }
+except KeyError as e:
+    logging.critical("KEYError: "+str(e) + " not found")
+    exit()
+
+#Logger Configuration
+logger = logging.getLogger("news18")
+handler = logging.FileHandler('news18.log')
+formatter = logging.Formatter(
+        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
