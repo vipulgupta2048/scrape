@@ -18,6 +18,23 @@ SCRAPER_DB_NAME
 SCRAPER_DB_USER
 SCRAPER_DB_PASS
 ```
+### Install TOR and Privoxy 
+
+#### Install TOR
+```
+sudo apt-get install tor
+```
+#### Install Privoxy
+```
+sudo apt-get install privoxy
+```
+#### Configure Privoxy to route TOR
+Add following lines at the end of  ```/etc/privoxy/config```
+```
+forward-socks5  / 127.0.0.1:9050 .
+forward-socks4a / 127.0.0.1:9050 .
+forward-socks5t / 127.0.0.1:9050 .
+```
 
 ### Upcoming
 - Scheduling of Scraper using Scrapyd
