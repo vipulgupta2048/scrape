@@ -53,7 +53,7 @@ COOKIES_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-HTTP_PROXY = 'http://127.0.0.1:8123'
+HTTP_PROXY = 'http://127.0.0.1:8118'
 DOWNLOADER_MIDDLEWARES = {
     'news18.middlewares.TorProxyMiddleware': 543,
 }

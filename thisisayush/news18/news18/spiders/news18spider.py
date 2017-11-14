@@ -5,14 +5,14 @@ from news18.items import News18Item
 
 class News18Spider(scrapy.Spider):
     name = "News18Spider"
-    
+
     custom_settings = {
         'site_name': "News18",
         'site_url': "https://www.news18.com",
         'site_id': -1,
         'urls_scraped': []  #Remove incase of OPTION 2 for duplicates handling
     }
-    
+
     start_url = "http://www.news18.com/news/"
     ignoreClasses = ["photoiconb", "photoicons", "vodeoiconb", "vodeoicons"]
 
@@ -45,7 +45,7 @@ class News18Spider(scrapy.Spider):
                 # Choice 2 (DATABASE Method)
                 if not NewsDatabase().urlExists(href):
                     yield scrapy.Request(url = href, callback=self.parse_news)
-                
+
                 # Choice 3 (Do Nothing, Let Pipeline Handle the duplicates)
                 yield scrapy.Request(url = href, callback=self.parse_news)
                 """
@@ -54,7 +54,7 @@ class News18Spider(scrapy.Spider):
                 logger.info(__name__+" Moving to Next Page")
                 yield scrapy.Request(url = response.urljoin(next_page))
         yield {"status": "Completed"}
-    
+
     def parse_news(self, response):
         news_url = news_title = news_description = news_picture = ""
         try:
