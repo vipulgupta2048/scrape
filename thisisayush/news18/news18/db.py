@@ -30,7 +30,7 @@ class NewsDatabase():
                     FOREIGN KEY(site) REFERENCES sites(id)\
                     ON DELETE CASCADE\
                     );"
-    
+
     insert_item_str = "INSERT INTO "+item_table_name+"\
                         (title, url, description, image, site) \
                         VALUES(%s, %s, %s, %s, %s);"
@@ -39,15 +39,14 @@ class NewsDatabase():
             self.conn = psycopg2.connect(self.connect_str)
             self.conn.autocommit = True
             self.cursor = self.conn.cursor()
-            
-            logger.info(__name__+" Connected to Database")
+            logger.debug(__name__+" Connected to Database")
             self.initilaize()
             return self.cursor
         except Exception as e:
             logger.critical(__name__+" Database Connection Error!"+str(e))
-        
+
         return None
-    
+
     def initilaize(self):
         try:
             # Create Tables
@@ -60,7 +59,7 @@ class NewsDatabase():
             self.conn.rollback()
             logger.error(__name__+" Database Initilaization Error "+str(e))
             return False
-    
+
     def getSiteId(self, site_name):
         logger.debug(__name__+" Searching Database for "+ site_name)
         sql = "SELECT id FROM "+self.site_table_name+" WHERE site_name = '"+site_name+"' LIMIT 1;"
@@ -72,7 +71,7 @@ class NewsDatabase():
             return site_id
         else:
             return False
-    
+
     def getUrlsScraped(self, site_id):
         if site_id == False:
             return []

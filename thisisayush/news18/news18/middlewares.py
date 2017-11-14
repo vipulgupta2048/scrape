@@ -58,5 +58,4 @@ class News18SpiderMiddleware(object):
 class TorProxyMiddleware(object):
 
     def process_request(self, request, spider):
-        print("Tor Started")
         request.meta['proxy'] = HTTP_PROXY

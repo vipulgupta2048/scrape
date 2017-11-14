@@ -13,7 +13,7 @@ import re
 class News18Pipeline(object):
     """Pipeline to check/create site """
     def open_spider(self, spider):
-        logger.debug(__name__+"[SPIDER_STARTED]"+spider.name)
+        logger.info(__name__+"[SPIDER_STARTED]"+spider.name)
         site_id = self.checkSite(spider)
         return {'site_id':site_id}
         
@@ -36,7 +36,7 @@ class News18Pipeline(object):
         if site_id == False:
             # SITE_ID == False, Add Site to Database
             try:
-                logger.debug("Site "+spider_name+" was Not Found! Creating Now!")
+                logger.debug(__name__+" Site "+spider_name+" was Not Found! Creating Now!")
 
                 con.execute(database.insert_site_str, (spider_name, spider_url))
                 database.conn.commit()
@@ -66,7 +66,7 @@ class DuplicatesPipeline(object):
     def process_item(self, item, spider):
         # Choice 1 (List Method) 
         if item['url'] in spider.custom_settings['urls_scraped']:
-            logger.debug(__name__+"  [DROPPED] URL "+item['url']+" Already Scraped")
+            logger.info(__name__+"  [DROPPED] URL "+item['url']+" Already Scraped")
             raise DropItem("[DROPPED] URL "+item['url']+" Already Scraped")
         else:
             return item
@@ -120,7 +120,8 @@ class PostgresPipeline(object):
         try:
             cur.execute(database.insert_item_str, (item['title'], item['url'], item['description'], item['image'], site_id))
             database.conn.commit()
-            logger.info("Added Item #"+str(cur.lastrowid)+" :: "+str(item))
+            logger.debug(__name__+" Added Item #"+str(cur.lastrowid)+" :: "+str(item))
+            logger.info(__name__+" Finish Scraping "+item['url'])
             spider.custom_settings['urls_scraped'].append(item['url'])
         except Exception as e:
             logger.error(" Unable to ADD Item "+str(item)+" due to "+str(e))
