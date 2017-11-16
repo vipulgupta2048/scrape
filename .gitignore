@@ -16,3 +16,15 @@ scrapeNews/scrapeNews/spiders/__pycache__/
 
 #Deprecated, please remove
 vipulgupta2048/Data
+
+#Ignore .pyc files
+*.pyc
+
+#ignore .log Files
+*.log
+
+#ignore any __pycache__
+**/__pycache__
+
+#ignore .sh files
+*.sh

@@ -9,6 +9,7 @@ import scrapy
 
 
 class News18Item(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    url = scrapy.Field()
+    title = scrapy.Field()
+    description = scrapy.Field()
+    image = scrapy.Field()
