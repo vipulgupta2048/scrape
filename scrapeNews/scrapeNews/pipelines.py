@@ -8,6 +8,7 @@ import psycopg2
 from scrapeNews.items import ScrapenewsItem
 from datetime import datetime
 import envConfig
+import logging
 
 # Setting up local variables USERNAME & PASSWORD
 PASSWORD = envConfig.PASSWORD
@@ -65,5 +66,11 @@ class ScrapenewsPipeline(object):
                 return (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
                 print("Error 107: ", Error)
+        # Conversion not needed for INSHORTS
+        # elif spiderName is 'inshorts':
+        #     try:
+        #         return (datetime.strptime(itemDate, "%Y-%m-%dT%H:%M:%S"))
+        #     except ValueError as Error:
+        #         logging.error(Error)
         else:
             return itemDate
