@@ -71,7 +71,7 @@ scrapy crawl SPIDER_NAME
 	1. indianExpressTech
 	2. indiaTv  
 	3. timeTech
-	4. ndtv [Spider Coming Soon]
+	4. ndtv
 	5. inshorts
 
 Happy collaborating !!   
