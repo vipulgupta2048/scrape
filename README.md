@@ -55,7 +55,9 @@ ITEM_PIPELINES = {
     # {'site_id':'YOUR_SPIDER_ID','YOUR_SPIDER_NAME':'','site_url':'YOUR_SPIDER_URL'},
     {'site_id':101,'site_name':'Indian Express','site_url':'http://indianexpress.com/section/technology/'},
     {'site_id':102,'site_name':'India TV','site_url':'http://www.indiatvnews.com/business/tech/'},
-    {'site_id':103,'site_name':'Time','site_url':'http://time.com/section/tech/'}
+    {'site_id':103,'site_name':'Time','site_url':'http://time.com/section/tech/'},
+    {'site_id':104,'site_name':'NDTV','site_url':'https://www.ndtv.com/latest/page-1'},
+    {'site_id':105,'site_name':'Inshorts','site_url':'http://www.inshorts.com/en/read/'}
     ]
     ```
 
@@ -69,5 +71,7 @@ scrapy crawl SPIDER_NAME
 	1. indianExpressTech
 	2. indiaTv  
 	3. timeTech
+	4. ndtv [Spider Coming Soon]
+	5. inshorts
 
 Happy collaborating !!   
