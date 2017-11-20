@@ -1,5 +1,5 @@
 import scrapy
-from zee.items import ZeeItem 
+from scrapeNews.items import ScrapenewsItem
 
 class zeespider(scrapy.Spider):
     name = "zee"
@@ -20,10 +20,12 @@ class zeespider(scrapy.Spider):
         
     #For scraping a particular article listed on the main page    
     def parse_news(self,response):
-        i = ZeeItem()                                                       
-        i['headline'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline 
-        i['datetime'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first() #scrapes datetime
+        i = ScrapenewsItem()                                                       
+        i['title'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline 
+        i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[15:-4] #scrapes datetime
         i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url 
-        i['summary'] = response.xpath('//p[contains(@class, "margin")]/text()').extract_first() #scrapes summary of the news
-        i['link'] = response.url
+        i['content'] = response.xpath('//p[contains(@class, "margin")]/text()').extract_first() #scrapes summary
+        i['link'] = response.url #scrapes link; article page
+        i['source'] = 106
+        
         yield i

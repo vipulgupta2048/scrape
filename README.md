@@ -58,7 +58,8 @@ ITEM_PIPELINES = {
     {'site_id':103,'site_name':'Time','site_url':'http://time.com/section/tech/'},
     {'site_id':104,'site_name':'NDTV','site_url':'https://www.ndtv.com/latest/page-1'},
     {'site_id':105,'site_name':'Inshorts','site_url':'http://www.inshorts.com/en/read/'}
-    ]
+	{'site_id':106,'site_name':'Zee News','site_url':'http://zeenews.india.com/india'} 
+	]
     ```
 
     - Run setupDB.py
@@ -73,5 +74,6 @@ scrapy crawl SPIDER_NAME
 	3. timeTech
 	4. ndtv [Spider Coming Soon]
 	5. inshorts
-
+    6. zeeNews
+    7. newsNation [In development]
 Happy collaborating !!   

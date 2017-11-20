@@ -7,8 +7,12 @@
 
 import scrapy
 
-
-class NnationItem(scrapy.Item):
+class ZeeItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+    summary = scrapy.Field()
+    image = scrapy.Field()
+    datetime = scrapy.Field()
+    headline = scrapy.Field()
+    link = scrapy.Field()
+    
