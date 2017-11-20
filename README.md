@@ -76,4 +76,5 @@ scrapy crawl SPIDER_NAME
 	5. inshorts
     6. zeeNews
     7. newsNation [In development]
+    
 Happy collaborating !!   
