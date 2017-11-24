@@ -88,7 +88,7 @@ class NewsDatabase():
             logger.error(__name__+" DATABASE ERROR: "+str(e))
         return []
 
-    def urlsExists(self, url):
+    def urlExists(self, url):
         try:
             sql = "SELECT url FROM "+self.item_table_name+" WHERE url= %s"
             cur = self.connect()
@@ -96,7 +96,6 @@ class NewsDatabase():
             rows = cur.rowcount
             self.conn.close()
             if rows > 0:
-                logger.debug(__name__+" Found "+url+" in Database")
                 return True
             else:
                 return False

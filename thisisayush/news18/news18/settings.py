@@ -93,16 +93,6 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 3.0
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-try:
-    DB_INFO = {
-        "host": os.environ['SCRAPER_DB_HOST'],
-        "name": os.environ['SCRAPER_DB_NAME'],
-        "user": os.environ['SCRAPER_DB_USER'],
-        "password": os.environ['SCRAPER_DB_PASS']
-    }
-except KeyError as e:
-    logging.critical("KEYError: "+str(e) + " not found")
-    exit()
 
 #Logger Configuration
 logger = logging.getLogger("news18")
@@ -111,4 +101,15 @@ formatter = logging.Formatter(
         '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.ERROR)
+
+try:
+    DB_INFO = {
+        "host": os.environ['SCRAPER_DB_HOST'],
+        "name": os.environ['SCRAPER_DB_NAME'],
+        "user": os.environ['SCRAPER_DB_USER'],
+        "password": os.environ['SCRAPER_DB_PASS']
+    }
+except KeyError as e:
+    logger.critical("KeyError: "+str(e) + " not found")
+    exit()
