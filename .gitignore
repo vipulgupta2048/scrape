@@ -1,6 +1,9 @@
 # Ignore python environment
 venv/
 
+# Ignore Environment Config File
+scrapeNews/envConfig.py
+
 #Ignore .pyc files
 *.pyc
 
