@@ -4,7 +4,6 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import logging
 from scrapy.exceptions import DropItem
 from news18.db import NewsDatabase
 from settings import logger
@@ -59,25 +58,15 @@ class News18Pipeline(object):
 
 class DuplicatesPipeline(object):
     """ Checks for Duplicate Links Missed by Spider """
-    def open_spider(self, spider):
-        site_id = spider.custom_settings['site_id']
-        spider.custom_settings['urls_scraped'] = NewsDatabase().getUrlsScraped(site_id)
 
     def process_item(self, item, spider):
-        # Choice 1 (List Method) 
-        if item['url'] in spider.custom_settings['urls_scraped']:
-            logger.info(__name__+"  [DROPPED] URL "+item['url']+" Already Scraped")
-            raise DropItem("[DROPPED] URL "+item['url']+" Already Scraped")
-        else:
-            return item
-        """
+        
         # Choice 2 (DATABASE METHOD)
         if NewsDatabase().urlExists(item['url']):
             logger.debug(__name__+"  [DROPPED] URL "+item['url']+" Already Scraped")
             raise DropItem("[DROPPED] URL "+item['url']+" Already Scraped")
         else:
             return item
-        """
 
 class DataFilterPipeline(object):
     """Removes Unncessary Data from the item"""

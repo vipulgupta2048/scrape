@@ -1,8 +1,8 @@
 import scrapy
 import json
 import re
-from news18.settings import logger
-from news18.items import News18Item
+from scrapeNews.settings import logger
+from scrapeNews.items import ScrapenewsItem
 from dateutil import parser
 
 class News18Spider(scrapy.Spider):
@@ -11,7 +11,7 @@ class News18Spider(scrapy.Spider):
     custom_settings = {
         'site_name': "News18",
         'site_url': "https://www.news18.com",
-        'site_id': -1,
+        'site_id': 107,
         'spider_version': '0.0'
     }
 
@@ -99,6 +99,6 @@ class News18Spider(scrapy.Spider):
             logger.error(__name__+" Empty Data for URL "+news_url)
             yield None
             return
-        news_date = parser.parse(news_date, ignoretz=False)
-        item = News18Item({'url': news_url, 'title': news_title, 'description': news_description, 'image': news_picture, 'date': news_date})
+        news_date = parser.parse(news_date, , ignoretz=False)
+        item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date, 'source': self.custom_settings.site_id})
         yield item

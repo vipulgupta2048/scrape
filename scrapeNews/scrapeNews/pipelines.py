@@ -76,6 +76,11 @@ class ScrapenewsPipeline(object):
                 return (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
                 logging.error(Error)
+        elif spiderName is 'News18Spider':
+            try:
+                return itemDate.strftime("%Y-%m-%dT%H:%M:%S")
+            except ValueError as Error:
+                logging.error(Error)
         # Conversion not needed for INSHORTS
         # elif spiderName is 'inshorts':
         #     try:

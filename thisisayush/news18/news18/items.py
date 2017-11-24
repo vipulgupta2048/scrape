@@ -13,3 +13,4 @@ class News18Item(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
     image = scrapy.Field()
+    date = scrapy.Field()
