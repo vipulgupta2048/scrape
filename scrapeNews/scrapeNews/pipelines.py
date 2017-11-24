@@ -32,10 +32,7 @@ class ScrapenewsPipeline(object):
         self.connection.close()
 
     def process_item(self, item, spider):
-        self.cursor.execute(
-            """SELECT link from news_table where site_id = %s and link= %s """,
-            (item.get('source'),
-             item.get('link')))
+        self.cursor.execute("""SELECT link from news_table where link= %s """, item.get('link'))
         if not self.cursor.fetchall():
             processedDate = self.process_date(item.get('newsDate'),item.get('link'), spider.name)
             try:
