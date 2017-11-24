@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
+import logging
+logger = logging.getLogger("scrapeNews")
 
 
 class IndianexpresstechSpider(scrapy.Spider):
@@ -22,33 +24,38 @@ class IndianexpresstechSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = self.getPageLink(response)
         item['source'] = 101
-        yield item
+        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+            yield item
 
     def getPageContent(self, response):
         data = response.xpath('//h2[@class="synopsis"]/text()').extract_first()
         if (data is None):
-            print('Error 201: ', response.url)
+            data = response.xpath("//div[@class='full-details']/p/text()").extract_first()
+        if (data is None):
+            logger.error(response.url)
             data = 'Error'
         return data
 
     def getPageTitle(self, response):
         data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
         if (data is None):
-            print('Error 202: ', response.url)
+            logger.error(response.url)
             data = 'Error'
         return data
 
     def getPageLink(self, response):
         data = response.url
         if (data is None):
-            print('Error 203: ', response.url)
+            logger.critical(response)
             data = 'Error'
         return data
 
     def getPageImage(self, response):
         data = response.xpath('//span[@class="custom-caption"]/img/@data-lazy-src').extract_first()
         if (data is None):
-            print('Error 204: ', response.url)
+            data = response.xpath("//span[@itemprop='image']/meta[@itemprop='url']/@content").extract_first()
+        if (data is None):
+            logger.error(response.url)
             data = 'Error'
         return data
 
@@ -56,14 +63,14 @@ class IndianexpresstechSpider(scrapy.Spider):
         try:
             # Relax, This line Will parse the date and remove unnecessary
             # details out of the string provided!
-            data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Published:')[1]).split("'")[0])
+            data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Published:')[1]).split("'")[0].split('\t')[0].split(' ',1)[1])
         except IndexError:
             try:
                 # Relax, This line Will parse the date and remove unnecessary
                 # details out of the string provided!
-                data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Updated: ')[1]).split("'")[0])
+                data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Updated: ')[1]).split("'")[0].split('\t')[0])
             except IndexError:
-                print('Error 205: ', response.url)
+                logger.error(response.url)
                 data = 'Error'
         finally:
             return data

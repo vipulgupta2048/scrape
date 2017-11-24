@@ -8,15 +8,22 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-
+import logging
 BOT_NAME = 'scrapeNews'
 
 SPIDER_MODULES = ['scrapeNews.spiders']
 NEWSPIDER_MODULE = 'scrapeNews.spiders'
 
-# Make Changes here to edit logging behaviours
-LOG_LEVEL = 'WARNING'  # to only display errors
-LOG_FORMAT = '%(levelname)s: %(message)s'
+#Logger Configuration
+LOG_LEVEL = 'CRITICAL'  # to only display errors
+logger = logging.getLogger("scrapeNews")
+formatter = logging.Formatter('%(filename)s[%(lineno)d]: %(message)s')
+fileHandler = logging.FileHandler('scrapeNews.log')
+streamHandler = logging.StreamHandler()
+fileHandler.setFormatter(formatter)
+streamHandler.setFormatter(formatter)
+logger.addHandler(fileHandler)
+logger.addHandler(streamHandler)
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrapeNews (+http://www.yourdomain.com)'
