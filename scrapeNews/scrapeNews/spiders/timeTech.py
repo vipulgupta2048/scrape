@@ -1,29 +1,88 @@
 # -*- coding: utf-8 -*-
-import json
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-
+import logging
+logger = logging.getLogger("scrapeNews")
 
 class TimetechSpider(scrapy.Spider):
     name = 'timeTech'
-    allowed_domains = ['time.com/wp-json/ti-api/v1/posts']
+
+    def __init__(self, pages=4, *args, **kwargs):
+        super(TimetechSpider, self).__init__(*args, **kwargs)
+        for count in range(1 , int(pages)+1):
+            self.start_urls.append('http://time.com/section/world/?page='+ str(count))
+
 
     def start_requests(self):
-        params = '?time_section_slug=time-section-tech&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=30'
-        start_url = 'http://time.com/wp-json/ti-api/v1/posts/' + params
-        yield scrapy.Request(url=start_url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+        for url in self.start_urls:
+            yield scrapy.Request(url, self.parse)
+            yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+
 
     def parse(self, response):
-        newsBoxList = json.loads(response.text)
+        # For the large newsBox in top of all the pages.
+        newsBox = 'http://www.time.com' + response.xpath("//div[@class='partial hero']/article/a/@href").extract_first()
+        yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+        # For the rest of the boxes
+        newsContainer = response.xpath("//div[@class='partial marquee']/article")
+        for newsBox in newsContainer:
+            link = 'http://www.time.com' + newsBox.xpath('a/@href').extract_first()
+            yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+
+
+    def parse_article(self, response):
         item = ScrapenewsItem()  # Scraper Items
-        for newsBox in newsBoxList:
-            item['title'] = newsBox['title']['rendered'],
-            item['link'] = newsBox['link'],
-            item['newsDate'] = newsBox['modified'],
-            # Relax, This line Takes the entire content (string), converts it
-            # to a list of first 30 words and joins them with white space to
-            # make it back to a string!
-            item['content'] = ' '.join(str(newsBox['content']['plain']).split(' ')[:30]),
-            item['image'] = newsBox['_embedded']['fortune:featured'][0]['image']['src']['square']
-            item['source'] = 103
+        item['image'] = self.getPageImage(response)
+        item['title'] = self.getPageTitle(response)
+        item['content'] = self.getPageContent(response)
+        item['newsDate'] = self.getPageDate(response)
+        item['link'] = self.getPageLink(response)
+        item['source'] = 103
+        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
+
+
+    def getPageTitle(self, response):
+        data = response.xpath("//h1[contains(@class,'headline')]/text()").extract_first()
+        if (data is None):
+            logger.error(response.url)
+            data = 'Error'
+        return data
+
+
+    def getPageLink(self, response):
+        data = response.url
+        if (data is None):
+            logger.error(response)
+            data = 'Error'
+        return data
+
+
+    def getPageImage(self, response):
+        data = response.xpath("//meta[@property='og:image']/@content").extract_first()
+        if (data is None):
+            logger.error(response.url)
+            data = 'Error'
+        return data
+
+
+    def getPageDate(self, response):
+        try:
+            # split used to Spit Data in Correct format!
+            data = (str(response.xpath("//script[@type='application/ld+json']").extract_first()).split('datePublished":"',1)[1]).split('.',1)[0]
+        except (TypeError,IndexError) as Error:
+            logger.error(response.url)
+            data = 'Error'
+        finally:
+            return data
+
+
+    def getPageContent(self, response):
+        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+        if (data is None):
+            logger.error(response.url)
+            data = 'Error'
+        return data
+
+
+# DEAD API's Link: 'time.com/wp-json/ti-api/v1/posts?time_section_slug=time-section-tech&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=30&page1'

@@ -8,7 +8,15 @@ logger = logging.getLogger("scrapeNews")
 class IndianexpresstechSpider(scrapy.Spider):
     name = 'indianExpressTech'
     allowed_domains = ['indianexpress.com']
-    start_urls = ['http://indianexpress.com/section/technology/']
+
+    def __init__(self, pages=2, *args, **kwargs):
+        super(IndianexpresstechSpider, self).__init__(*args, **kwargs)
+        for count in range(1 , int(pages)+1):
+            self.start_urls.append('http://indianexpress.com/section/technology/page/'+ str(count))
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield scrapy.Request(url, self.parse)
 
     def parse(self, response):
         newsContainer = response.xpath('//div[@class="top-article"]/ul[@class="article-list"]/li')

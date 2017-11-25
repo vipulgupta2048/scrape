@@ -8,10 +8,18 @@ logger = logging.getLogger("scrapeNews")
 class IndiatvSpider(scrapy.Spider):
     name = 'indiaTv'
     allowed_domains = ['www.indiatvnews.com']
-    start_urls = ['http://www.indiatvnews.com']
+
+    def __init__(self, pages=2, *args, **kwargs):
+        super(IndiatvSpider, self).__init__(*args, **kwargs)
+        for count in range(1 , int(pages)+1):
+            self.start_urls.append('http://www.indiatvnews.com/india/'+ str(count))
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield scrapy.Request(url, self.parse)
 
     def parse(self, response):
-        newsContainer = response.xpath('//div[@class="row latest_news"]/ul[@class="h_story normal"]/li')
+        newsContainer = response.xpath("//ul[@class='newsListfull']/li")
         for newsBox in newsContainer:
             link = newsBox.xpath('a/@href').extract_first()
             yield scrapy.Request(url=link, callback=self.parse_article)
@@ -60,7 +68,7 @@ class IndiatvSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        data = ' '.join((' '.join(response.xpath("//div[@class='content']/p/text()").extract())).split(' ')[:30])
+        data = ' '.join((' '.join(response.xpath("//div[@class='content']/p/text()").extract())).split(' ')[:40])
         if (data is None):
             logger.error(response.url)
             data = 'Error'
