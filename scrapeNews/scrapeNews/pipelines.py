@@ -58,6 +58,11 @@ class ScrapenewsPipeline(object):
                 processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
                 logger.error(Error, link)
+        if spiderName is 'moneyControl':
+            try:
+                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p %Z")).strftime("%Y-%m-%dT%H:%M:%S")
+            except ValueError as Error:
+                logger.error(Error, link)
         elif spiderName is 'indiaTv':
             try:
                 processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")

@@ -54,7 +54,7 @@ class IndianexpresstechSpider(scrapy.Spider):
     def getPageLink(self, response):
         data = response.url
         if (data is None):
-            logger.critical(response)
+            logger.error(response)
             data = 'Error'
         return data
 

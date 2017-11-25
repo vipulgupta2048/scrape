@@ -45,6 +45,10 @@ class TimetechSpider(scrapy.Spider):
     def getPageTitle(self, response):
         data = response.xpath("//h1[contains(@class,'headline')]/text()").extract_first()
         if (data is None):
+            data = response.xpath("//h1[@class='_8UFs4BVE']/text()").extract_first()
+        if (data is None):
+            data = response.xpath("//span[@class='xxx_oneoff_special_story_v3_headline']/text()").extract_first()
+        if (data is None):
             logger.error(response.url)
             data = 'Error'
         return data
@@ -69,10 +73,22 @@ class TimetechSpider(scrapy.Spider):
     def getPageDate(self, response):
         try:
             # split used to Spit Data in Correct format!
-            data = (str(response.xpath("//script[@type='application/ld+json']").extract_first()).split('datePublished":"',1)[1]).split('.',1)[0]
+            data = (str(response.xpath("//script[@type='application/ld+json']").extract_first()).split('datePublished":"',1)[1])[:19]
         except (TypeError,IndexError) as Error:
-            logger.error(response.url)
-            data = 'Error'
+            # This fail case works only on very specific articles.
+            scriptData = None
+            scriptsList = response.xpath("/html/head/script[not(contains(@type,'text/javascript'))]")
+            for script in scriptsList:
+                try:
+                    scriptData = (script.extract()).split("<script>utag_data",1)[1]
+                    break
+                except:
+                    continue
+            if (scriptData is not None):
+                data = (scriptData.split('"publish_date":"',1)[1]).split("+",1)[0]
+            if (data is None):
+                logger.error(response.url)
+                data = 'Error'
         finally:
             return data
 
