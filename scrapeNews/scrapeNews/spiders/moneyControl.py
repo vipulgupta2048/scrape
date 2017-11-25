@@ -26,7 +26,7 @@ class MoneycontrolSpider(scrapy.Spider):
             item['content'] = self.getPageContent(newsBox)
             item['newsDate'] = self.getPageDate(newsBox)
             item['link'] = self.getPageLink(newsBox)
-            item['source'] = 100
+            item['source'] = 108
             if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
                 yield item
 

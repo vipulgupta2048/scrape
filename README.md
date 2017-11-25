@@ -64,10 +64,11 @@ ITEM_PIPELINES = {
     {'site_id':102,'site_name':'India TV','site_url':'http://www.indiatvnews.com/business/tech/'},
     {'site_id':103,'site_name':'Time','site_url':'http://time.com/section/tech/'},
     {'site_id':104,'site_name':'NDTV','site_url':'https://www.ndtv.com/latest/page-1'},
-    {'site_id':105,'site_name':'Inshorts','site_url':'http://www.inshorts.com/en/read/'}
-	{'site_id':106,'site_name':'Zee News','site_url':'http://zeenews.india.com/india'}
-    {'site_id':107,'site_name':'News18','site_url':'http://www.news18.com/news/'}
-	{'site_id':108,'site_name':'moneyControl','site_url':'http://www.moneycontrol.com/news/business/'}
+    {'site_id':105,'site_name':'Inshorts','site_url':'http://www.inshorts.com/en/read/'},
+	{'site_id':106,'site_name':'Zee News','site_url':'http://zeenews.india.com/india'},
+    {'site_id':107,'site_name':'News18','site_url':'http://www.news18.com/news/'},
+	{'site_id':108,'site_name':'moneyControl','site_url':'http://www.moneycontrol.com/news/business/'},
+	{'site_id':109,'site_name':'oneindia','site_url':'https://www.oneindia.com/india/'}
 	]
     ```
 
@@ -86,7 +87,8 @@ scrapy crawl SPIDER_NAME
     6. zeeNews
     7. News18Spider
     8. moneyControl
-    9. newsNation [In development]
+    9. oneindia
+    10. newsNation [In development]
 
 - Options:
     1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages).
@@ -94,5 +96,7 @@ scrapy crawl SPIDER_NAME
         1. indianExpressTech
     	2. indiaTv  
     	3. timeTech
+        4. moneyControl
+        5. oneindia
 
 Happy collaborating !!   
