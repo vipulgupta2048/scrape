@@ -14,17 +14,7 @@ BOT_NAME = 'scrapeNews'
 SPIDER_MODULES = ['scrapeNews.spiders']
 NEWSPIDER_MODULE = 'scrapeNews.spiders'
 
-#Logger Configuration
 LOG_LEVEL = 'CRITICAL'  # to only display errors
-logger = logging.getLogger("scrapeNews")
-formatter = logging.Formatter('%(filename)s[%(lineno)d]: %(message)s')
-fileHandler = logging.FileHandler('scrapeNews.log')
-streamHandler = logging.StreamHandler()
-fileHandler.setFormatter(formatter)
-streamHandler.setFormatter(formatter)
-logger.addHandler(fileHandler)
-logger.addHandler(streamHandler)
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrapeNews (+http://www.yourdomain.com)'
 
@@ -99,10 +89,31 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-# Logger Configuration
-# logger = logging.getLogger("scrapeNews")
-# handler = logging.FileHandler('scrapeNews.log')
-# formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-# handler.setFormatter(formatter)
-# logger.addHandler(handler)
-# logger.setLevel(logging.ERROR)
+# Logger Configuration (scrapeNews)
+logger = logging.getLogger("scrapeNews")
+handler = logging.FileHandler('scrapeNews.log')
+formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.ERROR)
+
+#Logger Configuration (scrapeNewsInfo)
+loggerInfo = logging.getLogger("scrapeNewsInfo")
+formatterInfo = logging.Formatter('%(message)s %(asctime)s',"%I:%M%p on %B,%d'%Y")
+fileHandlerInfo = logging.FileHandler('scrapeNewsInfo.log')
+streamHandlerInfo = logging.StreamHandler()
+fileHandlerInfo.setFormatter(formatterInfo)
+streamHandlerInfo.setFormatter(formatterInfo)
+loggerInfo.addHandler(fileHandlerInfo)
+loggerInfo.addHandler(streamHandlerInfo)
+loggerInfo.setLevel(logging.INFO)
+
+#Logger Configuration (scrapeNewsError)
+loggerError = logging.getLogger("scrapeNewsError")
+formatterError = logging.Formatter('%(filename)s[%(lineno)d]: %(message)s')
+fileHandlerError = logging.FileHandler('scrapeNewsError.log')
+streamHandlerError = logging.StreamHandler()
+fileHandlerError.setFormatter(formatterError)
+streamHandlerError.setFormatter(formatterError)
+loggerError.addHandler(fileHandlerError)
+loggerError.addHandler(streamHandlerError)

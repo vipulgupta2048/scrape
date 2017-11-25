@@ -2,7 +2,7 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 import logging
-logger = logging.getLogger("scrapeNews")
+loggerError = logging.getLogger("scrapeNewsError")
 
 
 class IndianexpresstechSpider(scrapy.Spider):
@@ -40,21 +40,21 @@ class IndianexpresstechSpider(scrapy.Spider):
         if (data is None):
             data = response.xpath("//div[@class='full-details']/p/text()").extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
     def getPageTitle(self, response):
         data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
     def getPageLink(self, response):
         data = response.url
         if (data is None):
-            logger.error(response)
+            loggerError.error(response)
             data = 'Error'
         return data
 
@@ -63,7 +63,7 @@ class IndianexpresstechSpider(scrapy.Spider):
         if (data is None):
             data = response.xpath("//span[@itemprop='image']/meta[@itemprop='url']/@content").extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
@@ -78,7 +78,7 @@ class IndianexpresstechSpider(scrapy.Spider):
                 # details out of the string provided!
                 data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Updated: ')[1]).split("'")[0].split('\t')[0])
             except IndexError:
-                logger.error(response.url)
+                loggerError.error(response.url)
                 data = 'Error'
         finally:
             return data

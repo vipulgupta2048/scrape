@@ -2,7 +2,7 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 import logging
-logger = logging.getLogger("scrapeNews")
+loggerError = logging.getLogger("scrapeNewsError")
 
 class TimetechSpider(scrapy.Spider):
     name = 'timeTech'
@@ -49,7 +49,7 @@ class TimetechSpider(scrapy.Spider):
         if (data is None):
             data = response.xpath("//span[@class='xxx_oneoff_special_story_v3_headline']/text()").extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
@@ -57,7 +57,7 @@ class TimetechSpider(scrapy.Spider):
     def getPageLink(self, response):
         data = response.url
         if (data is None):
-            logger.error(response)
+            loggerError.error(response)
             data = 'Error'
         return data
 
@@ -65,7 +65,7 @@ class TimetechSpider(scrapy.Spider):
     def getPageImage(self, response):
         data = response.xpath("//meta[@property='og:image']/@content").extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
@@ -87,7 +87,7 @@ class TimetechSpider(scrapy.Spider):
             if (scriptData is not None):
                 data = (scriptData.split('"publish_date":"',1)[1]).split("+",1)[0]
             if (data is None):
-                logger.error(response.url)
+                loggerError.error(response.url)
                 data = 'Error'
         finally:
             return data
@@ -96,7 +96,7 @@ class TimetechSpider(scrapy.Spider):
     def getPageContent(self, response):
         data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 

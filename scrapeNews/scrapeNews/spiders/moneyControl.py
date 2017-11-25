@@ -2,7 +2,7 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 import logging
-logger = logging.getLogger("scrapeNews")
+loggerError = logging.getLogger("scrapeNewsError")
 
 class MoneycontrolSpider(scrapy.Spider):
     name = 'moneyControl'
@@ -33,34 +33,34 @@ class MoneycontrolSpider(scrapy.Spider):
     def getPageContent(self, newsBox):
         data = newsBox.xpath('p/text()').extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
     def getPageTitle(self, newsBox):
         data = newsBox.xpath('h2/a/text()').extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
     def getPageLink(self, newsBox):
         data = newsBox.xpath('a/@href').extract_first()
         if (data is None):
-            logger.error(response)
+            loggerError.error(response)
             data = 'Error'
         return data
 
     def getPageImage(self, newsBox):
         data = newsBox.xpath('a/img/@src').extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
     def getPageDate(self, newsBox):
         data = newsBox.xpath('span/text()').extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
