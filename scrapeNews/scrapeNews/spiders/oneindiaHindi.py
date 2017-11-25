@@ -4,16 +4,14 @@ from scrapeNews.items import ScrapenewsItem
 import logging
 loggerError = logging.getLogger("scrapeNewsError")
 
-
-class OneindiaSpider(scrapy.Spider):
-    name = 'oneindia'
+class OneindiahindiSpider(scrapy.Spider):
+    name = 'oneindiaHindi'
     allowed_domains = ['oneindia.com']
 
-
     def __init__(self, pages=2, *args, **kwargs):
-        super(OneindiaSpider, self).__init__(*args, **kwargs)
+        super(OneindiahindiSpider, self).__init__(*args, **kwargs)
         for count in range(1 , int(pages)+1):
-            self.start_urls.append('https://www.oneindia.com/india/?page-no='+ str(count))
+            self.start_urls.append('https://hindi.oneindia.com/news/india/?page-no='+ str(count))
 
 
     def start_requests(self):
@@ -24,7 +22,7 @@ class OneindiaSpider(scrapy.Spider):
     def parse(self, response):
         newsContainer = response.xpath('//div[@id="collection-wrapper"]/article')
         for newsBox in newsContainer:
-            link = 'https://www.oneindia.com/india/' + newsBox.xpath('div/h2/a/@href').extract_first()
+            link = 'https://hindi.oneindia.com/news/india/' + newsBox.xpath('div/h2/a/@href').extract_first()
             yield scrapy.Request(url=link, callback=self.parse_article)
 
 
@@ -35,7 +33,7 @@ class OneindiaSpider(scrapy.Spider):
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
         item['link'] = self.getPageLink(response)
-        item['source'] = 109
+        item['source'] = 110
         if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
@@ -63,7 +61,9 @@ class OneindiaSpider(scrapy.Spider):
         return data
 
     def getPageImage(self, response):
-        data = 'https://www.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
+        data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
+        if (data is None):
+            data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
         if (data is None):
             loggerError.error(response.url)
             data = 'Error'

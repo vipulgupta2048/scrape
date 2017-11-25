@@ -25,7 +25,6 @@ Navigate to repository: `pip3 install -r requirements.txt`
 - Requirements:
     - scrapy
     - requests
-    - click
     - python-dateutil
 
 ### Database Setup (PostgreSQL)
@@ -68,7 +67,8 @@ ITEM_PIPELINES = {
 	{'site_id':106,'site_name':'Zee News','site_url':'http://zeenews.india.com/india'},
     {'site_id':107,'site_name':'News18','site_url':'http://www.news18.com/news/'},
 	{'site_id':108,'site_name':'moneyControl','site_url':'http://www.moneycontrol.com/news/business/'},
-	{'site_id':109,'site_name':'oneindia','site_url':'https://www.oneindia.com/india/'}
+	{'site_id':109,'site_name':'oneindia','site_url':'https://www.oneindia.com/india/'},
+	{'site_id':110,'site_name':'oneindia(hindi)','site_url':'https://hindi.oneindia.com/news/india/'},
 	]
     ```
 
@@ -88,7 +88,8 @@ scrapy crawl SPIDER_NAME
     7. News18Spider
     8. moneyControl
     9. oneindia
-    10. newsNation [In development]
+    10. oneindiaHindi
+    11. newsNation [In development]
 
 - Options:
     1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages).
@@ -98,5 +99,6 @@ scrapy crawl SPIDER_NAME
     	3. timeTech
         4. moneyControl
         5. oneindia
+        6. oneindiaHindi
 
 Happy collaborating !!   

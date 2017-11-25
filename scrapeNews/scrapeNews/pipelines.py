@@ -9,7 +9,8 @@ from scrapeNews.items import ScrapenewsItem
 from datetime import datetime
 import envConfig
 import logging
-logger = logging.getLogger("scrapeNews")
+loggerError = logging.getLogger("scrapeNewsError")
+loggerInfo = logging.getLogger("scrapeNewsInfo")
 
 # Setting up local variables USERNAME & PASSWORD
 PASSWORD = envConfig.PASSWORD
@@ -26,10 +27,13 @@ class ScrapenewsPipeline(object):
             password=PASSWORD)
         self.cursor = self.connection.cursor()
         self.connection.autocommit = True
+        self.recordedArticles = 0
 
     def close_spider(self, spider):
         self.cursor.close()
         self.connection.close()
+        if self.recordedArticles > 0:
+            loggerInfo.info(str(self.recordedArticles) + " record(s) were added by " + spider.name + " at")
 
     def process_item(self, item, spider):
         self.cursor.execute("""SELECT link from news_table where link= %s """, (item.get('link'),))
@@ -45,45 +49,32 @@ class ScrapenewsPipeline(object):
                     processedDate,
                     item.get('source')))
                 self.connection.commit()
+                self.recordedArticles += 1
             except Exception as Error:
-                logger.error(Error)
+                loggerError.error(Error)
             finally:
                 return item
         else:
             return item
 
     def process_date(self, itemDate, link, spiderName):
-        if spiderName is 'indianExpressTech':
-            try:
+        try:
+            if spiderName is 'indianExpressTech':
                 processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
-            except ValueError as Error:
-                logger.error(Error, link)
-        if spiderName is 'moneyControl':
-            try:
-                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p %Z")).strftime("%Y-%m-%dT%H:%M:%S")
-            except ValueError as Error:
-                logger.error(Error, link)
-        elif spiderName is 'indiaTv':
-            try:
-                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
-            except ValueError as Error:
-                logger.error(Error, link)
-        elif spiderName is 'zee':
-            try:
-                processedItemDate = (datetime.strptime(itemDate,"%b %d, %Y, %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
-            except ValueError as Error:
-                logger.error(Error, link)
-        elif spiderName is 'ndtv':
-            try:
-                processedItemDate = (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
-            except ValueError as Error:
-                logging.error(Error, link)
-        elif spiderName is 'News18Spider':
-            try:
-                processedItemDate = itemDate.strftime("%Y-%m-%dT%H:%M:%S")
-            except ValueError as Error:
-                logging.error(Error, link)
-        else:
+            elif spiderName is 'moneyControl':
+                    processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p %Z")).strftime("%Y-%m-%dT%H:%M:%S")
+            elif spiderName is 'indiaTv':
+                    processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
+            elif spiderName is 'zee':
+                    processedItemDate = (datetime.strptime(itemDate,"%b %d, %Y, %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
+            elif spiderName is 'ndtv':
+                    processedItemDate = (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
+            elif spiderName is 'News18Spider':
+                    processedItemDate = itemDate.strftime("%Y-%m-%dT%H:%M:%S")
+            else:
+                processedItemDate = itemDate
+        except ValueError as Error:
+            loggerError.error(Error, link)
             processedItemDate = itemDate
-
-        return processedItemDate
+        finally:
+            return processedItemDate

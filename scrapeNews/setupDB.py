@@ -2,7 +2,7 @@
 import psycopg2
 import envConfig
 import logging
-logger = logging.getLogger("scrapeNews")
+loggerError = logging.getLogger("scrapeNewsError")
 
 class setupDB:
 
@@ -22,7 +22,7 @@ class setupDB:
         except psycopg2.ProgrammingError as Error:
             setupDB.createTables(USERNAME, PASSWORD)
         except Exception as Error:
-            logger.error(Error)
+            loggerError.error(Error)
     def createTables(USERNAME, PASSWORD):
         commands = (
             """
@@ -58,7 +58,7 @@ class setupDB:
             connection.close()
             setupDB.insertSpiderRecords(USERNAME, PASSWORD, *SPIDER_DETAILS)
         except Exception as Error:
-            logger.error(Error)
+            loggerError.error(Error)
     def insertSpiderRecords(USERNAME, PASSWORD, *SPIDER_DETAILS):
         try:
             connection = psycopg2.connect(
@@ -81,7 +81,7 @@ class setupDB:
             connection.close()
             print("\nDatabase setup successfully completed!\n")
         except Exception as Error:
-            logger.error(Error)
+            loggerError.error(Error)
 
 if __name__ == '__main__':
     # Setting up local variables USERNAME, PASSWORD & SPIDER_DETAILS

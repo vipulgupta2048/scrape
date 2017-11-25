@@ -2,7 +2,7 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 import logging
-logger = logging.getLogger("scrapeNews")
+loggerError = logging.getLogger("scrapeNewsError")
 
 
 class IndiatvSpider(scrapy.Spider):
@@ -39,21 +39,21 @@ class IndiatvSpider(scrapy.Spider):
     def getPageTitle(self, response):
         data = response.xpath('//h1[@class="arttitle"]/text()').extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
     def getPageLink(self, response):
         data = response.url
         if (data is None):
-            logger.error(response)
+            loggerError.error(response)
             data = 'Error'
         return data
 
     def getPageImage(self, response):
         data = response.xpath('//div[@class="content"]/div/figure/img/@src').extract_first()
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
@@ -62,7 +62,7 @@ class IndiatvSpider(scrapy.Spider):
             # split & rsplit Used to Spit Data in Correct format!
             data = response.xpath("//span[@class='dattime']/text()").extract()[1].rsplit(' ',3)[0]
         except (TypeError,IndexError) as Error:
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         finally:
             return data
@@ -70,6 +70,6 @@ class IndiatvSpider(scrapy.Spider):
     def getPageContent(self, response):
         data = ' '.join((' '.join(response.xpath("//div[@class='content']/p/text()").extract())).split(' ')[:40])
         if (data is None):
-            logger.error(response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
