@@ -9,6 +9,7 @@ from scrapeNews.items import ScrapenewsItem
 from datetime import datetime
 import envConfig
 import logging
+logger = logging.getLogger("scrapeNews")
 
 # Setting up local variables USERNAME & PASSWORD
 PASSWORD = envConfig.PASSWORD
@@ -31,13 +32,9 @@ class ScrapenewsPipeline(object):
         self.connection.close()
 
     def process_item(self, item, spider):
-        self.cursor.execute(
-            """SELECT link from news_table where site_id = %s and link= %s """,
-            (item.get('source'),
-             item.get('link')))
+        self.cursor.execute("""SELECT link from news_table where link= %s """, (item.get('link'),))
         if not self.cursor.fetchall():
-            processedDate = self.process_date(
-                item.get('newsDate'), spider.name)
+            processedDate = self.process_date(item.get('newsDate'),item.get('link'), spider.name)
             try:
                 self.cursor.execute(
                     """INSERT INTO news_table (title, content, image, link, newsDate, site_id) VALUES (%s, %s, %s, %s, %s, %s)""",
@@ -49,43 +46,39 @@ class ScrapenewsPipeline(object):
                     item.get('source')))
                 self.connection.commit()
             except Exception as Error:
-                print("Error 105: ", Error)
+                logger.error(Error)
             finally:
                 return item
         else:
             return item
 
-    def process_date(self, itemDate, spiderName):
+    def process_date(self, itemDate, link, spiderName):
         if spiderName is 'indianExpressTech':
             try:
-                return (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
-                print("Error 106: ", Error)
+                logger.error(Error, link)
         elif spiderName is 'indiaTv':
             try:
-                return (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
-                print("Error 107: ", Error)
+                logger.error(Error, link)
         elif spiderName is 'zee':
             try:
-                return (datetime.strptime(itemDate,"%b %d, %Y, %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = (datetime.strptime(itemDate,"%b %d, %Y, %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
-                print("Error 108: ", Error)
+                logger.error(Error, link)
         elif spiderName is 'ndtv':
             try:
-                return (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
-                logging.error(Error)
+                logging.error(Error, link)
         elif spiderName is 'News18Spider':
             try:
-                return itemDate.strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = itemDate.strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError as Error:
-                logging.error(Error)
-        # Conversion not needed for INSHORTS
-        # elif spiderName is 'inshorts':
-        #     try:
-        #         return (datetime.strptime(itemDate, "%Y-%m-%dT%H:%M:%S"))
-        #     except ValueError as Error:
-        #         logging.error(Error)
+                logging.error(Error, link)
         else:
-            return itemDate
+            processedItemDate = itemDate
+
+        return processedItemDate

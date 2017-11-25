@@ -45,7 +45,7 @@ class News18Spider(scrapy.Spider):
     def log_ip(self, response):
         ip = response.xpath("//body/text()").extract_first()
         logger.debug(__name__+" "+ip)
-	yield None
+        yield None
 
     def parse(self, response):
         if response.status != 200:
@@ -61,22 +61,22 @@ class News18Spider(scrapy.Spider):
                     news_type = news_type.split(" ")
                     for x in news_type:
                         if x in self.ignoreClasses:
-                            flag = 1 
+                            flag = 1
                             logger.debug(__name__+" [SKIPPED] "+x+" is in Ignored List")
                     if flag:
                         continue
 
                 href = response.urljoin(section.xpath("./p/a[1]/@href").extract_first())
-                
+
                 yield scrapy.Request(url = href, callback=self.parse_news) #Let Pipeline Handle duplicates (Consumes more bandwidth)
 
             next_page = response.xpath('//div[contains(@class, "pagination")]/ul/li[contains(@class,"next")]/a/@href').extract_first();
             if next_page is not None:
                 logger.debug(__name__+" Moving to Next Page")
                 yield scrapy.Request(url = response.urljoin(next_page))
-    
+
     def parse_news(self, response):
-        
+
         news_url = response.url
         news_parser = "default"
 
@@ -99,6 +99,6 @@ class News18Spider(scrapy.Spider):
             logger.error(__name__+" Empty Data for URL "+news_url)
             yield None
             return
-        news_date = parser.parse(news_date, , ignoretz=False)
+        news_date = parser.parse(news_date, ignoretz=False)
         item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date, 'source': self.custom_settings.site_id})
         yield item

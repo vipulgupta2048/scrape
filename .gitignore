@@ -4,16 +4,6 @@ venv/
 # Ignore Environment Config File
 scrapeNews/envConfig.py
 
-# Ignore data files[Maybe Useful for local development]
-data/
-
-#Ignore scraper's compiled files
-scrapeNews/scrapeNews/__pycache__/
-scrapeNews/__pycache__/
-
-#Ignore spiders' complied files
-scrapeNews/scrapeNews/spiders/__pycache__/
-
 #Ignore .pyc files
 *.pyc
 
@@ -21,7 +11,7 @@ scrapeNews/scrapeNews/spiders/__pycache__/
 *.log
 
 #ignore any __pycache__
-**/__pycache__
+**/__pycache__/
 
 #ignore .sh files
 *.sh

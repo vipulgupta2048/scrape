@@ -22,6 +22,12 @@ Linux: `source VENV_NAME/bin/activate`
 ### Install the requirements
 Navigate to repository: `pip3 install -r requirements.txt`
 
+- Requirements:
+    - scrapy
+    - requests
+    - click
+    - python-dateutil
+
 ### Database Setup (Postgresql)
 
 **Note: You can comment out the following code in settings.py to avoid using pipelines.**
@@ -58,7 +64,7 @@ ITEM_PIPELINES = {
     {'site_id':103,'site_name':'Time','site_url':'http://time.com/section/tech/'},
     {'site_id':104,'site_name':'NDTV','site_url':'https://www.ndtv.com/latest/page-1'},
     {'site_id':105,'site_name':'Inshorts','site_url':'http://www.inshorts.com/en/read/'}
-	{'site_id':106,'site_name':'Zee News','site_url':'http://zeenews.india.com/india'} 
+	{'site_id':106,'site_name':'Zee News','site_url':'http://zeenews.india.com/india'}
 	]
     ```
 
@@ -76,5 +82,12 @@ scrapy crawl SPIDER_NAME
 	5. inshorts
     6. zeeNews
     7. newsNation [In development]
-    
+
+- Options:
+    1. To set the number of pages to be scraped use  `-a pages = X ` (X = Number of pages). 
+	Applicable for:
+        1. indianExpressTech
+    	2. indiaTv  
+    	3. timeTech
+
 Happy collaborating !!   
