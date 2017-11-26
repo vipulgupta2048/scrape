@@ -36,9 +36,9 @@ class TimetechSpider(scrapy.Spider):
         item['title'] = self.getPageTitle(response)
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
-        item['link'] = self.getPageLink(response)
+        item['link'] = response.url
         item['source'] = 103
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
 
@@ -50,14 +50,6 @@ class TimetechSpider(scrapy.Spider):
             data = response.xpath("//span[@class='xxx_oneoff_special_story_v3_headline']/text()").extract_first()
         if (data is None):
             loggerError.error(response.url)
-            data = 'Error'
-        return data
-
-
-    def getPageLink(self, response):
-        data = response.url
-        if (data is None):
-            loggerError.error(response)
             data = 'Error'
         return data
 
@@ -89,16 +81,21 @@ class TimetechSpider(scrapy.Spider):
             if (data is None):
                 loggerError.error(response.url)
                 data = 'Error'
+        except Exception as Error:
+            loggerError.error(str(Error) + ' occured at: ' + response.url)
+            data = 'Error'
         finally:
             return data
 
 
     def getPageContent(self, response):
-        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
-        if (data is None):
-            loggerError.error(response.url)
+        try:
+            data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+        except Exception as Error:
+            loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
-        return data
+        finally:
+            return data
 
 
 # DEAD API's Link: 'time.com/wp-json/ti-api/v1/posts?time_section_slug=time-section-tech&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=30&page1'

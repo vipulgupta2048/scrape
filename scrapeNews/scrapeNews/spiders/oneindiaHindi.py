@@ -32,9 +32,9 @@ class OneindiahindiSpider(scrapy.Spider):
         item['title'] = self.getPageTitle(response)
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
-        item['link'] = self.getPageLink(response)
+        item['link'] = response.url
         item['source'] = 110
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
 
@@ -53,12 +53,6 @@ class OneindiahindiSpider(scrapy.Spider):
             data = 'Error'
         return data
 
-    def getPageLink(self, response):
-        data = response.url
-        if (data is None):
-            loggerError.error(response)
-            data = 'Error'
-        return data
 
     def getPageImage(self, response):
         data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
@@ -72,8 +66,8 @@ class OneindiahindiSpider(scrapy.Spider):
     def getPageDate(self, response):
         try:
             data = (response.xpath("//time/@datetime").extract_first()).rsplit('+',1)[0]
-        except IndexError:
-            loggerError.error(response.url)
+        except Exception as Error:
+            loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
         finally:
             return data

@@ -68,7 +68,7 @@ ITEM_PIPELINES = {
     {'site_id':107,'site_name':'News18','site_url':'http://www.news18.com/news/'},
 	{'site_id':108,'site_name':'moneyControl','site_url':'http://www.moneycontrol.com/news/business/'},
 	{'site_id':109,'site_name':'oneindia','site_url':'https://www.oneindia.com/india/'},
-	{'site_id':110,'site_name':'oneindia(hindi)','site_url':'https://hindi.oneindia.com/news/india/'},
+	{'site_id':110,'site_name':'oneindia(hindi)','site_url':'https://hindi.oneindia.com/news/india/'}
 	]
     ```
 
