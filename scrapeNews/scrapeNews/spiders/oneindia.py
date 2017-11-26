@@ -34,17 +34,17 @@ class OneindiaSpider(scrapy.Spider):
         item['title'] = self.getPageTitle(response)
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
-        item['link'] = self.getPageLink(response)
+        item['link'] = response.url
         item['source'] = 109
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
 
     def getPageContent(self, response):
         try:
             data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
-        except:
-            loggerError.error(response.url)
+        except Exception as Error:
+            loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
         return data
 
@@ -55,12 +55,6 @@ class OneindiaSpider(scrapy.Spider):
             data = 'Error'
         return data
 
-    def getPageLink(self, response):
-        data = response.url
-        if (data is None):
-            loggerError.error(response)
-            data = 'Error'
-        return data
 
     def getPageImage(self, response):
         data = 'https://www.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
@@ -71,9 +65,9 @@ class OneindiaSpider(scrapy.Spider):
 
     def getPageDate(self, response):
         try:
-            data = (response.xpath("//time/@datetime").extract_first()).rsplit('+',1)[0]
-        except IndexError:
-            loggerError.error(response.url)
+            data = (response.xpath("/html/head/meta[@property='article:published_time']/@content").extract_first()).rsplit('+',1)[0]
+        except Exception as Error:
+            loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
         finally:
             return data

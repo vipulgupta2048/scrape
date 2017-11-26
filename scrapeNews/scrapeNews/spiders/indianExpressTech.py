@@ -30,9 +30,9 @@ class IndianexpresstechSpider(scrapy.Spider):
         item['title'] = self.getPageTitle(response)
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
-        item['link'] = self.getPageLink(response)
+        item['link'] = response.url
         item['source'] = 101
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
     def getPageContent(self, response):
@@ -51,12 +51,6 @@ class IndianexpresstechSpider(scrapy.Spider):
             data = 'Error'
         return data
 
-    def getPageLink(self, response):
-        data = response.url
-        if (data is None):
-            loggerError.error(response)
-            data = 'Error'
-        return data
 
     def getPageImage(self, response):
         data = response.xpath('//span[@class="custom-caption"]/img/@data-lazy-src').extract_first()
@@ -80,5 +74,11 @@ class IndianexpresstechSpider(scrapy.Spider):
             except IndexError:
                 loggerError.error(response.url)
                 data = 'Error'
+            except Exception as Error:
+                loggerError.error(str(Error) + ' occured at: ' + response.url)
+                data = 'Error'
+        except Exception as Error:
+            loggerError.error(str(Error) + ' occured at: ' + response.url)
+            data = 'Error'
         finally:
             return data

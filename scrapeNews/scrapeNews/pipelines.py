@@ -62,15 +62,15 @@ class ScrapenewsPipeline(object):
             if spiderName is 'indianExpressTech':
                 processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
             elif spiderName is 'moneyControl':
-                    processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p %Z")).strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p %Z")).strftime("%Y-%m-%dT%H:%M:%S")
             elif spiderName is 'indiaTv':
-                    processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
             elif spiderName is 'zee':
-                    processedItemDate = (datetime.strptime(itemDate,"%b %d, %Y, %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = (datetime.strptime(itemDate,"%b %d, %Y, %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
             elif spiderName is 'ndtv':
-                    processedItemDate = (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
             elif spiderName is 'News18Spider':
-                    processedItemDate = itemDate.strftime("%Y-%m-%dT%H:%M:%S")
+                processedItemDate = itemDate.strftime("%Y-%m-%dT%H:%M:%S")
             else:
                 processedItemDate = itemDate
         except ValueError as Error:
