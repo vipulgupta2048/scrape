@@ -69,7 +69,8 @@ ITEM_PIPELINES = {
 	{'site_id':108,'site_name':'moneyControl','site_url':'http://www.moneycontrol.com/news/business/'},
 	{'site_id':109,'site_name':'oneindia','site_url':'https://www.oneindia.com/india/'},
 	{'site_id':110,'site_name':'oneindia(hindi)','site_url':'https://hindi.oneindia.com/news/india/'},
-	{'site_id':111,'site_name':'firstpost(hindi)','site_url':'https://hindi.firstpost.com/category/latest/'}
+	{'site_id':111,'site_name':'firstpost(hindi)','site_url':'https://hindi.firstpost.com/category/latest/'},
+	{'site_id':112,'site_name':'firstpost(sports)','site_url':'http://www.firstpost.com/category/sports/'}
 	]
     ```
 
@@ -91,7 +92,8 @@ scrapy crawl SPIDER_NAME
     9. oneindia
     10. oneindiaHindi
     11. firstpostHindi
-    12. newsNation [In development]
+    12. firstpostSports
+    13. newsNation [In development]
 
 - Options:
     1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages).
@@ -103,5 +105,6 @@ scrapy crawl SPIDER_NAME
         5. oneindia
         6. oneindiaHindi
         7. firstpostHindi
+        8. firstpostSports
 
 Happy collaborating !!   
