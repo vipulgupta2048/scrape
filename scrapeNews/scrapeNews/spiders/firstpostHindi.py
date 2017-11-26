@@ -38,7 +38,7 @@ class FirstposthindiSpider(scrapy.Spider):
             item['title'] = self.getPageTitle(response)
             item['content'] = self.getPageContent(response)
             item['newsDate'] = self.getPageDate(response)
-            item['link'] = self.getPageLink(response)
+            item['link'] = response.url
             item['source'] = 111
             if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
                 yield item
@@ -48,13 +48,6 @@ class FirstposthindiSpider(scrapy.Spider):
         data = response.xpath("//h1[@class='hd60']/text()").extract_first()
         if (data is None):
             loggerError.error(response.url)
-            data = 'Error'
-        return data
-
-    def getPageLink(self, response):
-        data = response.url
-        if (data is None):
-            loggerError.error(response)
             data = 'Error'
         return data
 
