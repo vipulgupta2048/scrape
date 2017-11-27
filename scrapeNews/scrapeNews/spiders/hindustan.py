@@ -19,12 +19,12 @@ class HindustanSpider(scrapy.Spider):
 
     def fun(self, response):
         text = response.text
-        headline : response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
-        images : response.xpath('//div[@class="thumbnail"]/img/@src').extract_first()
-        body : response.xpath('//div[@itemprop="articlebody"]/p').extract_first()
-        date : response.css('span.text-dt::text').extract_first()
+        headline = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
+        images = response.xpath('//div[@class="thumbnail"]/img/@src').extract_first()
+        body = response.xpath('//div[@itemprop="articlebody"]/p').extract_first()
+        date = response.css('span.text-dt::text').extract_first()
         
-        item = ScrapenewsItem({'link': response.url , 'title': headline, 'content': body, 'image': images, 'newsDate',: date , 'source': 109 })
+        item = ScrapenewsItem({'title': headline, 'link': response.url, 'newsDate': date, 'content': body, 'image': images,  'source': 111 })
         yield item   
 
     
