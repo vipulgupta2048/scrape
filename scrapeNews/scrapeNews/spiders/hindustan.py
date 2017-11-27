@@ -24,7 +24,7 @@ class HindustanSpider(scrapy.Spider):
         body = response.xpath('//div[@itemprop="articlebody"]/p').extract_first()
         date = response.css('span.text-dt::text').extract_first()
         
-        item = ScrapenewsItem({'link': response.url , 'title': headline, 'content': body, 'image': images, 'newsDate',: date , 'source': 109 })
+        item = ScrapenewsItem({'title': headline, 'link': response.url, 'newsDate': date, 'content': body, 'image': images,  'source': 111 })
         yield item   
 
     
