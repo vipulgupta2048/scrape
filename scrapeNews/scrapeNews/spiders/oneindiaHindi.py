@@ -8,7 +8,7 @@ class OneindiahindiSpider(scrapy.Spider):
     name = 'oneindiaHindi'
     allowed_domains = ['oneindia.com']
 
-    def __init__(self, pages=2, *args, **kwargs):
+    def __init__(self, pages=4, *args, **kwargs):
         super(OneindiahindiSpider, self).__init__(*args, **kwargs)
         for count in range(1 , int(pages)+1):
             self.start_urls.append('https://hindi.oneindia.com/news/india/?page-no='+ str(count))
