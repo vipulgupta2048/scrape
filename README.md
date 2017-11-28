@@ -71,7 +71,9 @@ ITEM_PIPELINES = {
 	{'site_id':110,'site_name':'oneindia(hindi)','site_url':'https://hindi.oneindia.com/news/india/'},
 	{'site_id':111,'site_name':'firstpost(hindi)','site_url':'https://hindi.firstpost.com/category/latest/'},
 	{'site_id':112,'site_name':'firstpost(sports)','site_url':'http://www.firstpost.com/category/sports/'},
-	{'site_id':113,'site_name':'newsx','site_url':'http://www.newsx.com/latest-news/'}
+	{'site_id':113,'site_name':'newsx','site_url':'http://www.newsx.com/latest-news/'},
+    {'site_id':114,'site_name':'hindustantimes','site_url':'http://www.hindustantimes.com/editors-pick/'},
+	{'site_id':115,'site_name':'asianage','site_url':'http://www.asianage.com/newsmakers'}
 	]
     ```
 
@@ -95,7 +97,9 @@ scrapy crawl SPIDER_NAME
     11. firstpostHindi
     12. firstpostSports
     13. newsx
-    14. newsNation [In development]
+    14. hindustantimes
+    15. asianage
+    16. newsNation [In development]
 
 - Options:
     1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages).
@@ -109,5 +113,6 @@ scrapy crawl SPIDER_NAME
         7. firstpostHindi
         8. firstpostSports
         9. newsx
+        10. asianage
 
 Happy collaborating !!   

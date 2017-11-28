@@ -9,7 +9,7 @@ class FirstposthindiSpider(scrapy.Spider):
     name = 'firstpostHindi'
     allowed_domains = ['hindi.firstpost.com']
 
-    def __init__(self, pages=1, *args, **kwargs):
+    def __init__(self, pages=2, *args, **kwargs):
         super(FirstposthindiSpider, self).__init__(*args, **kwargs)
         for count in range(1 , int(pages)+1):
             self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count))
