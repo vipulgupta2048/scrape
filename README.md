@@ -114,5 +114,6 @@ scrapy crawl SPIDER_NAME
         8. firstpostSports
         9. newsx
         10. asianage
+		11. ndtv
 
 Happy collaborating !!   
