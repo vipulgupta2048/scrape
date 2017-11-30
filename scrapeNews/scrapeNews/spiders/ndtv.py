@@ -5,6 +5,7 @@ import time
 import logging
 import requests
 from lxml import html
+from datetime import datetime
 
 
 class NdtvSpider(scrapy.Spider):
