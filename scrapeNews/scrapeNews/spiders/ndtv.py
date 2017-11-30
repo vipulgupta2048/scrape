@@ -28,9 +28,17 @@ class NdtvSpider(scrapy.Spider):
                     item['image'] = news.css('div.new_storylising_img>a>img::attr(src)').extract_first()
                     item['title'] = news.css('div.nstory_header>a::text').extract_first().strip()
                     item['content'] = news.css('div.nstory_intro::text').extract_first()
-                    item['newsDate'] = news.css('div.nstory_dateline::text').extract_first().strip()[2:28]
                     item['link'] = news.css('div.nstory_header>a::attr(href)').extract_first()
+                    #item['newsDate'] = news.css('div.nstory_dateline::text').extract_first().strip()[2:28]
+                    #item['newsDate'] = scrapy.Request(item['link'], callback=self.parse_date)
+                    item['newsDate'] = self.parse_date(scrapy.Request(item['link']))
                     item['source'] = 104
                     yield item
                 else:
                     logging.debug('Skipping a News Item, most probably an Advertisment')
+
+    def parse_date(self, response):
+        if response.css('span[itemprop*=dateModified]::attr(content)'):
+            return response.css('span[itemprop*=dateModified]::attr(content)').extract_first()[:-6]
+        elif response.css('meta[itemprop*=dateModified]::attr(content)'):
+            return response.css('meta[itemprop*=dateModified]::attr(content)').extract_first()[:-6]
