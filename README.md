@@ -60,8 +60,8 @@ ITEM_PIPELINES = {
     # {'site_id':'YOUR_SPIDER_ID','YOUR_SPIDER_NAME':'','site_url':'YOUR_SPIDER_URL'}
     {'site_id':100,'site_name':'EXAMPLE_SPIDER_NAME','site_url':'http://www.example.com'},
     {'site_id':101,'site_name':'Indian Express','site_url':'http://indianexpress.com/section/technology/'},
-    {'site_id':102,'site_name':'India TV','site_url':'http://www.indiatvnews.com/business/tech/'},
-    {'site_id':103,'site_name':'Time','site_url':'http://time.com/section/tech/'},
+    {'site_id':102,'site_name':'India TV','site_url':'http://www.indiatvnews.com/india/'},
+    {'site_id':103,'site_name':'Time(Tech)','site_url':'http://time.com/section/tech/'},
     {'site_id':104,'site_name':'NDTV','site_url':'https://www.ndtv.com/latest/page-1'},
     {'site_id':105,'site_name':'Inshorts','site_url':'http://www.inshorts.com/en/read/'},
 	{'site_id':106,'site_name':'Zee News','site_url':'http://zeenews.india.com/india'},
@@ -73,7 +73,8 @@ ITEM_PIPELINES = {
 	{'site_id':112,'site_name':'firstpost(sports)','site_url':'http://www.firstpost.com/category/sports/'},
 	{'site_id':113,'site_name':'newsx','site_url':'http://www.newsx.com/latest-news/'},
     {'site_id':114,'site_name':'hindustantimes','site_url':'http://www.hindustantimes.com/editors-pick/'},
-	{'site_id':115,'site_name':'asianage','site_url':'http://www.asianage.com/newsmakers'}
+	{'site_id':115,'site_name':'asianage','site_url':'http://www.asianage.com/newsmakers'},
+	{'site_id':116,'site_name':'timeNews','site_url':'http://time.com/section/world/'},
 	]
     ```
 
@@ -99,10 +100,11 @@ scrapy crawl SPIDER_NAME
     13. newsx
     14. hindustantimes
     15. asianage
-    16. newsNation [In development]
+    16. timeNews
+    17. newsNation [In development]
 
 - Options:
-    1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages).
+    1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages to scrape).
 	Applicable for:
         1. indianExpressTech
     	2. indiaTv  
@@ -115,5 +117,20 @@ scrapy crawl SPIDER_NAME
         9. newsx
         10. asianage
 		11. ndtv
+        12. timeNews
+
+    2. To set the number of pages to be scraped use  `-a offset = X` (X = Number of pages to skip).
+	Applicable for:
+        1. indianExpressTech
+    	2. indiaTv  
+    	3. timeTech
+        4. moneyControl
+        5. oneindia
+        6. oneindiaHindi
+        7. firstpostHindi
+        8. firstpostSports
+        9. newsx
+        10. asianage
+        11. timeNews
 
 Happy collaborating !!   

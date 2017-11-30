@@ -48,7 +48,6 @@ class ScrapenewsPipeline(object):
                     item.get('link'),
                     processedDate,
                     item.get('source')))
-                self.connection.commit()
                 self.recordedArticles += 1
             except Exception as Error:
                 loggerError.error(Error)

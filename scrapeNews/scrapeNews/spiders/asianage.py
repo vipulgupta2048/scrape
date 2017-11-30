@@ -10,10 +10,10 @@ class AsianageSpider(scrapy.Spider):
     start_urls = ['http://asianage.com/']
 
 
-    def __init__(self, pages=2, *args, **kwargs):
+    def __init__(self, offset=0, pages=2, *args, **kwargs):
         super(AsianageSpider, self).__init__(*args, **kwargs)
-        for count in range(1 , int(pages)+1):
-            self.start_urls.append('http://www.asianage.com/newsmakers?pg='+ str(count))
+        for count in range(int(offset), int(offset) + int(pages)):
+            self.start_urls.append('http://www.asianage.com/newsmakers?pg='+ str(count+1))
 
     def start_requests(self):
         for url in self.start_urls:
