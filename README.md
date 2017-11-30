@@ -102,7 +102,7 @@ scrapy crawl SPIDER_NAME
     16. newsNation [In development]
 
 - Options:
-    1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages).
+    1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages to scrape).
 	Applicable for:
         1. indianExpressTech
     	2. indiaTv  
@@ -115,5 +115,18 @@ scrapy crawl SPIDER_NAME
         9. newsx
         10. asianage
 		11. ndtv
+
+    2. To set the number of pages to be scraped use  `-a offset = X` (X = Number of pages to skip).
+	Applicable for:
+        1. indianExpressTech
+    	2. indiaTv  
+    	3. timeTech
+        4. moneyControl
+        5. oneindia
+        6. oneindiaHindi
+        7. firstpostHindi
+        8. firstpostSports
+        9. newsx
+        10. asianage
 
 Happy collaborating !!   

@@ -2,17 +2,45 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 import logging
+import envConfig
+import psycopg2
 loggerError = logging.getLogger("scrapeNewsError")
 
+# Setting up local variables USERNAME & PASSWORD
+PASSWORD = envConfig.PASSWORD
+USERNAME = envConfig.USERNAME
 
 class FirstposthindiSpider(scrapy.Spider):
     name = 'firstpostHindi'
     allowed_domains = ['hindi.firstpost.com']
 
-    def __init__(self, pages=2, *args, **kwargs):
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(FirstposthindiSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        crawler.signals.connect(spider.spider_opened, scrapy.signals.spider_opened)
+        return spider
+
+
+    def __init__(self, offset=0, pages=2, *args, **kwargs):
         super(FirstposthindiSpider, self).__init__(*args, **kwargs)
-        for count in range(1 , int(pages)+1):
-            self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count))
+        for count in range(int(offset), int(offset) + int(pages)):
+            self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count+1))
+
+
+    def spider_opened(self, spider):
+        self.connection = psycopg2.connect(
+        host='localhost',
+        user=USERNAME,
+        database='scraped_news',
+        password=PASSWORD)
+        self.cursor = self.connection.cursor()
+
+
+    def spider_closed(self, spider):
+        self.cursor.close()
+        self.connection.close()
 
 
     def start_requests(self):
@@ -24,7 +52,9 @@ class FirstposthindiSpider(scrapy.Spider):
         newsContainer = response.xpath("//ul[@id='more_author_story']/li")
         for newsBox in newsContainer:
             link = newsBox.xpath('h2/a/@href').extract_first()
-            yield scrapy.Request(url=link, callback=self.parse_article)
+            self.cursor.execute("""SELECT link from news_table where link= %s """, (link,))
+            if not self.cursor.fetchall():
+                yield scrapy.Request(url=link, callback=self.parse_article)
 
 
     def parse_article(self, response):
