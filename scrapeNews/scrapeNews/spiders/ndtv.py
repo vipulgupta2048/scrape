@@ -28,7 +28,7 @@ class NdtvSpider(scrapy.Spider):
                     item['image'] = news.css('div.new_storylising_img>a>img::attr(src)').extract_first()
                     item['title'] = news.css('div.nstory_header>a::text').extract_first().strip()
                     item['content'] = news.css('div.nstory_intro::text').extract_first()
-                    item['newsDate'] = news.css('div.nstory_dateline::text').extract()[-1].strip()[2:]
+                    item['newsDate'] = news.css('div.nstory_dateline::text').extract_first().strip()[2:28]
                     item['link'] = news.css('div.nstory_header>a::attr(href)').extract_first()
                     item['source'] = 104
                     yield item
