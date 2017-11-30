@@ -10,20 +10,21 @@ loggerError = logging.getLogger("scrapeNewsError")
 PASSWORD = envConfig.PASSWORD
 USERNAME = envConfig.USERNAME
 
-class TimetechSpider(scrapy.Spider):
-    name = 'timeTech'
 
+class TimenewsSpider(scrapy.Spider):
+    name = 'timeNews'
+    allowed_domains = ['time.com']
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(TimetechSpider, cls).from_crawler(crawler, *args, **kwargs)
+        spider = super(TimenewsSpider, cls).from_crawler(crawler, *args, **kwargs)
         crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
         crawler.signals.connect(spider.spider_opened, scrapy.signals.spider_opened)
         return spider
 
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
-        super(TimetechSpider, self).__init__(*args, **kwargs)
+        super(TimenewsSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://time.com/section/world/?page='+ str(count+1))
 
@@ -50,7 +51,9 @@ class TimetechSpider(scrapy.Spider):
     def parse(self, response):
         # For the large newsBox in top of all the pages.
         newsBox = 'http://www.time.com' + response.xpath("//div[@class='partial hero']/article/a/@href").extract_first()
-        yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+        self.cursor.execute("""SELECT link from news_table where link= %s """, (newsBox,))
+        if not self.cursor.fetchall():
+            yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
         # For the rest of the boxes
         newsContainer = response.xpath("//div[@class='partial marquee']/article")
         for newsBox in newsContainer:
@@ -67,7 +70,7 @@ class TimetechSpider(scrapy.Spider):
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
-        item['source'] = 103
+        item['source'] = 116
         if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
@@ -128,4 +131,4 @@ class TimetechSpider(scrapy.Spider):
             return data
 
 
-# DEAD API's Link: 'http://time.com/wp-json/ti-api/v1/posts?time_section_slug=time-section-tech&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=30&page1'
+# DEAD API's Link: 'http://time.com/wp-json/ti-api/v1/posts/?time_section_slug=time-section-newsfeed&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=20&recirc=1&page=2'
