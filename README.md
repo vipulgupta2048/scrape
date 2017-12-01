@@ -74,7 +74,7 @@ ITEM_PIPELINES = {
 	{'site_id':113,'site_name':'newsx','site_url':'http://www.newsx.com/latest-news/'},
     {'site_id':114,'site_name':'hindustantimes','site_url':'http://www.hindustantimes.com/editors-pick/'},
 	{'site_id':115,'site_name':'asianage','site_url':'http://www.asianage.com/newsmakers'},
-	{'site_id':116,'site_name':'timeNews','site_url':'http://time.com/section/world/'},
+	{'site_id':116,'site_name':'timeNews','site_url':'http://time.com/section/world/'}
 	]
     ```
 

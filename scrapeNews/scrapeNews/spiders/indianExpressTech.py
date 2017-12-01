@@ -1,25 +1,17 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
-import logging
-import envConfig
-import psycopg2
-loggerError = logging.getLogger("scrapeNewsError")
+from scrapeNews.pipelines import loggerError
 
 # Setting up local variables USERNAME & PASSWORD
 PASSWORD = envConfig.PASSWORD
 USERNAME = envConfig.USERNAME
 
 class IndianexpresstechSpider(scrapy.Spider):
+
     name = 'indianExpressTech'
     allowed_domains = ['indianexpress.com']
-
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(IndianexpresstechSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-        crawler.signals.connect(spider.spider_opened, scrapy.signals.spider_opened)
-        return spider
 
 
     def __init__(self, offset=0, pages=2, *args, **kwargs):
@@ -28,31 +20,21 @@ class IndianexpresstechSpider(scrapy.Spider):
             self.start_urls.append('http://indianexpress.com/section/technology/page/'+ str(count+1))
 
 
-    def spider_opened(self, spider):
-        self.connection = psycopg2.connect(
-        host='localhost',
-        user=USERNAME,
-        database='scraped_news',
-        password=PASSWORD)
-        self.cursor = self.connection.cursor()
-
-
-    def spider_closed(self, spider):
-        self.cursor.close()
-        self.connection.close()
-
-
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
 
+
     def parse(self, response):
+        postgres = pipeline()
+        postgres.openConnection()
         newsContainer = response.xpath('//div[@class="top-article"]/ul[@class="article-list"]/li')
         for newsBox in newsContainer:
             link = newsBox.xpath('figure/a/@href').extract_first()
-            self.cursor.execute("""SELECT link from news_table where link= %s """, (link,))
-            if not self.cursor.fetchall():
+            if not postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article)
+        postgres.closeConnection()
+
 
     def parse_article(self, response):
         item = ScrapenewsItem()  # Scraper Items

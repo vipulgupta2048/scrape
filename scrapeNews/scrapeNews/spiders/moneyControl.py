@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-import logging
-loggerError = logging.getLogger("scrapeNewsError")
+from scrapeNews.pipelines import loggerError
+
 
 class MoneycontrolSpider(scrapy.Spider):
+
     name = 'moneyControl'
     allowed_domains = ['moneycontrol.com']
+
 
     def __init__(self, pages=10, *args, **kwargs):
         super(MoneycontrolSpider, self).__init__(*args, **kwargs)
         for count in range(1 , int(pages)+1):
             self.start_urls.append('http://www.moneycontrol.com/news/business/page-'+ str(count))
 
+
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
+
 
     def parse(self, response):
         newsContainer = response.xpath("//ul[@id='cagetory']/li[@class='clearfix']")

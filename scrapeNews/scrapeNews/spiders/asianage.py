@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-import logging
-loggerError = logging.getLogger("scrapeNewsError")
+from scrapeNews.pipelines import loggerError
 
 class AsianageSpider(scrapy.Spider):
+
     name = 'asianage'
     allowed_domains = ['asianage.com']
     start_urls = ['http://asianage.com/']
 
 
-    def __init__(self, offset=0, pages=2, *args, **kwargs):
+    def __init__(self, offset=0, pages=3, *args, **kwargs):
         super(AsianageSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.asianage.com/newsmakers?pg='+ str(count+1))
 
+
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
+
 
     def parse(self, response):
         newsContainer = response.xpath("//div[contains(@class,'india-news')]/div[@class='singlesunday']")
