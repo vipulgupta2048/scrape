@@ -4,9 +4,6 @@ from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 
-# Setting up local variables USERNAME & PASSWORD
-PASSWORD = envConfig.PASSWORD
-USERNAME = envConfig.USERNAME
 
 class FirstposthindiSpider(scrapy.Spider):
 

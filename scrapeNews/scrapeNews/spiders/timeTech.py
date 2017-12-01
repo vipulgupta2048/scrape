@@ -5,10 +5,6 @@ from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 
 
-# Setting up local variables USERNAME & PASSWORD
-PASSWORD = envConfig.PASSWORD
-USERNAME = envConfig.USERNAME
-
 class TimetechSpider(scrapy.Spider):
     name = 'timeTech'
 
