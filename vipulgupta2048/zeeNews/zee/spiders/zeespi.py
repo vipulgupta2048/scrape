@@ -26,6 +26,6 @@ class zeespider(scrapy.Spider):
         i['datetime'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[11:-4] #scrapes datetime
         #i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
         #summary = response.xpath('//p[contains(@class, "margin")]/text()').extract_first()[0:-2] #scrapes summary of the news
-        #i['summary'] = unicodedata.normalize("NFKD", summary) 
+        #i['summary'] = unicodedata.normalize("NFKD", summary)
         #i['link'] = response.url
         yield i
