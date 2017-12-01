@@ -55,6 +55,11 @@ ITEM_PIPELINES = {
     ```
     USERNAME = 'YOUR_ROLE_NAME/YOUR_USERNAME'
     PASSWORD = 'YOUR_PASSWORD'
+    NEWS_TABLE = 'news_table'
+    SITE_TABLE = 'site_table'
+    LOG_TABLE = 'log_table'
+    DATABASE_NAME = 'scraped_news'
+    HOST_NAME = 'localhost'
     SPIDER_DETAILS = [
     # Add your Spiders in the following format.
     # {'site_id':'YOUR_SPIDER_ID','YOUR_SPIDER_NAME':'','site_url':'YOUR_SPIDER_URL'}
