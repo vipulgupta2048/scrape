@@ -37,10 +37,11 @@ class setupDB:
                 id SERIAL PRIMARY KEY,
                 title VARCHAR NOT NULL,
                 content VARCHAR NOT NULL,
-                link VARCHAR NOT NULL,
+                link VARCHAR NOT NULL UNIQUE,
                 image VARCHAR NOT NULL,
-                newsDate VARCHAR NOT NULL,
-                site_id SMALLINT NOT NULL REFERENCES site_table (id)
+                newsDate TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                datescraped TIMESTAMP WITHOUT TIME ZONE,
+                site_id SMALLINT NOT NULL REFERENCES site_table (id) ON DELETE CASCADE
             )
             """
         )

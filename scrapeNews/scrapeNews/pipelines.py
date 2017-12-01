@@ -9,52 +9,70 @@ from scrapeNews.items import ScrapenewsItem
 from datetime import datetime
 import envConfig
 import logging
+import os
+
 loggerError = logging.getLogger("scrapeNewsError")
 loggerInfo = logging.getLogger("scrapeNewsInfo")
 
-# Setting up local variables USERNAME & PASSWORD
+# Setting up environment variables
 PASSWORD = envConfig.PASSWORD
 USERNAME = envConfig.USERNAME
+NEWS_TABLE = envConfig.NEWS_TABLE
+SITE_TABLE = envConfig.SITE_TABLE
+LOG_TABLE = envConfig.LOG_TABLE
+DATABASE_NAME = envConfig.DATABASE_NAME
+HOST_NAME = envConfig.HOST_NAME
 
 
 class ScrapenewsPipeline(object):
 
     def open_spider(self, spider):
-        self.connection = psycopg2.connect(
-            host='localhost',
-            user=USERNAME,
-            database='scraped_news',
-            password=PASSWORD)
-        self.cursor = self.connection.cursor()
-        self.connection.autocommit = True
-        self.recordedArticles = 0
+        try:
+            self.connection = psycopg2.connect(
+                host=HOST_NAME,
+                user=USERNAME,
+                database=DATABASE_NAME,
+                password=PASSWORD)
+            self.cursor = self.connection.cursor()
+            self.connection.set_session(autocommit=True)
+            self.recordedArticles = 0
+        except Exception as Error:
+            loggerError.error(Error)
 
     def close_spider(self, spider):
-        self.cursor.close()
-        self.connection.close()
-        if self.recordedArticles > 0:
-            loggerInfo.info(str(self.recordedArticles) + " record(s) were added by " + spider.name + " at")
-
+        try:
+            self.cursor.close()
+            self.connection.close()
+            if self.recordedArticles > 0:
+                loggerInfo.info(str(self.recordedArticles) + " record(s) were added by " + spider.name + " at")
+        except Exception as Error:
+            loggerError.error(Error)
     def process_item(self, item, spider):
-        self.cursor.execute("""SELECT link from news_table where link= %s """, (item.get('link'),))
-        if not self.cursor.fetchall():
-            processedDate = self.process_date(item.get('newsDate'),item.get('link'), spider.name)
-            try:
-                self.cursor.execute(
-                    """INSERT INTO news_table (title, content, image, link, newsDate, site_id) VALUES (%s, %s, %s, %s, %s, %s)""",
-                    (item.get('title'),
-                    item.get('content'),
-                    item.get('image'),
-                    item.get('link'),
-                    processedDate,
-                    item.get('source')))
-                self.recordedArticles += 1
-            except Exception as Error:
-                loggerError.error(Error)
-            finally:
+        try:
+            postgresQuery = "SELECT link from " + NEWS_TABLE + " where link= %s"
+            self.cursor.execute(postgresQuery, (item.get('link'),))
+            if not self.cursor.fetchall():
+                processedDate = self.process_date(item.get('newsDate'),item.get('link'), spider.name)
+                try:
+                    postgresQuery = "INSERT INTO " + NEWS_TABLE + " (title, content, image, link, newsDate, site_id) VALUES (%s, %s, %s, %s, %s, %s)"
+                    self.cursor.execute(postgresQuery,
+                        (item.get('title'),
+                        item.get('content'),
+                        item.get('image'),
+                        item.get('link'),
+                        processedDate,
+                        item.get('source')))
+                    self.recordedArticles += 1
+                except Exception as Error:
+                    loggerError.error(Error)
+                finally:
+                    return item
+            else:
                 return item
-        else:
+        except Exception as Error:
+            loggerError.error(Error)
             return item
+
 
     def process_date(self, itemDate, link, spiderName):
         try:
@@ -79,3 +97,36 @@ class ScrapenewsPipeline(object):
             processedItemDate = itemDate
         finally:
             return processedItemDate
+
+
+class InnerSpiderPipeline(object):
+
+    def openConnection(self):
+        try:
+            self.connection = psycopg2.connect(
+                host=HOST_NAME,
+                user=USERNAME,
+                database=DATABASE_NAME,
+                password=PASSWORD)
+            self.connection.set_session(readonly=True, autocommit=True)
+            self.cursor = self.connection.cursor()
+        except Exception as Error:
+            loggerError.error(Error)
+
+
+    def closeConnection(self):
+        self.cursor.close()
+        self.connection.close()
+
+
+    def checkUrlExists(self, item):
+        postgresQuery = "SELECT link from " + NEWS_TABLE + " where link= %s"
+        try:
+            self.cursor.execute(postgresQuery, (item,))
+            if self.cursor.fetchall():
+                return True
+            else:
+                return False
+        except Exception as Error:
+            loggerError.error(Error)
+            return True

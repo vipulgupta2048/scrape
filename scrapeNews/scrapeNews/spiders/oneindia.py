@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
-import logging
-import envConfig
-import psycopg2
-loggerError = logging.getLogger("scrapeNewsError")
+from scrapeNews.pipelines import loggerError
 
 
 class OneindiaSpider(scrapy.Spider):
+
     name = 'oneindia'
     allowed_domains = ['oneindia.com']
 
@@ -18,25 +17,10 @@ class OneindiaSpider(scrapy.Spider):
         crawler.signals.connect(spider.spider_opened, scrapy.signals.spider_opened)
         return spider
 
-
     def __init__(self, offset=0, pages=2, *args, **kwargs):
         super(OneindiaSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('https://www.oneindia.com/india/?page-no='+ str(count+1))
-
-
-    def spider_opened(self, spider):
-        self.connection = psycopg2.connect(
-        host='localhost',
-        user=USERNAME,
-        database='scraped_news',
-        password=PASSWORD)
-        self.cursor = self.connection.cursor()
-
-
-    def spider_closed(self, spider):
-        self.cursor.close()
-        self.connection.close()
 
 
     def start_requests(self):
@@ -45,12 +29,14 @@ class OneindiaSpider(scrapy.Spider):
 
 
     def parse(self, response):
+        postgres = pipeline()
+        postgres.openConnection()
         newsContainer = response.xpath('//div[@id="collection-wrapper"]/article')
         for newsBox in newsContainer:
             link = 'https://www.oneindia.com/india/' + newsBox.xpath('div/h2/a/@href').extract_first()
-            self.cursor.execute("""SELECT link from news_table where link= %s """, (link,))
-            if not self.cursor.fetchall():
+            if not postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article)
+        postgres.closeConnection()
 
 
     def parse_article(self, response):
@@ -87,6 +73,7 @@ class OneindiaSpider(scrapy.Spider):
             loggerError.error(response.url)
             data = 'Error'
         return data
+
 
     def getPageDate(self, response):
         try:

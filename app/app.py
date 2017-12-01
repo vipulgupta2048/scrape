@@ -19,6 +19,13 @@ def stats():
     connection.close()
     return render_template("stats.html",statistics = statData)
 
+@app.route('/ScrapeNewsErrorLog')
+def ScrapeNewsErrorLog():
+    with open("./../scrapeNews/scrapeNewsError.log","r") as logs:
+        logsForHtml = []
+        for lines in logs.readlines():
+            logsForHtml.append("<pre>" + lines + "</pre>")
+        return '\n'.join(logsForHtml)
 
 if __name__ == "__main__":
     app.run()
