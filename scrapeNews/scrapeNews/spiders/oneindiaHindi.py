@@ -12,9 +12,20 @@ class OneindiahindiSpider(scrapy.Spider):
 
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
+        self.postgres = pipeline()
+        self.postgres.openConnection()
         super(OneindiahindiSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('https://hindi.oneindia.com/news/india/?page-no='+ str(count+1))
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(OneindiahindiSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.postgres.closeConnection()
 
 
     def start_requests(self):
@@ -22,15 +33,14 @@ class OneindiahindiSpider(scrapy.Spider):
             yield scrapy.Request(url, self.parse)
 
 
+
     def parse(self, response):
-        postgres = pipeline()
-        postgres.openConnection()
         newsContainer = response.xpath('//div[@id="collection-wrapper"]/article')
         for newsBox in newsContainer:
             link = 'https://hindi.oneindia.com/news/india/' + newsBox.xpath('div/h2/a/@href').extract_first()
-            if not postgres.checkUrlExists(link):
+            if not self.postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article)
-        postgres.closeConnection()
+
 
     def parse_article(self, response):
         item = ScrapenewsItem()  # Scraper Items

@@ -22,10 +22,16 @@ Linux: `source VENV_NAME/bin/activate`
 ### Install the requirements
 Navigate to repository: `pip3 install -r requirements.txt`
 
-- Requirements:
+- Requirements(For scraping):
     - scrapy
     - requests
     - python-dateutil
+
+- Requirements(For database):
+    - psycopg2
+
+- Requirements(For flask Application):
+    - flask
 
 ### Database Setup (PostgreSQL)
 
@@ -55,11 +61,11 @@ ITEM_PIPELINES = {
     ```
     USERNAME = 'YOUR_ROLE_NAME/YOUR_USERNAME'
     PASSWORD = 'YOUR_PASSWORD'
-    NEWS_TABLE = 'news_table'
-    SITE_TABLE = 'site_table'
-    LOG_TABLE = 'log_table'
-    DATABASE_NAME = 'scraped_news'
-    HOST_NAME = 'localhost'
+    NEWS_TABLE = 'NEWS_TABLE_NAME'
+    SITE_TABLE = 'SITE_TABLE_NAME'
+    LOG_TABLE = 'LOG_TABLE_NAME'
+    DATABASE_NAME = 'DATABASE_NAME'
+    HOST_NAME = 'HOST_NAME'
     SPIDER_DETAILS = [
     # Add your Spiders in the following format.
     # {'site_id':'YOUR_SPIDER_ID','YOUR_SPIDER_NAME':'','site_url':'YOUR_SPIDER_URL'}
@@ -83,7 +89,6 @@ ITEM_PIPELINES = {
 	]
     ```
 
-    - Run setupDB.py
 ## Run Spiders
 **Note: Navigate to the folder containing scrapy.cfg**
 ```

@@ -12,9 +12,20 @@ class FirstposthindiSpider(scrapy.Spider):
 
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
+        self.postgres = pipeline()
+        self.postgres.openConnection()
         super(FirstposthindiSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count+1))
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(FirstposthindiSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.postgres.closeConnection()
 
 
     def start_requests(self):
@@ -23,22 +34,15 @@ class FirstposthindiSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        postgres = pipeline()
-        postgres.openConnection()
         newsContainer = response.xpath("//ul[@id='more_author_story']/li")
         for newsBox in newsContainer:
             link = newsBox.xpath('h2/a/@href').extract_first()
-            if not postgres.checkUrlExists(link):
+            if not self.postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article)
-        postgres.closeConnection()
 
 
     def parse_article(self, response):
-        if str(response.url)[:35] is "https://hindi.firstpost.com/photos/":
-            pass
-        elif response.xpath("//div[@id='play_home_video']"):
-            pass
-        else:
+        if (str(response.url) != "https://hindi.firstpost.com/") and (not response.xpath("//div[@id='play_home_video']") and (not response.xpath('//div[contains(@class,"pht-artcl-top")]'))):
             item = ScrapenewsItem()  # Scraper Items
             item['image'] = self.getPageImage(response)
             item['title'] = self.getPageTitle(response)

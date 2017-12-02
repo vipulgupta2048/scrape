@@ -37,34 +37,34 @@ class AsianageSpider(scrapy.Spider):
     def getPageContent(self, newsBox):
         data = newsBox.xpath('div/p[@class="These"]/text()').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            loggerError.error(newsBox.url)
             data = 'Error'
         return data
 
     def getPageTitle(self, newsBox):
         data = newsBox.xpath('div/h2/a/text()').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            loggerError.error(newsBox.url)
             data = 'Error'
         return data
 
     def getPageLink(self, newsBox):
         data = 'http://www.asianage.com/newsmakers' + newsBox.xpath('div/a/@href').extract_first()
         if (data is None):
-            loggerError.error(response)
+            loggerError.error(newsBox)
             data = 'Error'
         return data
 
     def getPageImage(self, newsBox):
         data = newsBox.xpath('div/a/img/@data-src').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            loggerError.error(newsBox.url)
             data = 'Error'
         return data
 
     def getPageDate(self, newsBox):
         data = newsBox.xpath('div/p[@class="newDate"]/text()').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            loggerError.error(newsBox.url)
             data = 'Error'
         return data

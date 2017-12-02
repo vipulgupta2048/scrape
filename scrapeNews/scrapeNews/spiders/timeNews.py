@@ -12,9 +12,20 @@ class TimenewsSpider(scrapy.Spider):
 
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
+        self.postgres = pipeline()
+        self.postgres.openConnection()
         super(TimenewsSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://time.com/section/world/?page='+ str(count+1))
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(TimenewsSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.postgres.closeConnection()
 
 
     def start_requests(self):
@@ -22,25 +33,31 @@ class TimenewsSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
 
 
-    def parse(self, response):
-        postgres = pipeline()
-        postgres.openConnection()
 
-        # For the large newsBox in top of all the pages.
+    def parse(self, response):
+
+        # For the large newsBox in top of all the pages. (In Normal Pages) or sends all request for all the articles in API page or sends the request for the special page.
         try:
             newsBox = 'http://www.time.com' + response.xpath("//div[@class='partial hero']/article/a/@href").extract_first()
-            if not postgres.checkUrlExists(newsBox):
+            if not self.postgres.checkUrlExists(newsBox):
                 yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
         except Exception as Error:
-            loggerError.error(response.url)
+            if newsBox.xpath("//main[contains(@class,'content article')]"):
+                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+            elif newsBox.xpath("//div[contains(@class,'_29M-6C9w')]"):
+                newsContainer = newsBox.xpath("//div[contains(@class,'_29M-6C9w')]//div[contains(@class,'_2cCPyP5f')]//a[@class='_2S9ChopF']/@href")
+                for link in newsContainer:
+                    if not self.postgres.checkUrlExists(link):
+                        yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+            else:
+                loggerError.error(response.url)
 
         # For the rest of the boxes
         newsContainer = response.xpath("//div[@class='partial marquee']/article")
         for newsBox in newsContainer:
             link = 'http://www.time.com' + newsBox.xpath('a/@href').extract_first()
-            if not postgres.checkUrlExists(link):
+            if not self.postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
-        postgres.closeConnection()
 
 
     def parse_article(self, response):
@@ -56,7 +73,9 @@ class TimenewsSpider(scrapy.Spider):
 
 
     def getPageTitle(self, response):
-        data = response.xpath("//h1[contains(@class,'headline')]/text()").extract_first()
+        data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
+        if (data is None):
+            data = response.xpath("//h1[contains(@class,'headline')]/text()").extract_first()
         if (data is None):
             data = response.xpath("//h1[@class='_8UFs4BVE']/text()").extract_first()
         if (data is None):
@@ -104,6 +123,11 @@ class TimenewsSpider(scrapy.Spider):
     def getPageContent(self, response):
         try:
             data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+            if not data:
+                data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
+            if not data:
+                loggerError.error(str(Error) + ' occured at: ' + response.url)
+                data = 'Error'
         except Exception as Error:
             loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
