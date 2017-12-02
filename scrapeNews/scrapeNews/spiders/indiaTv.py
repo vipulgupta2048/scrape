@@ -11,7 +11,9 @@ class IndiatvSpider(scrapy.Spider):
     allowed_domains = ['www.indiatvnews.com']
 
 
-    def __init__(self, offset=0, pages=2, *args, **kwargs):
+    def __init__(self, offset=0, pages=3, *args, **kwargs):
+        self.postgres = pipeline()
+        self.postgres.openConnection()
         super(IndiatvSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.indiatvnews.com/india/'+ str(count+1))
@@ -22,15 +24,21 @@ class IndiatvSpider(scrapy.Spider):
             yield scrapy.Request(url, self.parse)
 
 
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(IndiatvSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.postgres.closeConnection()
+
     def parse(self, response):
-        postgres = pipeline()
-        postgres.openConnection()
         newsContainer = response.xpath("//ul[@class='newsListfull']/li")
         for newsBox in newsContainer:
             link = newsBox.xpath('a/@href').extract_first()
-            if not postgres.checkUrlExists(link):
+            if not self.postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article)
-        postgres.closeConnection()
 
 
     def parse_article(self, response):

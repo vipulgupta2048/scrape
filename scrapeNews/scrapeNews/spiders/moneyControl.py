@@ -19,6 +19,7 @@ class MoneycontrolSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
+            
 
 
     def parse(self, response):
@@ -37,34 +38,34 @@ class MoneycontrolSpider(scrapy.Spider):
     def getPageContent(self, newsBox):
         data = newsBox.xpath('p/text()').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            loggerError.error(newsBox.url)
             data = 'Error'
         return data
 
     def getPageTitle(self, newsBox):
         data = newsBox.xpath('h2/a/text()').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            loggerError.error(newsBox.url)
             data = 'Error'
         return data
 
     def getPageLink(self, newsBox):
         data = newsBox.xpath('a/@href').extract_first()
         if (data is None):
-            loggerError.error(response)
+            loggerError.error(newsBox)
             data = 'Error'
         return data
 
     def getPageImage(self, newsBox):
         data = newsBox.xpath('a/img/@src').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            loggerError.error(newsBox.url)
             data = 'Error'
         return data
 
     def getPageDate(self, newsBox):
         data = newsBox.xpath('span/text()').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            loggerError.error(newsBox.url)
             data = 'Error'
         return data

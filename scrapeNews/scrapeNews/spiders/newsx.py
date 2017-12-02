@@ -12,10 +12,22 @@ class NewsxSpider(scrapy.Spider):
     start_urls = ['http://newsx.com/']
 
 
-    def __init__(self, offset=0, pages=3, *args, **kwargs):
+    def __init__(self, offset=0, pages=4, *args, **kwargs):
+        self.postgres = pipeline()
+        self.postgres.openConnection()
         super(NewsxSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.newsx.com/latest-news/page/'+ str(count+1))
+
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(NewsxSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.postgres.closeConnection()
 
 
     def start_requests(self):
@@ -24,14 +36,11 @@ class NewsxSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        postgres = pipeline()
-        postgres.openConnection()
         newsContainer = response.xpath("//div[contains(@class,'cat-grid-gap')]/div[@class='well ft2']")
         for newsBox in newsContainer:
             link = newsBox.xpath('div/a/@href').extract_first()
-            if not postgres.checkUrlExists(link):
+            if not self.postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article)
-        postgres.closeConnection()
 
 
     def parse_article(self, response):
@@ -57,6 +66,8 @@ class NewsxSpider(scrapy.Spider):
 
     def getPageImage(self, response):
         data = response.xpath("//head/link[@rel='image_src']/@href").extract_first()
+        if (data is None):
+            data = response.xpath("//div[@class='panel-body story']/div[@class='thumbnail video-thumbnail']/img/@src").extract_first()
         if (data is None):
             loggerError.error(response.url)
             data = 'Error'

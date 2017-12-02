@@ -12,6 +12,8 @@ class IndianexpresstechSpider(scrapy.Spider):
 
 
     def __init__(self, offset=0, pages=2, *args, **kwargs):
+        self.postgres = pipeline()
+        self.postgres.openConnection()
         super(IndianexpresstechSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://indianexpress.com/section/technology/page/'+ str(count+1))
@@ -22,15 +24,21 @@ class IndianexpresstechSpider(scrapy.Spider):
             yield scrapy.Request(url, self.parse)
 
 
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(IndianexpresstechSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.postgres.closeConnection()
+
     def parse(self, response):
-        postgres = pipeline()
-        postgres.openConnection()
         newsContainer = response.xpath('//div[@class="top-article"]/ul[@class="article-list"]/li')
         for newsBox in newsContainer:
             link = newsBox.xpath('figure/a/@href').extract_first()
-            if not postgres.checkUrlExists(link):
+            if not self.postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article)
-        postgres.closeConnection()
 
 
     def parse_article(self, response):
@@ -49,6 +57,8 @@ class IndianexpresstechSpider(scrapy.Spider):
         if (data is None):
             data = response.xpath("//div[@class='full-details']/p/text()").extract_first()
         if (data is None):
+            data = ' '.join(' '.join(response.xpath("//div[@class='body-article']/p/text()").extract()).split()[:40])
+        if (data is None):
             loggerError.error(response.url)
             data = 'Error'
         return data
@@ -66,8 +76,11 @@ class IndianexpresstechSpider(scrapy.Spider):
         if (data is None):
             data = response.xpath("//span[@itemprop='image']/meta[@itemprop='url']/@content").extract_first()
         if (data is None):
-            loggerError.error(response.url)
             data = 'Error'
+            try:
+                data = ((response.xpath('//div[@class="lead-article"]/@style').extract_first()).split('url(',1)[1]).split(')',1)[0]
+            except Exception as Error:
+                loggerError.error(str(Error) + " occured at " + response.url)
         return data
 
     def getPageDate(self, response):

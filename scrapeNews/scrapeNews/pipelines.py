@@ -39,6 +39,7 @@ class ScrapenewsPipeline(object):
         except Exception as Error:
             loggerError.error(Error)
 
+
     def close_spider(self, spider):
         try:
             self.cursor.close()
@@ -47,6 +48,8 @@ class ScrapenewsPipeline(object):
                 loggerInfo.info(str(self.recordedArticles) + " record(s) were added by " + spider.name + " at")
         except Exception as Error:
             loggerError.error(Error)
+
+
     def process_item(self, item, spider):
         try:
             postgresQuery = "SELECT link from " + NEWS_TABLE + " where link= %s"
@@ -64,13 +67,13 @@ class ScrapenewsPipeline(object):
                         item.get('source')))
                     self.recordedArticles += 1
                 except Exception as Error:
-                    loggerError.error(Error)
+                    loggerError.error(str(Error) + " occured at " + str(item.get('link')))
                 finally:
                     return item
             else:
                 return item
         except Exception as Error:
-            loggerError.error(Error)
+            loggerError.error(str(Error) + " occured at " + str(item.get('link')))
             return item
 
 
