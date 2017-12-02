@@ -22,10 +22,16 @@ Linux: `source VENV_NAME/bin/activate`
 ### Install the requirements
 Navigate to repository: `pip3 install -r requirements.txt`
 
-- Requirements:
+- Requirements(For scraping):
     - scrapy
     - requests
     - python-dateutil
+
+- Requirements(For database):
+    - psycopg2
+
+- Requirements(For flask Application):
+    - flask
 
 ### Database Setup (PostgreSQL)
 
@@ -83,7 +89,6 @@ ITEM_PIPELINES = {
 	]
     ```
 
-    - Run setupDB.py
 ## Run Spiders
 **Note: Navigate to the folder containing scrapy.cfg**
 ```
