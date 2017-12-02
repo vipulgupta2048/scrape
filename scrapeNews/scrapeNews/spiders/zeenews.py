@@ -1,6 +1,6 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-import unicodedata
+
 
 
 class zeespider(scrapy.Spider):
