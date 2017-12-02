@@ -125,6 +125,8 @@ class ScrapenewsPipeline(object):
                 processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
             elif spiderName is 'zee':
                 processedItemDate = (datetime.strptime(itemDate," %b %d, %Y, %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
+            elif spiderName is 'newsNation':
+                processedItemDate = (datetime.strptime(itemDate," %d %b , %Y , %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
             # elif spiderName is 'ndtv':
             #     processedItemDate = (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
             elif spiderName is 'asianage':
