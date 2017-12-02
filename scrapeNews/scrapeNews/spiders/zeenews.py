@@ -1,5 +1,6 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
+import unicodedata
 
 class zeespider(scrapy.Spider):
     name = "zee"
@@ -22,10 +23,17 @@ class zeespider(scrapy.Spider):
     def parse_news(self,response):
         i = ScrapenewsItem()                                                       
         i['title'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline 
-        i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[15:-4] #scrapes datetime
+        i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[10:-4] #scrapes datetime
         i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url 
-        i['content'] = response.xpath('//p[contains(@class, "margin")]/text()').extract_first() #scrapes summary
+        i['content'] = self.getcontent(response)
         i['link'] = response.url #scrapes link; article page
         i['source'] = 106
-        
+    
         yield i
+
+    def getcontent(self,response):
+        data = response.xpath('//div[contains(@class, "article")]/div[contains(@class, "field")]//p/text()').extract()
+        if (data is None):
+            loggerError.error(response.url)
+            data = 'Error'
+        return data 
