@@ -1,5 +1,6 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
+import unicodedata
 
 
 class zeespider(scrapy.Spider):
@@ -26,6 +27,7 @@ class zeespider(scrapy.Spider):
 
     #For scraping a particular article listed on the main page
     def parse_news(self,response):
+<<<<<<< HEAD
         i = ScrapenewsItem()
         i['title'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline
         i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[10:-4] #scrapes datetime
@@ -34,6 +36,16 @@ class zeespider(scrapy.Spider):
         i['link'] = response.url #scrapes link; article page
         i['source'] = 106
 
+=======
+        i = ScrapenewsItem()                                                       
+        i['title'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline 
+        i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[10:-4] #scrapes datetime
+        i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url 
+        i['content'] = self.getcontent(response)
+        i['link'] = response.url #scrapes link; article page
+        i['source'] = 106
+    
+>>>>>>> abe675b... zeenews spider: upgraded: scrapes all news
         yield i
 
     def getcontent(self,response):
@@ -41,4 +53,8 @@ class zeespider(scrapy.Spider):
         if (data is None):
             loggerError.error(response.url)
             data = 'Error'
+<<<<<<< HEAD
         return data
+=======
+        return data 
+>>>>>>> abe675b... zeenews spider: upgraded: scrapes all news
