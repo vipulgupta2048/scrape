@@ -1,5 +1,6 @@
 import scrapy
 from zee.items import ZeeItem
+import unicodedata
 
 class zeespider(scrapy.Spider):
     name = "zee"
@@ -21,9 +22,10 @@ class zeespider(scrapy.Spider):
     #For scraping a particular article listed on the main page
     def parse_news(self,response):
         i = ZeeItem()
-        i['headline'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline
-        i['datetime'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[15:-4] #scrapes datetime
-        i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
-        i['summary'] = response.xpath('//p[contains(@class, "margin")]/text()').extract_first() #scrapes summary of the news
-        i['link'] = response.url
+        #i['headline'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline
+        i['datetime'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[11:-4] #scrapes datetime
+        #i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
+        #summary = response.xpath('//p[contains(@class, "margin")]/text()').extract_first()[0:-2] #scrapes summary of the news
+        #i['summary'] = unicodedata.normalize("NFKD", summary) 
+        #i['link'] = response.url
         yield i
