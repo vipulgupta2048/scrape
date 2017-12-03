@@ -2,7 +2,7 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
-
+from scrapeNews.db import DatabaseManager, LogsManager
 
 class FirstposthindiSpider(scrapy.Spider):
 
@@ -12,14 +12,31 @@ class FirstposthindiSpider(scrapy.Spider):
         'site_name':'firstpost(hindi)',
         'site_url':'https://hindi.firstpost.com/category/latest/'}
 
+    custom_settings = {
+        'site_name': "firstpost(hindi)",
+        'site_url': "https://hindi.firstpost.com/category/latest/",
+        'site_id': -1,
+        'log_id': -1,
+        'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+    }
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
+        #self.postgres = pipeline()
+        #self.postgres.openConnection()
         super(FirstposthindiSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count+1))
 
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(FirstposthindiSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        #self.postgres.closeConnection()
+        return True
+
 
     def start_requests(self):
         for url in self.start_urls:
@@ -34,9 +51,11 @@ class FirstposthindiSpider(scrapy.Spider):
         newsContainer = response.xpath("//ul[@id='more_author_story']/li")
         for newsBox in newsContainer:
             link = newsBox.xpath('h2/a/@href').extract_first()
-            if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
-
+            if not DatabaseManager().urlExists(link):
+                self.custom_settings['url_stats']['parsed'] += 1
+                yield scrapy.Request(url=link, callback=self.parse_article)
+            else:
+                self.custom_settings['url_stats']['dropped'] += 1
 
 
     def parse_article(self, response):
@@ -48,13 +67,13 @@ class FirstposthindiSpider(scrapy.Spider):
             item['content'] = self.getPageContent(response)
             item['newsDate'] = self.getPageDate(response)
             item['link'] = response.url
-            item['source'] = 111
-            if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
-                self.urls_scraped += 1
+            #item['source'] = 111
+            if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+                self.custom_settings['url_stats']['scraped'] += 1
                 yield item
-        else:
-            self.urls_parsed -= 1
-            yield None
+            else:
+                self.custom_settings['url_stats']['dropped'] += 1
+                yield None
 
 
     def getPageTitle(self, response):
@@ -96,4 +115,8 @@ class FirstposthindiSpider(scrapy.Spider):
         if not data:
             loggerError.error(response.url)
             data = 'Error'
-        return data
+        finally:
+            return data
+    
+    def closed(self, reason):
+        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)

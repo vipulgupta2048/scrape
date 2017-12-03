@@ -1,17 +1,19 @@
 import scrapy
-import json
 import re
 from scrapeNews.settings import logger
 from scrapeNews.items import ScrapenewsItem
-from dateutil import parser
+from scrapeNews.db import DatabaseManager, LogsManager
 
 class News18Spider(scrapy.Spider):
     name = "News18Spider"
 
     custom_settings = {
-        'site_id':107,
-        'site_name':'News18',
-        'site_url':'http://www.news18.com/news/'}
+        'site_name': "News18",
+        'site_url': "https://www.news18.com",
+        'site_id': -1,
+        'log_id': -1,
+        'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+    }
 
     xpaths = {
         'default': {
@@ -70,7 +72,11 @@ class News18Spider(scrapy.Spider):
 
                 href = response.urljoin(section.xpath("./p/a[1]/@href").extract_first())
 
-                yield scrapy.Request(url = href, callback=self.parse_news) #Let Pipeline Handle duplicates (Consumes more bandwidth)
+                if not DatabaseManager().urlExists(href):
+                    self.custom_settings['url_stats']['parsed'] += 1
+                    yield scrapy.Request(url = href, callback=self.parse_news) #Let Pipeline Handle duplicates (Consumes more bandwidth)
+                else:
+                    self.custom_settings['url_stats']['dropped'] += 1
 
             next_page = response.xpath('//div[contains(@class, "pagination")]/ul/li[contains(@class,"next")]/a/@href').extract_first();
             if next_page is not None:
@@ -95,12 +101,19 @@ class News18Spider(scrapy.Spider):
 
         if news_title == None or news_description == None or news_picture == None or news_date == None:
             logger.error(__name__+" Error Extracting Data for URL " + news_url)
+            self.custom_settings['url_stats']['dropped'] += 1    
             yield None
             return
         elif len(news_picture) == 0 or len(news_description) == 0 or len(news_picture) == 0 or len(news_date) == 0:
             logger.error(__name__+" Empty Data for URL "+news_url)
+            self.custom_settings['url_stats']['dropped'] += 1
             yield None
             return
-        news_date = parser.parse(news_date, ignoretz=False)
-        item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date, 'source': self.custom_settings['site_id']})
+        
+        item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date})
+
+        self.custom_settings['url_stats']['scraped'] += 1
         yield item
+
+    def closed(self, reason):
+        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)

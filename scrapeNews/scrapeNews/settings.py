@@ -9,12 +9,13 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 import logging
+import os
 BOT_NAME = 'scrapeNews'
 
 SPIDER_MODULES = ['scrapeNews.spiders']
 NEWSPIDER_MODULE = 'scrapeNews.spiders'
 
-LOG_LEVEL = 'CRITICAL'  # to only display errors
+LOG_LEVEL = 'ERROR'  # to only display errors
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrapeNews (+http://www.yourdomain.com)'
 
@@ -65,7 +66,10 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'scrapeNews.pipelines.ScrapenewsPipeline': 300
+    'scrapeNews.pipelines.ScrapenewsPipeline': 100,
+    'scrapeNews.pipelines.DuplicatesPipeline': 101,
+    'scrapeNews.pipelines.DataFormatterPipeline': 102,
+    'scrapeNews.pipelines.DatabasePipeline': 103
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -89,10 +93,14 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+#Date Format for Database
+DbDateFormat = "%Y-%m-%d %H:%M:%S %z"
+
+
 # Logger Configuration (scrapeNews)
 logger = logging.getLogger("scrapeNews")
 handler = logging.FileHandler('scrapeNews.log')
-formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s [Line %(lineno)d]  %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.ERROR)
@@ -106,3 +114,17 @@ fileHandlerError.setFormatter(formatterError)
 streamHandlerError.setFormatter(formatterError)
 loggerError.addHandler(fileHandlerError)
 loggerError.addHandler(streamHandlerError)
+
+
+#DATABASE CONFIG
+
+try:
+    DB_INFO = {
+        "host": os.environ['SCRAPER_DB_HOST'],
+        "name": os.environ['SCRAPER_DB_NAME'],
+        "user": os.environ['SCRAPER_DB_USER'],
+        "password": os.environ['SCRAPER_DB_PASS']
+    }
+except KeyError as e:
+    logger.critical("KeyError: "+str(e) + " not found")
+    exit()

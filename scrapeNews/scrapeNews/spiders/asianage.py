@@ -2,8 +2,17 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
+from scrapeNews.db import LogsManager
 
 class AsianageSpider(scrapy.Spider):
+
+    custom_settings = {
+        'site_name': "asianage",
+        'site_url': "http://www.asianage.com/newsmakers",
+        'site_id': -1,
+        'log_id': -1,
+        'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+    }
 
     name = 'asianage'
     allowed_domains = ['asianage.com']
@@ -24,11 +33,8 @@ class AsianageSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
-
-    def errorRequestHandler(self, failure):
-        self.urls_parsed -= 1
-        loggerError.error('Non-200 response at ' + str(failure.request.url))
+            self.custom_settings['url_stats']['parsed'] += 1
+            yield scrapy.Request(url, self.parse)
 
 
     def parse(self, response):
@@ -36,15 +42,17 @@ class AsianageSpider(scrapy.Spider):
         newsContainer = response.xpath("//div[contains(@class,'india-news')]/div[@class='singlesunday']")
         for newsBox in newsContainer:
             item['image'] = self.getPageImage(newsBox)
-            if not self.postgres.checkUrlExists(item['link']):
-                item['title'] = self.getPageTitle(newsBox)
-                item['content'] = self.getPageContent(newsBox)
-                item['newsDate'] = self.getPageDate(newsBox)
-                item['link'] = self.getPageLink(newsBox)
-                item['source'] = 115
-                if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
-                    self.urls_scraped += 1
-                    yield item
+            item['title'] = self.getPageTitle(newsBox)
+            item['content'] = self.getPageContent(newsBox)
+            item['newsDate'] = self.getPageDate(newsBox)
+            item['link'] = self.getPageLink(newsBox)
+            item['source'] = 115
+            if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+                self.custom_settings['url_stats']['scraped'] += 1
+                yield item
+            else:
+                self.custom_settings['url_stats']['dropped'] += 1
+                yield None
 
     def getPageContent(self, newsBox):
         data = newsBox.xpath('div/p[@class="These"]/text()').extract_first()
@@ -80,3 +88,6 @@ class AsianageSpider(scrapy.Spider):
             loggerError.error(newsBox.extract())
             data = 'Error'
         return data
+
+    def closed(self, reason):
+        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)

@@ -1,5 +1,6 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
+from scrapeNews.db import LogsManager
 
 
 class zeespider(scrapy.Spider):
@@ -15,14 +16,23 @@ class zeespider(scrapy.Spider):
         self.postgres.closeConnection(reason)
 
 
+    custom_settings = {
+        'site_name': "Zee News",
+        'site_url': "http://zeenews.india.com/india",
+        'site_id': -1,
+        'log_id': -1,
+        'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+    }
+
     #Scraping the main page for article links
     def parse(self, response):
         articles = response.xpath('//section[contains(@class, "maincontent")]//div[contains(@class, "section-article")]') #extracts HTML from the start_url
         for article in articles:
-            x = article.xpath('.//h3/a[2]') #extracts <a> tag from start _url
+            x = article.xpath('.//h3/a[2]') #extracts <a> tag from start _url 
             link = x.xpath('.//@href').extract_first()  #extracts URL for the articles recursively
-            yield response.follow(link, callback = self.parse_news)
-
+            self.custom_settings['url_stats']['parsed'] += 1
+            yield response.follow(link, callback = self.parse_news)        
+        
         #For scraping the links on the next page of the website
         next_page = response.xpath('//link[@rel = "next"]/@href').extract_first()
         if next_page is not None:
@@ -36,8 +46,8 @@ class zeespider(scrapy.Spider):
         i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
         i['content'] = self.getcontent(response)
         i['link'] = response.url #scrapes link; article page
-        i['source'] = 106
 
+        self.custom_settings['url_stats']['scraped'] += 1
         yield i
 
     def getcontent(self,response):
@@ -45,4 +55,7 @@ class zeespider(scrapy.Spider):
         if (data is None):
             loggerError.error(response.url)
             data = 'Error'
-        return data
+        return data 
+
+    def closed(self, reason):
+        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)

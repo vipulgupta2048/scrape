@@ -2,7 +2,7 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
-
+from scrapeNews.db import DatabaseManager, LogsManager
 
 class IndiatvSpider(scrapy.Spider):
 
@@ -12,8 +12,18 @@ class IndiatvSpider(scrapy.Spider):
         'site_name':'India TV',
         'site_url':'http://www.indiatvnews.com/india/'}
 
+    custom_settings = {
+        'site_name': "India TV",
+        'site_url': "http://www.indiatvnews.com/business/tech/",
+        'site_id': -1,
+        'log_id': -1,
+        'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+    }
+
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
+        #self.postgres = pipeline()
+        #self.postgres.openConnection()
         super(IndiatvSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.indiatvnews.com/india/' + str(count + 1))
@@ -25,16 +35,26 @@ class IndiatvSpider(scrapy.Spider):
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
 
-    def errorRequestHandler(self, failure):
-        self.urls_parsed -= 1
-        loggerError.error('Non-200 response at ' + str(failure.request.url))
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(IndiatvSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        #self.postgres.closeConnection()
+        return True
 
     def parse(self, response):
         newsContainer = response.xpath("//ul[@class='newsListfull']/li")
         for newsBox in newsContainer:
             link = newsBox.xpath('a/@href').extract_first()
-            if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
+            if not DatabaseManager().urlExists(link):
+                self.custom_settings['url_stats']['parsed'] += 1
+                yield scrapy.Request(url=link, callback=self.parse_article)
+            else:
+                self.custom_settings['url_stats']['dropped'] += 1
 
 
     def parse_article(self, response):
@@ -44,10 +64,13 @@ class IndiatvSpider(scrapy.Spider):
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
-        item['source'] = 102
-        if item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
-            self.urls_scraped += 1
+        #item['source'] = 102
+        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+            self.custom_settings['url_stats']['scraped'] += 1
             yield item
+        else:
+            self.custom_settings['url_stats']['dropped'] += 1
+            yield None
 
 
     def getPageTitle(self, response):
@@ -82,4 +105,8 @@ class IndiatvSpider(scrapy.Spider):
         if not data:
             loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
-        return data
+        finally:
+            return data
+
+    def closed(self, reason):
+        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
