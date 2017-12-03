@@ -144,7 +144,7 @@ class TimetechSpider(scrapy.Spider):
             data = 'Error'
         return data
 
-    def closed(self, spider):
+    def closed(self, reason):
         LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
 
 

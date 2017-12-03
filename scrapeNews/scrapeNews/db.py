@@ -14,7 +14,7 @@ class DatabaseManager(object):
     logs_table_name = "log_table"
 
     site_table = "CREATE TABLE IF NOT EXISTS "+site_table_name+"(\
-                    id SMALLINT SERIAL PRIMARY KEY,\
+                    id SERIAL PRIMARY KEY,\
                     site_name VARCHAR NOT NULL UNIQUE,\
                     site_url VARCHAR NOT NULL \
                     );"
@@ -28,8 +28,8 @@ class DatabaseManager(object):
                     link VARCHAR UNIQUE NOT NULL, \
                     content TEXT NOT NULL, \
                     image VARCHAR NOT NULL, \
-                    newsDate timetz NOT NULL, \
-                    datescraped timetz NOT NULL, \
+                    newsDate timestamptz NOT NULL, \
+                    datescraped timestamptz NOT NULL, \
                     site_id SMALLINT NOT NULL, \
                     FOREIGN KEY(site_id) REFERENCES "+site_table_name+"(id)\
                     ON DELETE CASCADE\
@@ -42,14 +42,14 @@ class DatabaseManager(object):
     logs_table = "CREATE TABLE IF NOT EXISTS "+logs_table_name+"(\
                     id SERIAL PRIMARY KEY, \
                     site INT NOT NULL, \
-                    start_time timetz NOT NULL, \
-                    end_time timetz, \
+                    start_time timestamptz NOT NULL, \
+                    end_time timestamptz, \
                     urls_parsed INT, \
                     urls_scraped INT, \
                     urls_dropped INT, \
                     urls_stored INT, \
                     shutdown_reason VARCHAR, \
-                    FOREIGN KEY(site) REFERENCES sites(id) \
+                    FOREIGN KEY(site) REFERENCES "+site_table_name+"(id) \
                     ON DELETE CASCADE \
                     );"
 
@@ -107,7 +107,7 @@ class DatabaseManager(object):
         try:
             if self.connect() == None:
                 return False
-            sql = "SELECT url FROM "+self.item_table_name+" WHERE site= %s"
+            sql = "SELECT link FROM "+self.item_table_name+" WHERE site= %s"
             cur = self.cursor
             cur.execute(sql, (site_id,))
             urls_parsed = []
@@ -122,7 +122,7 @@ class DatabaseManager(object):
         try:
             if self.connect() == None:
                 return False
-            sql = "SELECT url FROM "+self.item_table_name+" WHERE url= %s"
+            sql = "SELECT link FROM "+self.item_table_name+" WHERE link= %s"
             cur = self.cursor
             cur.execute(sql, (url,))
             rows = cur.rowcount

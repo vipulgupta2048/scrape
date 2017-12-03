@@ -109,7 +109,7 @@ class News18Spider(scrapy.Spider):
             self.custom_settings['url_stats']['dropped'] += 1
             yield None
             return
-        
+
         item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date})
 
         self.custom_settings['url_stats']['scraped'] += 1

@@ -45,7 +45,7 @@ class ScrapenewsPipeline(object):
                 if database.connect() != None:
                     database.cursor.execute(database.insert_site_str, (spider_name, spider_url))
                     database.conn.commit()
-                    site_id = con.fetchone()['id']
+                    site_id = database.cursor.fetchone()['id']
                     #Save SITE_ID to Spider
                     spider.custom_settings['site_id'] = site_id
                 else:
@@ -78,12 +78,12 @@ class DuplicatesPipeline(object):
     """
     def process_item(self, item, spider):
 
-        if DatabaseManager().urlExists(item['url']):
-            logger.info(__name__+" [Dropped URL] "+item['url']+" Url Already in Database")
+        if DatabaseManager().urlExists(item['link']):
+            logger.info(__name__+" [Dropped URL] "+item['link']+" Url Already in Database")
             spider.custom_settings['url_stats']['dropped'] += 1
-            raise DropItem("[Dropped URL] "+item['url']+" Url Already in Database")
+            raise DropItem("[Dropped URL] "+item['link']+" Url Already in Database")
         else:
-            return Item
+            return item
 
 class DataFormatterPipeline(object):
     """
@@ -109,17 +109,22 @@ class DataFormatterPipeline(object):
 
     def process_item(self, item, spider):
         # Format Date
-        item['date'] = processDate(item['date'])
+        item['newsDate'] = self.processDate(item['newsDate'], spider)
 
         # Format Data
         item['title'] = self.processRegex(item['title'])
         item['content'] = self.processRegex(item['content'])
-        
+
         return item
 
-    def processDate(self, dateStr):
-        date_parsed = parser.parse(dateStr, ignoretz=False)
-        return date_parsed.strftime(DbDateFormat)
+    def processDate(self, dateStr, spider):
+        try:
+	    date_parsed = parser.parse(dateStr, ignoretz=False, fuzzy=True)
+            return date_parsed.strftime(DbDateFormat)
+        except ValueError as e:
+            logger.error(__name__+" [ITEM DROPPED] "+str(e))
+            spider.custom_settings['url_stats']['dropped'] += 1
+            raise DropItem("[ITEM DROPPED] "+str(e))
 
     def processRegex(self, text):
         for test in self.regex_match:
@@ -138,7 +143,7 @@ class DatabasePipeline(object):
         logger.debug(__name__+" Received Item for SITE_ID: "+str(site_id)) 
 
         try:
-            cur.execute(database.insert_item_str, (item['title'], item['link'], item['content'], item['image'], item['date'], site_id))
+            cur.execute(database.insert_item_str, (item['title'], item['link'], item['content'], item['image'], item['newsDate'], site_id))
             database.conn.commit()
             logger.info(__name__+" Finish Scraping "+str(item['link']))
             spider.custom_settings['url_stats']['stored'] += 1
