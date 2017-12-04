@@ -8,7 +8,10 @@ class MoneycontrolSpider(scrapy.Spider):
 
     name = 'moneyControl'
     allowed_domains = ['moneycontrol.com']
-
+    custom_settings = {
+        'site_id':108,
+        'site_name':'moneyControl',
+        'site_url':'http://www.moneycontrol.com/news/business/'}
 
     def __init__(self, pages=10, *args, **kwargs):
         super(MoneycontrolSpider, self).__init__(*args, **kwargs)
@@ -19,7 +22,7 @@ class MoneycontrolSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
-            
+
 
 
     def parse(self, response):

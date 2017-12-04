@@ -9,6 +9,10 @@ class OneindiahindiSpider(scrapy.Spider):
 
     name = 'oneindiaHindi'
     allowed_domains = ['oneindia.com']
+    custom_settings = {
+        'site_id':110,
+        'site_name':'oneindia(hindi)',
+        'site_url':'https://hindi.oneindia.com/news/india/'}
 
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):

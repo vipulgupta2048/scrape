@@ -9,6 +9,10 @@ class IndianexpresstechSpider(scrapy.Spider):
 
     name = 'indianExpressTech'
     allowed_domains = ['indianexpress.com']
+    custom_settings = {
+        'site_id': 101,
+        'site_name': 'Indian Express',
+        'site_url': 'http://indianexpress.com/section/technology/'}
 
 
     def __init__(self, offset=0, pages=2, *args, **kwargs):

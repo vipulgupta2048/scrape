@@ -9,7 +9,10 @@ class TimenewsSpider(scrapy.Spider):
 
     name = 'timeNews'
     allowed_domains = ['time.com']
-
+    custom_settings = {
+        'site_id':116,
+        'site_name':'time(world)',
+        'site_url':'http://time.com/section/world/'}
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
         self.postgres = pipeline()
@@ -126,7 +129,7 @@ class TimenewsSpider(scrapy.Spider):
             if not data:
                 data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
             if not data:
-                loggerError.error(str(Error) + ' occured at: ' + response.url)
+                loggerError.error(response.url)
                 data = 'Error'
         except Exception as Error:
             loggerError.error(str(Error) + ' occured at: ' + response.url)

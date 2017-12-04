@@ -3,8 +3,15 @@ import scrapy
 from scrapeNews.items import ScrapenewsItem
 
 class HindustanSpider(scrapy.Spider):
+
+
     name = 'hindustan'
     allowed_domains = ['www.hindustantimes.com']
+    custom_settings = {
+        'site_id':114,
+        'site_name':'hindustantimes',
+        'site_url':'http://www.hindustantimes.com/editors-pick/'}
+
     temp = 'http://www.hindustantimes.com/Fragment/HT/Web/Components/home-editors-pick.dwc?style=/PortalConfig/www.ns.hindustantimes.com/jpt-ns/include/fragments/show-more-fragment.jpt&offset='
     start_urls = [temp+'1']
     count = 1
@@ -23,11 +30,6 @@ class HindustanSpider(scrapy.Spider):
         images = response.xpath('//div[@class="thumbnail"]/img/@src').extract_first()
         body = response.xpath('//div[@itemprop="articlebody"]/p').extract_first()
         date = response.css('span.text-dt::text').extract_first()
-        
+
         item = ScrapenewsItem({'title': headline, 'link': response.url, 'newsDate': date, 'content': body, 'image': images,  'source': 114 })
-        yield item   
-
-    
-
-
-            
+        yield item

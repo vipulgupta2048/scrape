@@ -9,11 +9,9 @@ class News18Spider(scrapy.Spider):
     name = "News18Spider"
 
     custom_settings = {
-        'site_name': "News18",
-        'site_url': "https://www.news18.com",
-        'site_id': 107,
-        'spider_version': '0.0'
-    }
+        'site_id':107,
+        'site_name':'News18',
+        'site_url':'http://www.news18.com/news/'}
 
     xpaths = {
         'default': {
