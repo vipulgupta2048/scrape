@@ -9,6 +9,10 @@ class IndiatvSpider(scrapy.Spider):
 
     name = 'indiaTv'
     allowed_domains = ['www.indiatvnews.com']
+    custom_settings = {
+        'site_id':102,
+        'site_name':'India TV',
+        'site_url':'http://www.indiatvnews.com/business/tech/'}
 
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
@@ -16,7 +20,7 @@ class IndiatvSpider(scrapy.Spider):
         self.postgres.openConnection()
         super(IndiatvSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
-            self.start_urls.append('http://www.indiatvnews.com/india/'+ str(count+1))
+            self.start_urls.append('http://www.indiatvnews.com/india/' + str(count + 1))
 
 
     def start_requests(self):
@@ -26,12 +30,13 @@ class IndiatvSpider(scrapy.Spider):
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(IndiatvSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+        spider = super(IndiatvSpider,cls).from_crawler(crawler,*args,**kwargs)
+        crawler.signals.connect(spider.spider_closed,scrapy.signals.spider_closed)
         return spider
 
     def spider_closed(self, spider):
         self.postgres.closeConnection()
+
 
     def parse(self, response):
         newsContainer = response.xpath("//ul[@class='newsListfull']/li")
@@ -72,7 +77,7 @@ class IndiatvSpider(scrapy.Spider):
     def getPageDate(self, response):
         try:
             # split & rsplit Used to Spit Data in Correct format!
-            data = response.xpath("//span[@class='dattime']/text()").extract()[1].rsplit(' ',3)[0]
+            data = response.xpath("//span[@class='dattime']/text()").extract()[1].rsplit(' ', 3)[0]
         except Exception as Error:
             loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'

@@ -9,7 +9,10 @@ class FirstposthindiSpider(scrapy.Spider):
 
     name = 'firstpostHindi'
     allowed_domains = ['hindi.firstpost.com']
-
+    custom_settings = {
+        'site_id':111,
+        'site_name':'firstpost(hindi)',
+        'site_url':'https://hindi.firstpost.com/category/latest/'}
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
         self.postgres = pipeline()

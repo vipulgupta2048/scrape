@@ -8,7 +8,10 @@ class AsianageSpider(scrapy.Spider):
     name = 'asianage'
     allowed_domains = ['asianage.com']
     start_urls = ['http://asianage.com/']
-
+    custom_settings = {
+        'site_id':115,
+        'site_name':'asianage',
+        'site_url':'http://www.asianage.com/newsmakers'}
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
         super(AsianageSpider, self).__init__(*args, **kwargs)

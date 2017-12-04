@@ -7,7 +7,10 @@ from scrapeNews.pipelines import loggerError
 
 class TimetechSpider(scrapy.Spider):
     name = 'timeTech'
-
+    custom_settings = {
+        'site_id':103,
+        'site_name':'Time(Tech)',
+        'site_url':'http://time.com/section/tech/'}
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
         self.postgres = pipeline()
@@ -124,7 +127,7 @@ class TimetechSpider(scrapy.Spider):
             if not data:
                 data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
             if not data:
-                loggerError.error(str(Error) + ' occured at: ' + response.url)
+                loggerError.error(response.url)
                 data = 'Error'
         except Exception as Error:
             loggerError.error(str(Error) + ' occured at: ' + response.url)

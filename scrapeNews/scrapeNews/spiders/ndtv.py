@@ -9,8 +9,15 @@ from datetime import datetime
 
 
 class NdtvSpider(scrapy.Spider):
+
+
     name = 'ndtv'
     start_urls = ['http://www.ndtv.com/latest/']
+    custom_settings = {
+        'site_id':104,
+        'site_name':'NDTV',
+        'site_url':'https://www.ndtv.com/latest/page-1'}
+
 
     def __init__(self, pages=1, *args, **kwargs):
         super(NdtvSpider, self).__init__(*args, **kwargs)

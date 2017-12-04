@@ -9,7 +9,10 @@ class FirstpostsportsSpider(scrapy.Spider):
 
     name = 'firstpostSports'
     allowed_domains = ['firstpost.com']
-
+    custom_settings = {
+        'site_id':112,
+        'site_name':'firstpost(sports)',
+        'site_url':'http://www.firstpost.com/category/sports/'}
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
         self.postgres = pipeline()
@@ -32,7 +35,7 @@ class FirstpostsportsSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
-        
+
 
     def parse(self, response):
         newsContainer = response.xpath("//ul[@class='articles-list']/li")

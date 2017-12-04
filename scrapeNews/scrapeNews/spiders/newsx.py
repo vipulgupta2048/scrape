@@ -10,7 +10,10 @@ class NewsxSpider(scrapy.Spider):
     name = 'newsx'
     allowed_domains = ['newsx.com']
     start_urls = ['http://newsx.com/']
-
+    custom_settings = {
+        'site_id':113,
+        'site_name':'newsx',
+        'site_url':'http://www.newsx.com/latest-news/'}
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
         self.postgres = pipeline()

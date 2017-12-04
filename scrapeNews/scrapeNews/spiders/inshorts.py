@@ -7,6 +7,11 @@ class InshortsSpider(scrapy.Spider):
     name = 'inshorts'
     allowed_domains = ['www.inshorts.com/en/read']
     start_urls = ['http://www.inshorts.com/en/read/']
+    custom_settings = {
+        'site_id':105,
+        'site_name':'Inshorts',
+        'site_url':'http://www.inshorts.com/en/read/'}
+
 
     def parse(self, response):
         for news in response.css('div.news-card'):

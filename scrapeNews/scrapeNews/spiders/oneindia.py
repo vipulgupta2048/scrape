@@ -9,7 +9,10 @@ class OneindiaSpider(scrapy.Spider):
 
     name = 'oneindia'
     allowed_domains = ['oneindia.com']
-
+    custom_settings = {
+        'site_id':109,
+        'site_name':'oneindia',
+        'site_url':'https://www.oneindia.com/india/'}
 
     def __init__(self, offset=0, pages=2, *args, **kwargs):
         self.postgres = pipeline()
