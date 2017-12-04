@@ -98,5 +98,5 @@ class News18Spider(scrapy.Spider):
             yield None
             return
         news_date = parser.parse(news_date, ignoretz=False)
-        item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date, 'source': self.custom_settings.site_id})
+        item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date, 'source': self.custom_settings['site_id']})
         yield item
