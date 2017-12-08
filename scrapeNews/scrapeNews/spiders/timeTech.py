@@ -2,7 +2,7 @@
 import scrapy
 #from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
-from scrapeNews.pipelines import loggerError
+from scrapeNews.settings import logger
 from scrapeNews.db import DatabaseManager, LogsManager
 
 class TimetechSpider(scrapy.Spider):
@@ -34,10 +34,9 @@ class TimetechSpider(scrapy.Spider):
         #self.postgres.closeConnection()
     #    return True
 
-    def start_requests(self):
-        yield scrapy.Request(self.start_url, self.parse)
-    #    for url in self.start_urls:
-    #        yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+    #def start_requests(self):
+        # Spider Disabled due to error
+        #yield scrapy.Request(self.start_url, self.parse)
 
     def parse(self, response):
         try:
