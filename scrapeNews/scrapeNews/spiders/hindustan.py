@@ -21,17 +21,18 @@ class HindustanSpider(scrapy.Spider):
     start_urls = [temp+'1']
     count = 1
     def parse(self, response):
-        something = response.css('div.media')
-        for somethings in something:
-            link = somethings.xpath('.//div[contains(@class,"media-body")]/div[1]/a/@href').extract_first()
-            if not DatabaseManager().urlExists(link):
-                self.custom_settings['url_stats']['parsed'] += 1
-                yield scrapy.Request(url=link, callback=self.fun)
-            else:
-                self.custom_settings['url_stats']['dropped'] += 1
-        self.count += 1
-        #print(self.count)
-        yield scrapy.Request(url=self.temp+str(self.count), callback=self.parse)
+        if len(response.text) != 0:
+            something = response.css('div.media')
+            for somethings in something:
+                link = somethings.xpath('.//div[contains(@class,"media-body")]/div[1]/a/@href').extract_first()
+                if not DatabaseManager().urlExists(link):
+                    self.custom_settings['url_stats']['parsed'] += 1
+                    yield scrapy.Request(url=link, callback=self.fun)
+                else:
+                    self.custom_settings['url_stats']['dropped'] += 1
+            self.count += 1
+            #print(self.count)
+            yield scrapy.Request(url=self.temp+str(self.count), callback=self.parse)
 
     def fun(self, response):
         text = response.text

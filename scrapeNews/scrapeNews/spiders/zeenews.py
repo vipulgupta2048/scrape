@@ -26,34 +26,42 @@ class zeespider(scrapy.Spider):
 
     #Scraping the main page for article links
     def parse(self, response):
-        articles = response.xpath('//section[contains(@class, "maincontent")]//div[contains(@class, "section-article")]') #extracts HTML from the start_url
-        for article in articles:
-            x = article.xpath('.//h3/a[2]') #extracts <a> tag from start _url
-            link = x.xpath('.//@href').extract_first()  #extracts URL for the articles recursively
-            self.custom_settings['url_stats']['parsed'] += 1
-            yield response.follow(link, callback = self.parse_news)
+        try:
+            articles = response.xpath('//section[contains(@class, "maincontent")]//div[contains(@class, "section-article")]') #extracts HTML from the start_url
+            for article in articles:
+                x = article.xpath('.//h3/a[2]') #extracts <a> tag from start _url
+                link = x.xpath('.//@href').extract_first()  #extracts URL for the articles recursively
+                self.custom_settings['url_stats']['parsed'] += 1
+                yield response.follow(link, callback = self.parse_news)
 
-        #For scraping the links on the next page of the website
-        next_page = response.xpath('//link[@rel = "next"]/@href').extract_first()
-        if next_page is not None:
-           yield response.follow(next_page, callback = self.parse)
+            #For scraping the links on the next page of the website
+            next_page = response.xpath('//link[@rel = "next"]/@href').extract_first()
+            if next_page is not None:
+               yield response.follow(next_page, callback = self.parse)
+        except Exception as e:
+            logger.error(__name_ + " Unhandled: " + str(e))
 
     #For scraping a particular article listed on the main page
     def parse_news(self,response):
-        i = ScrapenewsItem()
-        i['title'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline 
-        i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[10:-4] #scrapes datetime
-        i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
-        i['content'] = self.getcontent(response)
-        i['link'] = response.url #scrapes link; article page
+        try:
+            i = ScrapenewsItem()
+            i['title'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline 
+            i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[10:-4] #scrapes datetime
+            i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
+            i['content'] = self.getcontent(response)
+            i['link'] = response.url #scrapes link; article page
 
-        self.custom_settings['url_stats']['scraped'] += 1
-        yield i
+            self.custom_settings['url_stats']['scraped'] += 1
+
+            yield i
+        except Exception as e:
+            self.custom_settings['url_stats']['dropped'] += 1
+            yield None
 
     def getcontent(self,response):
         data = response.xpath('//div[contains(@class, "article")]/div[contains(@class, "field")]//p/text()').extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            logger.error(__name__ + " Unable to Extract Content : " + response.url)
             data = 'Error'
         return data
 

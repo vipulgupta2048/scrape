@@ -33,15 +33,11 @@ Navigate to repository: `pip3 install -r requirements.txt`
 - Requirements(For flask Application):
     - flask
 
+- Requirements(for Deploying)
+   - Scrapyd
+   - Scrapyd-Client ( Use ```pip install git+https://github.com/scrapy/scrapyd-client```
+
 ### Database Setup (PostgreSQL)
-
-**Note: You can comment out the following code in settings.py to avoid using pipelines.**
-
-```
-ITEM_PIPELINES = {
-   'scrapeNews.pipelines.ScrapenewsPipeline': 300
-}
-```
 
 - Installation in Debian: `sudo apt-get install postgresql postgresql-contrib`
 
@@ -57,6 +53,7 @@ ITEM_PIPELINES = {
 	- `createuser YOUR_ROLE_NAME/YOUR_USERNAME --interactive --pwprompt`
 
 - Setup Database:
+<<<<<<< f9c21c32e8e6d2704eb174904e02eb83d1b26a8f
     - Create file a scrapeNews/envConfig.py; Inside it, Write:
     ```
     USERNAME = 'YOUR_ROLE_NAME/YOUR_USERNAME'
@@ -66,9 +63,41 @@ ITEM_PIPELINES = {
     LOG_TABLE = 'LOG_TABLE_NAME'
     DATABASE_NAME = 'DATABASE_NAME'
     HOST_NAME = 'HOST_NAME'
+=======
+    - Create file a ```add_env.sh```; Inside it, Write:
+    ```bash
+    #!/bin/bash
+
+    export SCRAPER_DB_HOST=localhost
+    export SCRAPER_DB_USER=YOUR_ROLE_NAME/YOUR_USERNAME
+    export SCRAPER_DB_PASS=YOUR_PASSWORD
+    export SCRAPER_DB_NAME=YOUR_DATABASE_NAME
+>>>>>>> (add) Infinite Runs to Spiders, TOR | (fix) Bugs | (update) README
     ```
 
-## Run Spiders
+### Configuring your spiders
+
+Add the following inside your spider class,
+
+```python
+
+from scrapeNews.db import LogsManager
+
+custom_settings = {
+    'site_name': "asianage",
+    'site_url': "http://www.asianage.com/newsmakers",
+    'site_id': -1,
+    'log_id': -1,
+    'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+}
+
+def closed(self, reason):
+    LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+
+```
+
+
+### Run Spiders
 **Note: Navigate to the folder containing scrapy.cfg**
 ```
 scrapy crawl SPIDER_NAME
@@ -79,6 +108,7 @@ scrapy crawl SPIDER_NAME
 	3. timeTech
 	4. ndtv
 	5. inshorts
+<<<<<<< f9c21c32e8e6d2704eb174904e02eb83d1b26a8f
     6. zee
     7. News18Spider
     8. moneyControl
@@ -121,5 +151,28 @@ scrapy crawl SPIDER_NAME
         9. newsx
         10. asianage
         11. timeNews
+=======
+        6. zeeNews
+        7. News18Spider
+        8. moneyControl
+        9. oneindia
+        10. oneindiaHindi
+        11. firstpostHindi
+        12. firstpostSports
+        13. newsx
+        14. hindustantimes
+        15. asianage
+        16. timeNews
+        17. newsNation [In development]
+
+### Additional Utilities 
+
+- scrapeNews.db.DatabaseManager
+    - Consists of Various Database Related Utilities
+- scrapeNews.db.LogsManager
+    - Consists Methods for Managing Spider Run Stats
+- scrapeNews.settings.logger
+    - Preconfigured Logger, import it and use like ```logger.error(__name__ + " Your_ERROR")```
+>>>>>>> (add) Infinite Runs to Spiders, TOR | (fix) Bugs | (update) README
 
 Happy collaborating !!   

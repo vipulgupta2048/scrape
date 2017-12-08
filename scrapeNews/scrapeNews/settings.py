@@ -15,7 +15,7 @@ BOT_NAME = 'scrapeNews'
 SPIDER_MODULES = ['scrapeNews.spiders']
 NEWSPIDER_MODULE = 'scrapeNews.spiders'
 
-LOG_LEVEL = 'ERROR'  # to only display errors
+LOG_LEVEL = 'DEBUG'  # to only display errors
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrapeNews (+http://www.yourdomain.com)'
 
@@ -53,9 +53,11 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'scrapeNews.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
+HTTP_PROXY = 'http://127.0.0.1:8118'
+DOWNLOADER_MIDDLEWARES = {
+    'scrapeNews.middlewares.TorProxyMiddleware': 543,
+}
+
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html

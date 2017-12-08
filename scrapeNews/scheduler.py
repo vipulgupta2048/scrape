@@ -95,7 +95,7 @@ def scheduleAllSpiders():
     list_jobs()
 
 scheduleScheduler()
-schedule.every(1).hours.do(list_jobs)
+
 print("Scheduler Running! Check Log file for details")
 while True:
    schedule.run_pending()

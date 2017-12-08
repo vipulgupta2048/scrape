@@ -10,9 +10,12 @@ import re
 import logging
 from scrapeNews.items import ScrapenewsItem
 from dateutil import parser
-from scrapeNews.settings import logger, DbDateFormat
+from .settings import logger, DbDateFormat
 from scrapy.exceptions import DropItem, CloseSpider
-from scrapeNews.db import DatabaseManager, LogsManager
+from .db import DatabaseManager, LogsManager
+#Calling logging module instance
+loggerError = logging.getLogger("scrapeNewsError")
+loggerInfo = logging.getLogger("scrapeNewsInfo")
 
 class ScrapenewsPipeline(object):
     """
@@ -119,7 +122,7 @@ class DataFormatterPipeline(object):
 
     def processDate(self, dateStr, spider):
         try:
-	    date_parsed = parser.parse(dateStr, ignoretz=False, fuzzy=True)
+            date_parsed = parser.parse(dateStr, ignoretz=False, fuzzy=True)
             return date_parsed.strftime(DbDateFormat)
         except ValueError as e:
             logger.error(__name__+" [ITEM DROPPED] "+str(e))
@@ -152,40 +155,3 @@ class DatabasePipeline(object):
             database.conn.rollback()
 
         return item
-
-class InnerSpiderPipeline(object):
-
-    def openConnection(self):
-        try:
-            self.connection = psycopg2.connect(
-                host= os.environ['HOST_NAME'],
-                user=os.environ['USERNAME'],
-                database=os.environ['DATABASE_NAME'],
-                password=os.environ['PASSWORD'])
-            self.connection.set_session(readonly=True, autocommit=True)
-            self.cursor = self.connection.cursor()
-        except Exception as Error:
-            loggerError.error(Error)
-
-
-    def closeConnection(self):
-        self.cursor.close()
-        self.connection.close()
-
-
-    def checkUrlExists(self, link):
-        self.spider.urls_parsed += 1
-        # Check if the url already exists in the database.
-        postgresQuery = "SELECT link from " + os.environ['NEWS_TABLE'] + " where link= %s"
-        try:
-            if (self.connection.status != 1):
-                self.openConnection(self.spider)
-            self.cursor.execute(postgresQuery, (link,))
-            if self.cursor.fetchall():
-                self.spider.urls_dropped += 1
-                return True
-            else:
-                return False
-        except Exception as Error:
-            loggerError.error(Error)
-            return True

@@ -17,36 +17,47 @@ class OneindiaSpider(scrapy.Spider):
         'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
     }
 
-    def __init__(self, offset=0, pages=2, *args, **kwargs):
+    start_url = "https://www.oneindia.com/india/?page-no="
+    #def __init__(self, offset=0, pages=2, *args, **kwargs):
         #self.postgres = pipeline()
         #self.postgres.openConnection()
-        super(OneindiaSpider, self).__init__(*args, **kwargs)
-        for count in range(int(offset), int(offset) + int(pages)):
-            self.start_urls.append('https://www.oneindia.com/india/?page-no='+ str(count+1))
+    #    super(OneindiaSpider, self).__init__(*args, **kwargs)
+    #    for count in range(int(offset), int(offset) + int(pages)):
+    #        self.start_urls.append('https://www.oneindia.com/india/?page-no='+ str(count+1))
 
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(OneindiaSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-        return spider
+    #@classmethod
+    #def from_crawler(cls, crawler, *args, **kwargs):
+    #    spider = super(OneindiaSpider, cls).from_crawler(crawler, *args, **kwargs)
+    #    crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+    #    return spider
 
-    def spider_closed(self, spider):
+    #def spider_closed(self, spider):
         #self.postgres.closeConnection()
-        return True
+    #    return True
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
+        yield scrapy.Request(self.start_url+"1", self.parse)
+    #    for url in self.start_urls:
+    #        yield scrapy.Request(url, self.parse)
 
     def parse(self, response):
-        newsContainer = response.xpath('//div[@id="collection-wrapper"]/article')
-        for newsBox in newsContainer:
-            link = 'https://www.oneindia.com/india/' + newsBox.xpath('div/h2/a/@href').extract_first()
-            if not DatabaseManager().urlExists(link):
-                self.custom_settings['url_stats']['parsed'] += 1
-                yield scrapy.Request(url=link, callback=self.parse_article)
-            else:
-                self.custom_settings['url_stats']['dropped'] += 1
+        try:
+            newsContainer = response.xpath('//div[@id="collection-wrapper"]/article')
+            for newsBox in newsContainer:
+                link = 'https://www.oneindia.com/india/' + newsBox.xpath('div/h2/a/@href').extract_first()
+                if not DatabaseManager().urlExists(link):
+                    self.custom_settings['url_stats']['parsed'] += 1
+                    yield scrapy.Request(url=link, callback=self.parse_article)
+                else:
+                    self.custom_settings['url_stats']['dropped'] += 1
+            try:
+                next_page = response.urljoin(response.xpath("//div[contains(@class, 'prev-next-story')]//a[contains(@class, 'next')]/@href").extract_first())
+                yield scrapy.Request(next_page, self.parse)
+            except Exception as e:
+                #Scraping Completed
+                return False
+        except Exception as e:
+            logger.error(__name__ + " Unhandled: " + str(e))
 
     def parse_article(self, response):
         item = ScrapenewsItem()  # Scraper Items
@@ -65,33 +76,26 @@ class OneindiaSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
-        if not data:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+        try:
+            data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
+        except Exception as Error:
+            logger.error(__name__ + " Error Extracting Content : "+ response.url + " : " + str(Error))
             data = 'Error'
         return data
 
     def getPageTitle(self, response):
         data = response.xpath("//h1[contains(@class,'heading')]/text()").extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            logger.error(__name__ + "Error Extracting Title: " + response.url)
             data = 'Error'
         return data
 
 
     def getPageImage(self, response):
-        try:
-            data = 'https://www.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
-        except Exception as Error:
-            try:
-                data = 'https://www.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
-            except Exception as Error:
-                data = response.xpath("//link[@rel='image_src']/@href").extract_first()
-                if not data:
-                    data = response.xpath("//div[@class='assigned_video']/img/@src").extract_first()
-                if not data:
-                    loggerError.error(str(Error) + " occured at: " + response.url)
-                    data = 'Error'
+        data = 'https://www.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
+        if (data is None):
+            logger.error(__name__ + " Error Extracting Image: " + response.url)
+            data = 'Error'
         return data
 
 
@@ -99,7 +103,7 @@ class OneindiaSpider(scrapy.Spider):
         try:
             data = (response.xpath("/html/head/meta[@property='article:published_time']/@content").extract_first()).rsplit('+',1)[0]
         except Exception as Error:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+            logger.error(__name__ + " Error Extracting Date: " + response.url + " : " + str(Error))
             data = 'Error'
         finally:
             return data

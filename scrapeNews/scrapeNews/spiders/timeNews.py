@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+#from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 from scrapeNews.db import DatabaseManager,LogsManager
@@ -17,57 +18,66 @@ class TimenewsSpider(scrapy.Spider):
         'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
     }
 
-
-    def __init__(self, offset=0, pages=4, *args, **kwargs):
+    start_url = "http://time.com/section/world/?page=1"
+    #def __init__(self, offset=0, pages=4, *args, **kwargs):
         #self.postgres = pipeline()
         #self.postgres.openConnection()
-        super(TimenewsSpider, self).__init__(*args, **kwargs)
-        for count in range(int(offset), int(offset) + int(pages)):
-            self.start_urls.append('http://time.com/section/world/?page='+ str(count+1))
+    #    super(TimenewsSpider, self).__init__(*args, **kwargs)
+    #    for count in range(int(offset), int(offset) + int(pages)):
+    #        self.start_urls.append('http://time.com/section/world/?page='+ str(count+1))
 
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(TimenewsSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-        return spider
+    #@classmethod
+    #def from_crawler(cls, crawler, *args, **kwargs):
+    #    spider = super(TimenewsSpider, cls).from_crawler(crawler, *args, **kwargs)
+    #    crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
+    #    return spider
 
-    def spider_closed(self, spider):
+    #def spider_closed(self, spider):
         #self.postgres.closeConnection()
-        return True
+    #    return True
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
+        yield scrapy.Request(self.start_url, self.parse)
+    #    for url in self.start_urls:
+    #        yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
 
     def parse(self, response):
-
-        # For the large newsBox in top of all the pages. (In Normal Pages) or sends all request for all the articles in API page or sends the request for the special page.
         try:
-            newsBox = 'http://www.time.com' + response.xpath("//div[@class='partial hero']/article/a/@href").extract_first()
-            if not DatabaseManager().urlExists(newsBox):
-                self.custom_settings['url_stats']['parsed'] += 1
-                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
-        except Exception as Error:
-            if newsBox.xpath("//main[contains(@class,'content article')]"):
-                self.custom_settings['url_stats']['parsed'] += 1
-                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
-            elif newsBox.xpath("//div[contains(@class,'_29M-6C9w')]"):
-                newsContainer = newsBox.xpath("//div[contains(@class,'_29M-6C9w')]//div[contains(@class,'_2cCPyP5f')]//a[@class='_2S9ChopF']/@href")
-                for link in newsContainer:
+            next_page = response.xpath("//a[@rel='next']/@href").extract_first()
+            if next_page != None:
+
+                # For the large newsBox in top of all the pages. (In Normal Pages) or sends all request for all the articles in API page or sends the request for the special page.
+                try:
+                    newsBox = 'http://www.time.com' + response.xpath("//div[@class='partial hero']/article/a/@href").extract_first()
+                    if not DatabaseManager().urlExists(newsBox):
+                        self.custom_settings['url_stats']['parsed'] += 1
+                        yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                except Exception as Error:
+                    if newsBox.xpath("//main[contains(@class,'content article')]"):
+                        self.custom_settings['url_stats']['parsed'] += 1
+                        yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                    elif newsBox.xpath("//div[contains(@class,'_29M-6C9w')]"):
+                        newsContainer = newsBox.xpath("//div[contains(@class,'_29M-6C9w')]//div[contains(@class,'_2cCPyP5f')]//a[@class='_2S9ChopF']/@href")
+                        for link in newsContainer:
+                            if not DatabaseManager().urlExists(link):
+                                self.custom_settings['url_stats']['parsed'] += 1
+                                yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                    else:
+                        loggerError.error(response.url)
+
+                # For the rest of the boxes
+                newsContainer = response.xpath("//div[@class='partial marquee']/article")
+                for newsBox in newsContainer:
+                    link = 'http://www.time.com' + newsBox.xpath('a/@href').extract_first()
                     if not DatabaseManager().urlExists(link):
                         self.custom_settings['url_stats']['parsed'] += 1
                         yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
-            else:
-                loggerError.error(response.url)
 
-        # For the rest of the boxes
-        newsContainer = response.xpath("//div[@class='partial marquee']/article")
-        for newsBox in newsContainer:
-            link = 'http://www.time.com' + newsBox.xpath('a/@href').extract_first()
-            if not DatabaseManager().urlExists(link):
-                self.custom_settings['url_stats']['parsed'] += 1
-                yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                next_page = response.urljoin(next_page)
+                yield scrapy.Request(next_page, self.parse)
 
+        except Exception as e:
+            logger.error(__name__ + " Unhandled: " + str(e))
 
     def parse_article(self, response):
         item = ScrapenewsItem()  # Scraper Items

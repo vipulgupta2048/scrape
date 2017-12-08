@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import DictCursor
-from settings import DB_INFO, logger
+from .settings import DB_INFO, logger
 
 class DatabaseManager(object):
 
