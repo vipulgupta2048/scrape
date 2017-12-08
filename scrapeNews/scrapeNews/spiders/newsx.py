@@ -3,6 +3,7 @@ import scrapy
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 from scrapeNews.db import DatabaseManager, LogsManager
+from scrapeNews.settings import logger
 
 class NewsxSpider(scrapy.Spider):
 
