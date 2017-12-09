@@ -33,24 +33,26 @@ class FirstpostsportsSpider(scrapy.Spider):
 
 
     def parse_article(self, response):
-        item = ScrapenewsItem()  # Scraper Items
-        item['image'] = self.getPageImage(response)
-        item['title'] = self.getPageTitle(response)
-        item['content'] = self.getPageContent(response)
-        item['newsDate'] = self.getPageDate(response)
-        item['link'] = response.url
-        item['source'] = 112
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
-            yield item
+        if (str(response.url)[:32] != "http://www.firstpost.com/photos/"):
+            item = ScrapenewsItem()  # Scraper Items
+            item['image'] = self.getPageImage(response)
+            item['title'] = self.getPageTitle(response)
+            item['content'] = self.getPageContent(response)
+            item['newsDate'] = self.getPageDate(response)
+            item['link'] = response.url
+            item['source'] = 112
+            if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+                yield item
 
 
     def getPageTitle(self, response):
         try:
             data = ' '.join(response.xpath("//h1[@itemprop='headline']/text()").extract_first().split())
         except AttributeError as Error:
-            try:
-                data = response.xpath('//h1[@class="story-title"]/text()').extract_first()
-            except Exception as Error:
+            data = response.xpath('//h1[@class="story-title"]/text()').extract_first()
+            if (data is None):
+                data = response.xpath('//h1[@class="page-title article-title"]/text()').extract_first()
+            if (data is None):
                 loggerError.error(Error, response.url)
                 data = 'Error'
         except Exception as Error:
@@ -77,10 +79,8 @@ class FirstpostsportsSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        try:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'article-full-content')]/p/text()").extract())).split(' ')[:40])
-        except Exception as Error:
+        data = ' '.join((' '.join(response.xpath("//div[contains(@class,'article-full-content')]/p/text()").extract())).split(' ')[:40])
+        if not data:
             loggerError.error(Error, response.url)
             data = 'Error'
-        finally:
-            return data
+        return data

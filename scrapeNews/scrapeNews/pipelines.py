@@ -138,11 +138,13 @@ class postgresSQL(object):
             return item
 
 
-    def checkUrlExists(self, item):
+    def checkUrlExists(self, link):
         # Check if the url already exists in the database.
         postgresQuery = "SELECT link from " + os.environ['NEWS_TABLE'] + " where link= %s"
         try:
-            self.cursor.execute(postgresQuery, (item,))
+            if (self.connection.status != 1):
+                self.openConnection()
+            self.cursor.execute(postgresQuery, (link,))
             if self.cursor.fetchall():
                 return True
             else:

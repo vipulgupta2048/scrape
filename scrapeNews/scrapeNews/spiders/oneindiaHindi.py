@@ -47,9 +47,8 @@ class OneindiahindiSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        try:
-            data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
-        except:
+        data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
+        if not data:
             loggerError.error(response.url)
             data = 'Error'
         return data

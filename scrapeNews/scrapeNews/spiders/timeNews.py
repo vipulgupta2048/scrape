@@ -112,18 +112,14 @@ class TimenewsSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        try:
-            data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
-            if not data:
-                data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
-            if not data:
-                loggerError.error(response.url)
-                data = 'Error'
-        except Exception as Error:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+        if not data:
+            data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
+        if not data:
+            data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+        if not data:
+            loggerError.error(response.url)
             data = 'Error'
-        finally:
-            return data
-
+        return data
 
 # DEAD API's Link: 'http://time.com/wp-json/ti-api/v1/posts/?time_section_slug=time-section-newsfeed&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=20&recirc=1&page=2'

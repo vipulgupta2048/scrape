@@ -34,15 +34,18 @@ class NewsxSpider(scrapy.Spider):
 
 
     def parse_article(self, response):
-        item = ScrapenewsItem()  # Scraper Items
-        item['image'] = self.getPageImage(response)
-        item['title'] = self.getPageTitle(response)
-        item['content'] = self.getPageContent(response)
-        item['newsDate'] = self.getPageDate(response)
-        item['link'] = response.url
-        item['source'] = 113
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
-            yield item
+        if (response.url == 'http://www.newsx.com'):
+            pass
+        else:
+            item = ScrapenewsItem()  # Scraper Items
+            item['image'] = self.getPageImage(response)
+            item['title'] = self.getPageTitle(response)
+            item['content'] = self.getPageContent(response)
+            item['newsDate'] = self.getPageDate(response)
+            item['link'] = response.url
+            item['source'] = 113
+            if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+                yield item
 
 
     def getPageTitle(self, response):
@@ -76,6 +79,8 @@ class NewsxSpider(scrapy.Spider):
     def getPageContent(self, response):
         data = response.xpath("//div[@class='story-short-title']/h2/text()").extract_first()
         if (data is None):
+            data = ' '.join(' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract()).split()[:40])
+        if not data:
             loggerError.error(response.url)
             data = 'Error'
         return data

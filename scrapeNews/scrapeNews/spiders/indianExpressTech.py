@@ -50,7 +50,7 @@ class IndianexpresstechSpider(scrapy.Spider):
             data = response.xpath("//div[@class='full-details']/p/text()").extract_first()
         if (data is None):
             data = ' '.join(' '.join(response.xpath("//div[@class='body-article']/p/text()").extract()).split()[:40])
-        if (data is None):
+        if not data:
             loggerError.error(response.url)
             data = 'Error'
         return data

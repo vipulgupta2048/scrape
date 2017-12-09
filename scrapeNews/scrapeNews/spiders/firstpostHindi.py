@@ -71,10 +71,8 @@ class FirstposthindiSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        try:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/p/text()").extract())).split(' ')[:40])
-        except Exception as Error:
+        data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/p/text()").extract())).split(' ')[:40])
+        if not data:
             loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
-        finally:
-            return data
+        return data
