@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 
@@ -13,20 +12,9 @@ class TimetechSpider(scrapy.Spider):
         'site_url':'http://time.com/section/tech/'}
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
-        self.postgres = pipeline()
-        self.postgres.openConnection()
         super(TimetechSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://time.com/section/tech/?page='+ str(count+1))
-
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(TimetechSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-        return spider
-
-    def spider_closed(self, spider):
-        self.postgres.closeConnection()
 
 
     def start_requests(self):

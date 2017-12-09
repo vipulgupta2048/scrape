@@ -6,7 +6,7 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import psycopg2
 from scrapeNews.items import ScrapenewsItem
-from datetime import datetime
+from dateutil import parser
 import logging
 import envConfig
 import os
@@ -50,8 +50,30 @@ createDatabase()
 
 
 class ScrapenewsPipeline(object):
+    # This class serves the purpose of cleaning the items received from spider,
+    # Calling the instance of spider's postgresSQL class and calling functions
+    # to create and destroy connection as and when needed.
 
     def open_spider(self, spider):
+        # Called when a spider starts
+        spider.postgres = postgresSQL()
+        spider.postgres.openConnection(spider)
+
+    def close_spider(self, spider):
+        # Called when a spider closes
+        spider.postgres.closeConnection(spider.name)
+
+
+    def process_item(self, item, spider):
+        spider.postgres.insertIntoNewsTable(item, spider)
+
+
+class postgresSQL(object):
+    # postgresSQL class will be the class that has connection when the with postgresSQL
+    # and all database related operations must take place here, (In favour of keeping the
+    # number of connections low )
+    def openConnection(self, spider):
+        # Makes a connection with postgresSQL using pyscopg2
         try:
             self.connection = psycopg2.connect(
                 host= os.environ['HOST_NAME'],
@@ -78,90 +100,46 @@ class ScrapenewsPipeline(object):
             loggerError.error(Error)
 
 
-    def close_spider(self, spider):
+    def closeConnection(self, spiderName):
+        # closes connection with postgreSQL using pyscopg2
         try:
             self.cursor.close()
             self.connection.close()
             if self.recordedArticles > 0:
-                loggerInfo.info(str(self.recordedArticles) + " record(s) were added by " + spider.name + " at")
+                loggerInfo.info(str(self.recordedArticles) + " record(s) were added by " + spiderName + " at")
         except Exception as Error:
             loggerError.error(Error)
 
 
-    def process_item(self, item, spider):
+    def insertIntoNewsTable(self, item, spider):
+        # Insert item into NEWS_TABLE after all the processing.
         try:
-            postgresQuery = "SELECT link from " + os.environ['NEWS_TABLE'] + " where link= %s"
-            self.cursor.execute(postgresQuery, (item.get('link'),))
-            if not self.cursor.fetchall():
-                processedDate = self.process_date(item.get('newsDate'),item.get('link'), spider.name)
-                try:
-                    postgresQuery = "INSERT INTO " + os.environ['NEWS_TABLE'] + " (title, content, image, link, newsDate, site_id, datescraped) VALUES (%s, %s, %s, %s, %s, %s, NOW())"
-                    self.cursor.execute(postgresQuery,
-                        (item.get('title'),
-                        item.get('content'),
-                        item.get('image'),
-                        item.get('link'),
-                        processedDate,
-                        item.get('source')))
-                    self.recordedArticles += 1
-                except Exception as Error:
-                    loggerError.error(str(Error) + " occured at " + str(item.get('link')))
-                finally:
-                    return item
+            if (self.connection.status != 1):
+                self.openConnection()
+            postgresQuery = "INSERT INTO " + os.environ['NEWS_TABLE'] + " (title, content, image, link, newsDate, site_id, datescraped) VALUES (%s, %s, %s, %s, %s, %s, NOW())"
+            processedDate = str(parser.parse(item.get('newsDate'), ignoretz=False))
+            self.cursor.execute(postgresQuery,
+                (item.get('title'),
+                item.get('content'),
+                item.get('image'),
+                item.get('link'),
+                processedDate,
+                item.get('source')))
+            self.recordedArticles += 1
+        except psycopg2.IntegrityError as Error:
+            # If the link already exists, this exception will be invoked
+            if (Error.pgcode == '23505'):
+                pass
             else:
-                return item
+                loggerError.error(str(Error) + " occured at " + str(item.get('link')))
         except Exception as Error:
             loggerError.error(str(Error) + " occured at " + str(item.get('link')))
+        finally:
             return item
 
 
-    def process_date(self, itemDate, link, spiderName):
-        try:
-            if spiderName is 'indianExpressTech':
-                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
-            elif spiderName is 'moneyControl':
-                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %I:%M %p %Z")).strftime("%Y-%m-%dT%H:%M:%S")
-            elif spiderName is 'indiaTv':
-                processedItemDate = (datetime.strptime(itemDate,"%B %d, %Y %H:%M")).strftime("%Y-%m-%dT%H:%M:%S")
-            elif spiderName is 'zee':
-                processedItemDate = (datetime.strptime(itemDate," %b %d, %Y, %H:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
-            # elif spiderName is 'ndtv':
-            #     processedItemDate = (datetime.strptime(itemDate, '%A %B %d, %Y')).strftime("%Y-%m-%dT%H:%M:%S")
-            elif spiderName is 'asianage':
-                processedItemDate = (datetime.strptime(itemDate,"%d %b %Y %I:%M %p")).strftime("%Y-%m-%dT%H:%M:%S")
-            elif spiderName is 'News18Spider':
-                processedItemDate = itemDate.strftime("%Y-%m-%dT%H:%M:%S")
-            else:
-                processedItemDate = itemDate
-        except ValueError as Error:
-            loggerError.error(Error, link)
-            processedItemDate = itemDate
-        finally:
-            return processedItemDate
-
-
-class InnerSpiderPipeline(object):
-
-
-    def openConnection(self):
-        try:
-            self.connection = psycopg2.connect(
-                host= os.environ['HOST_NAME'],
-                user=os.environ['USERNAME'],
-                database=os.environ['DATABASE_NAME'],
-                password=os.environ['PASSWORD'])
-            self.connection.set_session(readonly=True, autocommit=True)
-            self.cursor = self.connection.cursor()
-        except Exception as Error:
-            loggerError.error(Error)
-
-
-    def closeConnection(self):
-        self.cursor.close()
-        self.connection.close()
-
-
     def checkUrlExists(self, item):
+        # Check if the url already exists in the database.
         postgresQuery = "SELECT link from " + os.environ['NEWS_TABLE'] + " where link= %s"
         try:
             self.cursor.execute(postgresQuery, (item,))

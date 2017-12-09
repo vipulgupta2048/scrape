@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 
@@ -14,21 +13,11 @@ class FirstposthindiSpider(scrapy.Spider):
         'site_name':'firstpost(hindi)',
         'site_url':'https://hindi.firstpost.com/category/latest/'}
 
+
     def __init__(self, offset=0, pages=3, *args, **kwargs):
-        self.postgres = pipeline()
-        self.postgres.openConnection()
         super(FirstposthindiSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count+1))
-
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(FirstposthindiSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-        return spider
-
-    def spider_closed(self, spider):
-        self.postgres.closeConnection()
 
 
     def start_requests(self):

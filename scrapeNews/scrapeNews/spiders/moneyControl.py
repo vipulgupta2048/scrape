@@ -24,7 +24,6 @@ class MoneycontrolSpider(scrapy.Spider):
             yield scrapy.Request(url, self.parse)
 
 
-
     def parse(self, response):
         newsContainer = response.xpath("//ul[@id='cagetory']/li[@class='clearfix']")
         for newsBox in newsContainer:
