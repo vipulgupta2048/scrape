@@ -53,7 +53,7 @@ class AsianageSpider(scrapy.Spider):
 
     def getPageLink(self, newsBox):
         data = 'http://www.asianage.com/newsmakers' + newsBox.xpath('div/a/@href').extract_first()
-        if (data is None):
+        if (data == 'http://www.asianage.com/newsmakers'):
             loggerError.error(newsBox)
             data = 'Error'
         return data

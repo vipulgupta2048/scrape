@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 
@@ -16,8 +15,6 @@ class IndiatvSpider(scrapy.Spider):
 
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
-        self.postgres = pipeline()
-        self.postgres.openConnection()
         super(IndiatvSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.indiatvnews.com/india/' + str(count + 1))
@@ -26,16 +23,6 @@ class IndiatvSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
-
-
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(IndiatvSpider,cls).from_crawler(crawler,*args,**kwargs)
-        crawler.signals.connect(spider.spider_closed,scrapy.signals.spider_closed)
-        return spider
-
-    def spider_closed(self, spider):
-        self.postgres.closeConnection()
 
 
     def parse(self, response):
@@ -86,10 +73,8 @@ class IndiatvSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        try:
-            data = ' '.join((' '.join(response.xpath("//div[@class='content']/p/text()").extract())).split(' ')[:40])
-        except Exception as Error:
+        data = ' '.join((' '.join(response.xpath("//div[@class='content']/p/text()").extract())).split(' ')[:40])
+        if not data:
             loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
-        finally:
-            return data
+        return data
