@@ -29,7 +29,7 @@ class zeespider(scrapy.Spider):
         i = ScrapenewsItem()
         i['title'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline
         i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[10:-4] #scrapes datetime
-        i['image'] = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
+        i['image'] = self.getimage(response)
         i['content'] = self.getcontent(response)
         i['link'] = response.url #scrapes link; article page
         i['source'] = 106
@@ -40,5 +40,12 @@ class zeespider(scrapy.Spider):
         data = response.xpath('//div[contains(@class, "article")]/div[contains(@class, "field")]//p/text()').extract()
         if (data is None):
             loggerError.error(response.url)
-            data = 'Error'
+            data = 'Error - No content found'
+        return data
+
+    def getimage(self,response):
+        data = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
+        if (data is None):
+            loggerError.error(response.url)
+            data = 'Error - No image found'
         return data
