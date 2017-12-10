@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 from time import strftime
 import logging
+import os
 
 api_url = "http://localhost:6800/"
 
@@ -16,16 +17,19 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 def scheduleScheduler():
-    schedule.every().day.at("20:10").do(scheduleAllSpiders).tag("daily-task")
+    schedule.every().day.at("12:30").do(scheduleAllSpiders).tag("daily-task")
 
 def scheduleRechecking():
     schedule.clear("daily-task")
     schedule.every(30).minutes.do(scheduleAllSpiders).tag("recheck-task")
 
 def list_jobs():
+    os.system('clear')
     curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print("++++++++ Scrapyd Scheduler (thisisayush) ++++++++")
     print("================= "+curr_time+" =================")
-    print("- Running Schedules: ")
+    print(" [ CHECK LOG FILE FOR ERRORS ] [PID: "+str(os.getpid())+"]")
+    print("- Running Schedules: (Updated Every 1 minute)")
     print(schedule.jobs)
     print("- Running Schedules on Server: ")
     try:
@@ -82,9 +86,9 @@ def scheduleAllSpiders():
                     sch = requests.post(api_url + "schedule.json", data=payload)
                     if sch.status_code == 200:
                         job = sch.json()
-	    	        logger.info("Successfully Scheduled Spider "+spider+ " JOBID: "+job['jobid'])
+                        logger.info("Successfully Scheduled Spider "+spider+ " JOBID: "+job['jobid'])
                     else:
-		        logger.error("Status Code (schedule.json <payload> "+str(payload)+"): "+str(sch.status_code))
+                        logger.error("Status Code (schedule.json <payload> "+str(payload)+"): "+str(sch.status_code))
                         logger.error("Unable to Schedule Spider "+spider)
         else:
             logger.info("Pending Spider Jobs! ReScheduling The Check")
@@ -95,8 +99,9 @@ def scheduleAllSpiders():
     list_jobs()
 
 scheduleScheduler()
+schedule.every(1).minute.do(list_jobs)
+list_jobs()
 
-print("Scheduler Running! Check Log file for details")
 while True:
    schedule.run_pending()
    time.sleep(5)

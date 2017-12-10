@@ -35,7 +35,7 @@ class HindustanSpider(scrapy.Spider):
                 self.count += 1
                 #print(self.count)
                 yield scrapy.Request(url=self.temp+str(self.count), callback=self.parse)
-       except Exception as e:
+        except Exception as e:
            logger.error(__name__ + " Unhandled: " + str(e))
 
     def fun(self, response):

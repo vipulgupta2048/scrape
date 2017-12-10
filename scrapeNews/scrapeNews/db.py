@@ -9,6 +9,8 @@ class DatabaseManager(object):
                     host='"+DB_INFO['host']+"' \
                     password='"+DB_INFO['password']+"'"
     conn = None
+    endOnDel = True
+
     site_table_name = "site_table"
     item_table_name = "item_table"
     logs_table_name = "log_table"
@@ -53,12 +55,18 @@ class DatabaseManager(object):
                     ON DELETE CASCADE \
                     );"
 
-    def __init__(self):
-        self.connect()
+    def __init__(self, connection = None, endOnDel = True):
+        if connection == None:
+            self.connect()
+        else:
+            self.conn = connection.conn
+            self.cursor = connection.cursor
+            self.endOnDel = endOnDel
 
     def connect(self):
         if self.conn != None:
-            return self.cursor
+            if self.conn.closed == 0:
+                return self.cursor
         try:
             self.conn = psycopg2.connect(self.connect_str)
             self.conn.autocommit = True
@@ -135,8 +143,9 @@ class DatabaseManager(object):
         return False
 
     def __del__(self):
-        if self.conn != None:
+        if self.conn != None and self.endOnDel == True:
             self.conn.close()
+            self.conn = None
 
 
 class LogsManager(object):
@@ -169,8 +178,10 @@ class LogsManager(object):
                    urls_dropped = %s, urls_stored = %s, shutdown_reason = %s WHERE id = %s"
             cur = self.dbase.cursor
             cur.execute(sql, (url_stats['parsed'], url_stats['scraped'], url_stats['dropped'], url_stats['stored'], reason, log_id,))
+            self.dbase.conn.commit()
             return True
         except Exception as e:
+            self.dbase.conn.rollback()
             logger.error(__name__+" DATABASE ERROR: "+str(e))
             return False
 
@@ -197,3 +208,51 @@ class LogsManager(object):
         except Exception as e:
             logger.error(__name__+" DATABASE ERROR: "+str(e))
             return False
+    def __del__(self):
+        del self.dbase
+
+class ConnectionManager(object):
+
+    connection = None
+
+    def __init__(self, connection):
+        self.connection = connection
+
+    def checkConnection(self):
+        try:
+            if self.connection.conn == None:
+                self.reconnect()
+                if self.connection.conn == None:
+                   return False
+                else:
+                   return True
+            elif self.connection.conn.closed != 0:
+                self.reconnect()
+                if self.connection.conn == None:
+                    return False
+                else:
+                    return True
+            else:
+                return True
+
+        except NameError as e:
+            return False
+        except Exception as e:
+            logger.error(__name__+" Unhandled: " + str(e) )
+
+    def reconnect(self):
+        logger.debug(__name__+" Closed Connection Detected.. trying to connect...")
+        max_tries = 3
+        curr_tries = 0
+        while curr_tries < max_tries:
+            curr_tries += 1
+            if self.connection.conn != None:
+                if self.connection.conn.closed == 0:
+                    break
+            logger.debug(__name__ + " Trying Connecting to Database"+str(curr_tries)+"/"+str(max_tries))
+            self.connection.connect()
+        if self.connection.conn == None or self.connection.conn.closed != 0:
+            return False
+        else:
+            return True
+

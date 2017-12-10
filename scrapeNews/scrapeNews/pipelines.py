@@ -12,7 +12,7 @@ from scrapeNews.items import ScrapenewsItem
 from dateutil import parser
 from .settings import logger, DbDateFormat
 from scrapy.exceptions import DropItem, CloseSpider
-from .db import DatabaseManager, LogsManager
+from .db import DatabaseManager, LogsManager, ConnectionManager
 #Calling logging module instance
 loggerError = logging.getLogger("scrapeNewsError")
 loggerInfo = logging.getLogger("scrapeNewsInfo")
@@ -25,6 +25,9 @@ class ScrapenewsPipeline(object):
     """
     def open_spider(self, spider):
         logger.info(__name__+" [Spider Started]: "+spider.name)
+        spider.dbconn = DatabaseManager()
+        if spider.dbconn.conn == None:
+            raise CloseSpider("Unable to Establish a Database Connection!")
         site_id = self.checkSite(spider)
         spider.custom_settings['site_id'] = site_id
         spider.custom_settings['log_id'] = LogsManager().start_log(site_id)
@@ -32,7 +35,9 @@ class ScrapenewsPipeline(object):
     def checkSite(self, spider):
         """ Check if website exists in database and fetch site id, else create new """
         #Connect To DATABASE
-        database = DatabaseManager()
+        if not ConnectionManager(spider.dbconn).checkConnection():
+            raise CloseSpider("Unable to Establish a Database Connection")
+        database = spider.dbconn
 
         #Fetch Current Spider Details
         spider_name = spider.custom_settings['site_name']
@@ -72,6 +77,8 @@ class ScrapenewsPipeline(object):
 
     def close_spider(self, spider):
         #loggerInfo.info(str(self.recordedArticles) + " record(s) were added by " + spider.name + " at")
+        spider.dbconn.conn.commit()
+        spider.dbconn.conn.close()
         logger.info(__name__ + spider.name +"SPIDER CLOSED")
 
 class DuplicatesPipeline(object):
@@ -80,8 +87,10 @@ class DuplicatesPipeline(object):
     Please Use DatabaseManager().urlExists(url) in your spiders to preserve bandwidth and speed up process
     """
     def process_item(self, item, spider):
+        if not ConnectionManager(spider.dbconn).checkConnection():
+            raise CloseSpider("Unable to Establish a Database Connection")
 
-        if DatabaseManager().urlExists(item['link']):
+        if spider.dbconn.urlExists(item['link']):
             logger.info(__name__+" [Dropped URL] "+item['link']+" Url Already in Database")
             spider.custom_settings['url_stats']['dropped'] += 1
             raise DropItem("[Dropped URL] "+item['link']+" Url Already in Database")
@@ -139,7 +148,10 @@ class DatabasePipeline(object):
     This Pipeline Manages and Stores Processed Data into Database
     """
     def process_item(self, item, spider):
-        database = DatabaseManager()
+        if not ConnectionManager(spider.dbconn).checkConnection():
+            raise CloseSpider("Unable to Establish a Database Connection")
+
+        database = spider.dbconn
         cur = database.cursor
 
         site_id = spider.custom_settings['site_id']
