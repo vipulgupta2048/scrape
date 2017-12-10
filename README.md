@@ -13,6 +13,10 @@ Clone the repository (or download it). Then, follow the installation steps to ru
 ```
 python3 -m venv VENV_NAME
 ```
+or
+```
+virtualenv -p python3 VENV_NAME
+```
 
 ### Activate the venv
 Windows: `VENV_NAME/Scripts/activate`
@@ -20,12 +24,14 @@ Windows: `VENV_NAME/Scripts/activate`
 Linux: `source VENV_NAME/bin/activate`
 
 ### Install the requirements
-Navigate to repository: `pip3 install -r requirements.txt`
+Navigate to repository: `pip install -r requirements.txt`
 
 - Requirements(For scraping):
     - scrapy
     - requests
     - python-dateutil
+    - TOR
+    - Privoxy
 
 - Requirements(For database):
     - psycopg2
@@ -36,6 +42,25 @@ Navigate to repository: `pip3 install -r requirements.txt`
 - Requirements(for Deploying)
    - Scrapyd
    - Scrapyd-Client ( Use ```pip install git+https://github.com/scrapy/scrapyd-client```
+
+
+### Install TOR and Privoxy
+
+#### Install TOR
+```
+sudo apt-get install tor
+```
+#### Install Privoxy
+```
+sudo apt-get install privoxy
+```
+#### Configure Privoxy to route TOR
+Add following lines at the end of  ```/etc/privoxy/config```
+```
+forward-socks5  / 127.0.0.1:9050 .
+forward-socks4a / 127.0.0.1:9050 .
+forward-socks5t / 127.0.0.1:9050 .
+```
 
 ### Database Setup (PostgreSQL)
 
