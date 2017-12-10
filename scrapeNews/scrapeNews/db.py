@@ -149,7 +149,13 @@ class DatabaseManager(object):
 
 
 class LogsManager(object):
-    dbase = DatabaseManager()
+    dbase = None
+
+    def __init__(self, connection = None):
+        if connection == None:
+            self.dbase = DatabaseManager()
+        else:
+            self.dbase = connection
 
     def start_log(self, site):
         try:
@@ -163,6 +169,26 @@ class LogsManager(object):
         except Exception as e:
            logger.error(__name__+" DATABASE ERROR: "+str(e))
            return False
+
+    def update_log(self, log_id, url_stats):
+        """
+        log_id (str): Returned from start_log
+        url_stats (Dictionary): {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored' : 0}
+        reason (str): String
+        """
+
+        try:
+            if self.dbase.connect() == None:
+                return False
+            sql = "UPDATE "+self.dbase.logs_table_name+" \
+                  SET urls_parsed = %s, urls_scraped = %s, \
+                  urls_dropped = %s, urls_stored = %s WHERE id = %s"
+            self.dbase.cursor.execute(sql, (url_stats['parsed'], url_stats['scraped'], url_stats['dropped'], url_stats['stored'], log_id))
+            self.dbase.conn.commit()
+            return True
+        except Exception as e:
+            logger.error(__name__ + " DATABASE ERROR: " + str(e))
+            return False
 
     def end_log(self, log_id, url_stats, reason):
         """
@@ -241,7 +267,7 @@ class ConnectionManager(object):
             logger.error(__name__+" Unhandled: " + str(e) )
 
     def reconnect(self):
-        logger.debug(__name__+" Closed Connection Detected.. trying to connect...")
+        logger.error(__name__+" Closed Connection Detected.. trying to connect...")
         max_tries = 3
         curr_tries = 0
         while curr_tries < max_tries:
@@ -249,7 +275,7 @@ class ConnectionManager(object):
             if self.connection.conn != None:
                 if self.connection.conn.closed == 0:
                     break
-            logger.debug(__name__ + " Trying Connecting to Database"+str(curr_tries)+"/"+str(max_tries))
+            logger.error(__name__ + " Trying Connecting to Database"+str(curr_tries)+"/"+str(max_tries))
             self.connection.connect()
         if self.connection.conn == None or self.connection.conn.closed != 0:
             return False

@@ -120,6 +120,15 @@ class DataFormatterPipeline(object):
     }
 
     def process_item(self, item, spider):
+
+        for x in item:
+            if item[x] == None:
+                logger.error(__name__ + " [" + spider.name + "] [DROPPED] " + x + " is None ")
+                raise DropItem("Content Missing from Item")
+            if len(item[x]) == 0:
+                logger.error(__name__ + " [" + spider.name + "] [DROPPED] " + x + " is Empty")
+                raise DropItem("Content Missing from Item")
+
         # Format Date
         item['newsDate'] = self.processDate(item['newsDate'], spider)
 
@@ -134,7 +143,7 @@ class DataFormatterPipeline(object):
             date_parsed = parser.parse(dateStr, ignoretz=False, fuzzy=True)
             return date_parsed.strftime(DbDateFormat)
         except ValueError as e:
-            logger.error(__name__+" [ITEM DROPPED] "+str(e))
+            logger.error(__name__ + " [" + spider.name + "] [DROPPED] Error Parsing Date: "+str(e))
             spider.custom_settings['url_stats']['dropped'] += 1
             raise DropItem("[ITEM DROPPED] "+str(e))
 
@@ -163,7 +172,8 @@ class DatabasePipeline(object):
             logger.info(__name__+" Finish Scraping "+str(item['link']))
             spider.custom_settings['url_stats']['stored'] += 1
         except Exception as e:
-            logger.error(__name__+" Unable to Add Item "+str(item)+" due to "+str(e))
+            logger.error(__name__ + " [" + spider.name + "] Database Insertion Failed  due to " + str(e))
+            spider.custom_settings['url_stats']['dropped'] += 1
             database.conn.rollback()
-
+        LogsManager(database).update_log(spider.custom_settings['log_id'], spider.custom_settings['url_stats'])
         return item
