@@ -23,6 +23,8 @@ class OneindiaSpider(scrapy.Spider):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
 
+    def closed(self, reason):
+        self.postgres.closeConnection(reason)
 
 
     def parse(self, response):
@@ -41,6 +43,7 @@ class OneindiaSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 109
+        self.urls_scraped += 1
         if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
