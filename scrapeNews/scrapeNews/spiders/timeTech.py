@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 
@@ -13,26 +12,17 @@ class TimetechSpider(scrapy.Spider):
         'site_url':'http://time.com/section/tech/'}
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
-        self.postgres = pipeline()
-        self.postgres.openConnection()
         super(TimetechSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://time.com/section/tech/?page='+ str(count+1))
 
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(TimetechSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-        return spider
-
-    def spider_closed(self, spider):
-        self.postgres.closeConnection()
+    def closed(self, reason):
+        self.postgres.closeConnection(reason)
 
 
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
-
 
 
     def parse(self, response):
@@ -69,6 +59,7 @@ class TimetechSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 103
+        self.urls_scraped += 1
         if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
@@ -122,18 +113,15 @@ class TimetechSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        try:
-            data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
-            if not data:
-                data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
-            if not data:
-                loggerError.error(response.url)
-                data = 'Error'
-        except Exception as Error:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+        if not data:
+            data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
+        if not data:
+            data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+        if not data:
+            loggerError.error(response.url)
             data = 'Error'
-        finally:
-            return data
+        return data
 
 
 # DEAD API's Link: 'http://time.com/wp-json/ti-api/v1/posts?time_section_slug=time-section-tech&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=30&page1'

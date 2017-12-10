@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
 
@@ -15,20 +14,12 @@ class TimenewsSpider(scrapy.Spider):
         'site_url':'http://time.com/section/world/'}
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
-        self.postgres = pipeline()
-        self.postgres.openConnection()
         super(TimenewsSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://time.com/section/world/?page='+ str(count+1))
 
-    @classmethod
-    def from_crawler(cls, crawler, *args, **kwargs):
-        spider = super(TimenewsSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-        return spider
-
-    def spider_closed(self, spider):
-        self.postgres.closeConnection()
+    def closed(self, reason):
+        self.postgres.closeConnection(reason)
 
 
     def start_requests(self):
@@ -71,6 +62,7 @@ class TimenewsSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 116
+        self.urls_scraped += 1
         if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             yield item
 
@@ -124,18 +116,14 @@ class TimenewsSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        try:
-            data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
-            if not data:
-                data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
-            if not data:
-                loggerError.error(response.url)
-                data = 'Error'
-        except Exception as Error:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+        if not data:
+            data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
+        if not data:
+            data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+        if not data:
+            loggerError.error(response.url)
             data = 'Error'
-        finally:
-            return data
-
+        return data
 
 # DEAD API's Link: 'http://time.com/wp-json/ti-api/v1/posts/?time_section_slug=time-section-newsfeed&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=20&recirc=1&page=2'

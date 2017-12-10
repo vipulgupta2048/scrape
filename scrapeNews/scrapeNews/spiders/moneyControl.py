@@ -18,16 +18,19 @@ class MoneycontrolSpider(scrapy.Spider):
         for count in range(1 , int(pages)+1):
             self.start_urls.append('http://www.moneycontrol.com/news/business/page-'+ str(count))
 
+    def closed(self, reason):
+        self.postgres.closeConnection(reason)
+
 
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url, self.parse)
 
 
-
     def parse(self, response):
         newsContainer = response.xpath("//ul[@id='cagetory']/li[@class='clearfix']")
         for newsBox in newsContainer:
+            self.urls_parsed += 1
             item = ScrapenewsItem()  # Scraper Items
             item['image'] = self.getPageImage(newsBox)
             item['title'] = self.getPageTitle(newsBox)
@@ -35,6 +38,7 @@ class MoneycontrolSpider(scrapy.Spider):
             item['newsDate'] = self.getPageDate(newsBox)
             item['link'] = self.getPageLink(newsBox)
             item['source'] = 108
+            self.urls_scraped += 1
             if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
                 yield item
 
