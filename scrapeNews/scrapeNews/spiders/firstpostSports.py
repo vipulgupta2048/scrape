@@ -18,6 +18,9 @@ class FirstpostsportsSpider(scrapy.Spider):
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.firstpost.com/category/sports/page/'+ str(count+1))
 
+    def closed(self, reason):
+        self.postgres.closeConnection(reason)
+
 
     def start_requests(self):
         for url in self.start_urls:
@@ -41,6 +44,7 @@ class FirstpostsportsSpider(scrapy.Spider):
             item['newsDate'] = self.getPageDate(response)
             item['link'] = response.url
             item['source'] = 112
+            self.urls_scraped += 1
             if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
                 yield item
 
