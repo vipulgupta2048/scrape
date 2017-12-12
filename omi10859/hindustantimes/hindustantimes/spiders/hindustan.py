@@ -25,8 +25,8 @@ class HindustanSpider(scrapy.Spider):
         images = response.xpath('//div[@class="thumbnail"]/img/@src').extract_first()
         body = response.xpath('//div[@itemprop="articlebody"]/p').extract_first()
         date = response.css('span.text-dt::text').extract_first()
-
-        item = {'title': headline, 'link': response.url, 'newsDate': date, 'content': body, 'image': images}
+        date = date.replace('Updated:',"")
+        item = {'title': headline, 'link': response.url, 'date': date, 'content': body, 'image': images}
         yield item
 
     
