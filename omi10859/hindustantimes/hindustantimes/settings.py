@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 
 # Scrapy settings for hindustantimes project
 #
@@ -14,6 +14,7 @@ BOT_NAME = 'hindustantimes'
 SPIDER_MODULES = ['hindustantimes.spiders']
 NEWSPIDER_MODULE = 'hindustantimes.spiders'
 
+LOG_LEVEL = 'ERROR'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'hindustantimes (+http://www.yourdomain.com)'
@@ -64,9 +65,11 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'hindustantimes.pipelines.HindustantimesPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'hindustantimes.pipelines.HindustantimesPipeline': 300,
+#    'hindustantimes.pipelines.Dropitem': 400,
+    'hindustantimes.pipelines.DatabasePipeline': 500,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
