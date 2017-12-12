@@ -5,7 +5,7 @@ $(document).ready(function(){
         search: true,
         pagination: true,
         sidePagination: 'server',
-        url: 'ajax/getitems',
+        url: 'ajax/get/logs',
         classes: 'table table-striped table-hover',
         showRefresh: true,
         showColumns: true,

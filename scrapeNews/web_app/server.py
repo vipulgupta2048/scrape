@@ -19,8 +19,8 @@ def browse():
 def logsView():
     return render_template('logs.html')
 
-@application.route('/ajax/getitems')
-def get_items():
+@application.route('/ajax/get/<resource>')
+def get_items(resource):
     items= {
         'total': 0,
         'rows': []
@@ -38,25 +38,38 @@ def get_items():
     sort = re.sub(r'[^\w]', '' , sort)
     search = re.sub(r'[^\w]', '', search)
     search = "%"+search.lower()+"%"
-    sql = "WITH res_main AS ( \
-               SELECT s.site_name, s.spider_name, l.* AS total FROM log_table \
-               AS l JOIN site_table AS s ON l.site = s.id \
-               WHERE LOWER(s.site_name) LIKE %s OR LOWER(l.shutdown_reason) LIKE %s OR l.id::text LIKE %s \
-           ), res_count AS ( \
-               SELECT COUNT(*) AS total FROM res_main \
-           ) \
-           SELECT * FROM res_main, res_count \
-               ORDER BY res_main." + sort + " " + order + " \
-               OFFSET %s FETCH NEXT %s ROWS ONLY;"
-#    logger.error(sql)
+
+    filter_str = "SELECT * FROM res_main, res_count \
+                   ORDER BY res_main." + sort + " " + order + " \
+                   OFFSET %s FETCH NEXT %s ROWS ONLY;"
+
+    queries = ()
+    if resource == "logs":
+       sql = "WITH res_main AS ( \
+                   SELECT s.site_name, s.spider_name, l.* FROM log_table \
+                   AS l JOIN site_table AS s ON l.site = s.id \
+                   WHERE LOWER(s.site_name) LIKE %s OR LOWER(l.shutdown_reason) LIKE %s OR l.id::text LIKE %s \
+               ), res_count AS ( \
+                   SELECT COUNT(*) AS total FROM res_main \
+               )";
+       queries = (search, search, search, offset, limit)
+    elif resource == "items":
+       sql = "WITH res_main AS ( \
+                  SELECT s.site_name, s.spider_name, i.* FROM item_table \
+                  AS i JOIN site_table AS s ON i.site_id = s.id \
+                  WHERE LOWER(s.site_name) LIKE %s OR LOWER(i.title) LIKE %s OR LOWER(i.link) LIKE %s OR LOWER(i.content) LIKE %s \
+                  OR i.id::text LIKE %s \
+              ), res_count AS ( \
+                   SELECT COUNT(*) AS total FROM res_main \
+              )"
+       queries = (search, search, search, search, search, offset, limit)
+    else:
+        return json.dumps(items)
+    sql += filter_str
+
     try:
         conn = DatabaseManager()
-#        if len(search)>0:
-#            search = "%"+search+"%"
-#            sql += " WHERE s.site_name LIKE %s OR l.shutdown_reason LIKE %s OR l.id LIKE %s"
-#            conn.cursor.execute(sql, (offset, limit, search, search, search))
-#        else:
-        conn.cursor.execute(sql, (search, search, search, offset, limit))
+        conn.cursor.execute(sql, queries)
 
         data = conn.cursor.fetchall()
         for row in data:
