@@ -14,7 +14,6 @@ class HindustanSpider(scrapy.Spider):
             link = somethings.xpath('.//div[contains(@class,"media-body")]/div[1]/a/@href').extract_first()
             yield scrapy.Request(url=link, callback=self.fun)
         self.count += 1
-        
         yield scrapy.Request(url=self.temp+str(self.count), callback=self.parse)
 
 

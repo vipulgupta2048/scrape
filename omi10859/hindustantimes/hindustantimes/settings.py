@@ -67,8 +67,9 @@ ROBOTSTXT_OBEY = True
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'hindustantimes.pipelines.HindustantimesPipeline': 300,
-#    'hindustantimes.pipelines.Dropitem': 400,
-    'hindustantimes.pipelines.DatabasePipeline': 500,
+    'hindustantimes.pipelines.Dropitem': 400,
+    'hindustantimes.pipelines.DuplicatePipelines': 500,
+    'hindustantimes.pipelines.DatabasePipeline': 600
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
