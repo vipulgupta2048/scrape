@@ -16,3 +16,4 @@ class HindustantimesItem(scrapy.Item):
     description = scrapy.Field()
     image = scrapy.Field()
     date = scrapy.Field()
+    
