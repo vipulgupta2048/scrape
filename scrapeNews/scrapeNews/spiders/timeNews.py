@@ -10,7 +10,7 @@ class TimenewsSpider(scrapy.Spider):
     allowed_domains = ['time.com']
     custom_settings = {
         'site_id':116,
-        'site_name':'time(world)',
+        'site_name':'timeNews',
         'site_url':'http://time.com/section/world/'}
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
@@ -24,8 +24,11 @@ class TimenewsSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+            yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
 
+    def errorRequestHandler(self, failure):
+        self.urls_parsed -= 1
+        loggerError.error('Non-200 response at ' + str(failure.request.url))
 
 
     def parse(self, response):
@@ -42,7 +45,7 @@ class TimenewsSpider(scrapy.Spider):
                 newsContainer = newsBox.xpath("//div[contains(@class,'_29M-6C9w')]//div[contains(@class,'_2cCPyP5f')]//a[@class='_2S9ChopF']/@href")
                 for link in newsContainer:
                     if not self.postgres.checkUrlExists(link):
-                        yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                        yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
             else:
                 loggerError.error(response.url)
 
@@ -51,7 +54,7 @@ class TimenewsSpider(scrapy.Spider):
         for newsBox in newsContainer:
             link = 'http://www.time.com' + newsBox.xpath('a/@href').extract_first()
             if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
 
 
     def parse_article(self, response):
@@ -62,8 +65,8 @@ class TimenewsSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 116
-        self.urls_scraped += 1
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+            self.urls_scraped += 1
             yield item
 
 
@@ -121,6 +124,8 @@ class TimenewsSpider(scrapy.Spider):
             data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
         if not data:
             data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+        if not data:
+            data =  response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract_first()
         if not data:
             loggerError.error(response.url)
             data = 'Error'

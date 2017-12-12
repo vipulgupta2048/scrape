@@ -24,7 +24,11 @@ class FirstpostsportsSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url, self.parse)
+            yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
+
+    def errorRequestHandler(self, failure):
+        self.urls_parsed -= 1
+        loggerError.error('Non-200 response at ' + str(failure.request.url))
 
 
     def parse(self, response):
@@ -32,7 +36,7 @@ class FirstpostsportsSpider(scrapy.Spider):
         for newsBox in newsContainer:
             link = newsBox.xpath('a/@href').extract_first()
             if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article)
+                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
 
 
     def parse_article(self, response):
@@ -44,8 +48,8 @@ class FirstpostsportsSpider(scrapy.Spider):
             item['newsDate'] = self.getPageDate(response)
             item['link'] = response.url
             item['source'] = 112
-            self.urls_scraped += 1
-            if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+            if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+                self.urls_scraped += 1
                 yield item
 
 

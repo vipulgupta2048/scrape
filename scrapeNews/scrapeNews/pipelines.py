@@ -22,7 +22,6 @@ os.environ['HOST_NAME'] = envConfig.HOST_NAME
 
 # Calling logging module instance
 loggerError = logging.getLogger("scrapeNewsError")
-loggerInfo = logging.getLogger("scrapeNewsInfo")
 
 def createDatabase():
     # This function is creating the database, it is different that others because it uses a
@@ -85,7 +84,7 @@ class postgresSQL(object):
             self.cursor = self.connection.cursor()
             self.connection.set_session(autocommit=True)
             commands = [
-                "CREATE TABLE IF NOT EXISTS "+os.environ['SITE_TABLE']+" (id SMALLINT PRIMARY KEY, site_name VARCHAR NOT NULL, site_url VARCHAR NOT NULL)",
+                "CREATE TABLE IF NOT EXISTS "+os.environ['SITE_TABLE']+" (id SMALLINT PRIMARY KEY, site_name VARCHAR NOT NULL, site_url VARCHAR NOT NULL, status_check TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW())",
                 "CREATE TABLE IF NOT EXISTS "+os.environ['NEWS_TABLE']+" (id SERIAL PRIMARY KEY, title VARCHAR NOT NULL, content VARCHAR NOT NULL, link VARCHAR NOT NULL UNIQUE, image VARCHAR NOT NULL, newsDate TIMESTAMP WITHOUT TIME ZONE NOT NULL, datescraped TIMESTAMP WITHOUT TIME ZONE, site_id SMALLINT NOT NULL REFERENCES site_table (id) ON DELETE CASCADE)",
                 "CREATE TABLE IF NOT EXISTS "+os.environ['LOG_TABLE']+" (id SERIAL PRIMARY KEY, spider_id SMALLINT REFERENCES site_table (id) ON DELETE CASCADE, process_id SMALLINT NOT NULL, start_time TIMESTAMP WITHOUT TIME ZONE, end_time TIMESTAMP WITHOUT TIME ZONE, urls_parsed SMALLINT, urls_scraped SMALLINT, urls_dropped SMALLINT, urls_stored SMALLINT, close_reason VARCHAR)"
             ]
@@ -130,7 +129,7 @@ class postgresSQL(object):
             self.cursor.close()
             self.connection.close()
             if self.spider.urls_stored > 0:
-                print (str(self.spider.urls_stored) + " record(s) were added by " + self.spider.name + " at " + str(parser.datetime.datetime.now()))
+                print (str(self.spider.urls_stored) + " record(s) were added by " + self.spider.name + " at " + parser.datetime.datetime.strftime(parser.datetime.datetime.now(),'%I:%M:%S'))
         except Exception as Error:
             loggerError.error(Error)
 
@@ -139,7 +138,7 @@ class postgresSQL(object):
         # Insert item into NEWS_TABLE after all the processing.
         try:
             if (self.connection.status != 1):
-                self.openConnection()
+                self.openConnection(self.spider)
             postgresQuery = "INSERT INTO " + os.environ['NEWS_TABLE'] + " (title, content, image, link, newsDate, site_id, datescraped) VALUES (%s, %s, %s, %s, %s, %s, NOW())"
             processedDate = str(parser.parse(item.get('newsDate'), ignoretz=False))
             self.cursor.execute(postgresQuery,
@@ -153,7 +152,6 @@ class postgresSQL(object):
         except psycopg2.IntegrityError as Error:
             # If the link already exists, this exception will be invoked
             if (Error.pgcode == '23505'):
-                self.spider.urls_dropped +=1
                 pass
             else:
                 loggerError.error(str(Error) + " occured at " + str(item.get('link')))
@@ -169,7 +167,7 @@ class postgresSQL(object):
         postgresQuery = "SELECT link from " + os.environ['NEWS_TABLE'] + " where link= %s"
         try:
             if (self.connection.status != 1):
-                self.openConnection()
+                self.openConnection(self.spider)
             self.cursor.execute(postgresQuery, (link,))
             if self.cursor.fetchall():
                 self.spider.urls_dropped += 1

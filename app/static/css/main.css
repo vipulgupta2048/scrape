@@ -6,3 +6,13 @@
     width: 80%;
     margin-top: 4vh;
 }
+.red{
+    font-size: 18px;
+    font-weight: 600;
+    color: red;
+}
+.green{
+    font-size: 16px;
+    font-weight: 600;
+    color: green;
+}
