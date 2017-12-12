@@ -25,8 +25,11 @@ class OneindiahindiSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url, self.parse)
+            yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
 
+    def errorRequestHandler(self, failure):
+        self.urls_parsed -= 1
+        loggerError.error('Non-200 response at ' + str(failure.request.url))
 
 
     def parse(self, response):
@@ -34,7 +37,7 @@ class OneindiahindiSpider(scrapy.Spider):
         for newsBox in newsContainer:
             link = 'https://hindi.oneindia.com/news/india/' + newsBox.xpath('div/h2/a/@href').extract_first()
             if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article)
+                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
 
 
     def parse_article(self, response):
@@ -45,8 +48,8 @@ class OneindiahindiSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 110
-        self.urls_scraped += 1
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+            self.urls_scraped += 1
             yield item
 
 
@@ -66,12 +69,16 @@ class OneindiahindiSpider(scrapy.Spider):
 
 
     def getPageImage(self, response):
-        data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
-        if (data == 'https://hindi.oneindia.com'):
-            data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
-        if (data == 'https://hindi.oneindia.com'):
-            loggerError.error(response.url)
-            data = 'Error'
+        try:
+            data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
+        except Exception as Error:
+            try:
+                data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
+            except Exception as Error:
+                data = response.xpath("//link[@rel='image_src']/@href").extract_first()
+                if not data:
+                    loggerError.error(str(Error) +' occured at: '+ response.url)
+                    data = 'Error'
         return data
 
     def getPageDate(self, response):

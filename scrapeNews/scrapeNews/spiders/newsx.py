@@ -2,6 +2,7 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
+from time import sleep
 
 
 class NewsxSpider(scrapy.Spider):
@@ -25,7 +26,12 @@ class NewsxSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url, self.parse)
+            yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
+            sleep(1)
+
+    def errorRequestHandler(self, failure):
+        self.urls_parsed -= 1
+        loggerError.error('Non-200 response at ' + str(failure.request.url))
 
 
     def parse(self, response):
@@ -33,7 +39,8 @@ class NewsxSpider(scrapy.Spider):
         for newsBox in newsContainer:
             link = newsBox.xpath('div/a/@href').extract_first()
             if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article)
+                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
+                sleep(2)
 
 
     def parse_article(self, response):
@@ -47,16 +54,16 @@ class NewsxSpider(scrapy.Spider):
             item['newsDate'] = self.getPageDate(response)
             item['link'] = response.url
             item['source'] = 113
-            self.urls_scraped += 1
-            if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+            if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+                self.urls_scraped += 1
                 yield item
 
 
     def getPageTitle(self, response):
         try:
             data = ' '.join(response.xpath("//h1[@itemprop='headline']/text()").extract_first().split())
-        except AttributeError as Error:
-            loggerError.error(response.url)
+        except Exception as Error:
+            loggerError.error(str(Error) +" occured at: "+ response.url)
             data = 'Error'
         finally:
             return data
@@ -75,7 +82,7 @@ class NewsxSpider(scrapy.Spider):
             # split & rsplit Used to Spit Data in Correct format!
             data = (response.xpath("//head/meta[@itemprop='datePublished']/@content").extract_first()).rsplit('+',1)[0]
         except Exception as Error:
-            loggerError.error(Error, response.url)
+            loggerError.error(str(Error) +" occured at: "+ response.url)
             data = 'Error'
         finally:
             return data

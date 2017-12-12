@@ -39,14 +39,12 @@ class NdtvSpider(scrapy.Spider):
         item = ScrapenewsItem()  # Scraper Items
         for news in response.css('div.new_storylising>ul>li'):
                 if news.css('div.nstory_header>a::text'):
-                    self.urls_parsed += 1
                     item['image'] = news.css('div.new_storylising_img>a>img::attr(src)').extract_first()
                     item['title'] = news.css('div.nstory_header>a::text').extract_first().strip()
                     item['content'] = news.css('div.nstory_intro::text').extract_first()
                     item['link'] = news.css('div.nstory_header>a::attr(href)').extract_first()
                     item['newsDate'] = self.parse_date(item['link'])
                     item['source'] = 104
-                    self.urls_scraped += 1
                     yield item
                 else:
                     logging.debug('Skipping a News Item, most probably an Advertisment')

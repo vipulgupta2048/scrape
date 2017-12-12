@@ -75,7 +75,6 @@ class News18Spider(scrapy.Spider):
             next_page = response.xpath('//div[contains(@class, "pagination")]/ul/li[contains(@class,"next")]/a/@href').extract_first();
             if next_page is not None:
                 logger.debug(__name__+" Moving to Next Page")
-                self.urls_parsed += 1
                 yield scrapy.Request(url = response.urljoin(next_page))
 
     def parse_news(self, response):
@@ -104,5 +103,4 @@ class News18Spider(scrapy.Spider):
             return
         news_date = parser.parse(news_date, ignoretz=False)
         item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date, 'source': self.custom_settings['site_id']})
-        self.urls_scraped += 1
         yield item

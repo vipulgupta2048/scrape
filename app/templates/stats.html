@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='css/main.css')}}">
         <link rel='stylesheet' href="{{ url_for('static',filename='css/bootstrap.min.css')}}">
         <link rel='stylesheet' href="{{ url_for('static',filename='css/bootstrap-theme.min.css')}}">
+        <script src="{{ url_for('static',filename='js/function.js') }}"></script>
     </head>
     <body>
         <div class="absolute-center">
@@ -17,6 +18,8 @@
                 <th style='text-align: center'>Spider Name</th>
                 <th style='text-align: center'>Records</th>
                 <th style='text-align: center'>Site link</th>
+                <th style='text-align: center'>Status</th>
+                <th style='text-align: center'>Reset</th>
               </tr>
             </thead>
             <tbody>
@@ -26,6 +29,12 @@
                     <td> {{ stat[1] }} </td>
                     <td align="center"> {{ stat[2] }} </td>
                     <td><a target="_blank" href='{{ stat[3] }}'>{{ stat[3] }}</a></td>
+                    {% if stat[4] %}
+                    <td class='red' align="center"> Check </td>
+                    {% else %}
+                    <td class='green' align="center"> Ok </td>
+                    {% endif %}
+                    <td align="center"><button title="Click to set to 'Ok' and check for future bugs!" alt="Click to set to 'Ok' and check for future bugs!" type="button" class="btn btn-danger" onclick="sendResetRequest('{{ stat[0] }}')">RESET</button></td>
                 </tr>
                 {% endfor %}
             </tbody>

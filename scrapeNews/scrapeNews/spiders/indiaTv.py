@@ -10,7 +10,7 @@ class IndiatvSpider(scrapy.Spider):
     custom_settings = {
         'site_id':102,
         'site_name':'India TV',
-        'site_url':'http://www.indiatvnews.com/business/tech/'}
+        'site_url':'http://www.indiatvnews.com/india/'}
 
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
@@ -23,15 +23,18 @@ class IndiatvSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url, self.parse)
+            yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
 
+    def errorRequestHandler(self, failure):
+        self.urls_parsed -= 1
+        loggerError.error('Non-200 response at ' + str(failure.request.url))
 
     def parse(self, response):
         newsContainer = response.xpath("//ul[@class='newsListfull']/li")
         for newsBox in newsContainer:
             link = newsBox.xpath('a/@href').extract_first()
             if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article)
+                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
 
 
     def parse_article(self, response):
@@ -42,8 +45,8 @@ class IndiatvSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 102
-        self.urls_scraped += 1
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+            self.urls_scraped += 1
             yield item
 
 
