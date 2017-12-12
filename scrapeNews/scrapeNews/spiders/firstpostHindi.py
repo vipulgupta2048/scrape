@@ -14,14 +14,11 @@ class FirstposthindiSpider(scrapy.Spider):
 
 
     def __init__(self, offset=0, pages=3, *args, **kwargs):
-        self.i=0
-        self.j=0
         super(FirstposthindiSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count+1))
 
     def closed(self, reason):
-        print ('Thrown: ', self.i, 'Catched: ', self.j)
         self.postgres.closeConnection(reason)
 
     def start_requests(self):

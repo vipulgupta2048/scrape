@@ -29,7 +29,6 @@ class TimetechSpider(scrapy.Spider):
         self.urls_parsed -= 1
         loggerError.error('Non-200 response at ' + str(failure.request.url))
 
-
     def parse(self, response):
 
         # For the large newsBox in top of all the pages. (In Normal Pages) or sends all request for all the articles in API page or sends the request for the special page.
