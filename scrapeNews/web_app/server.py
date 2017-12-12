@@ -19,19 +19,20 @@ def browse():
 def logsView():
     return render_template('logs.html')
 
+@application.route('/jobs')
+def jobsView():
+    return render_template('jobs.html')
+
 @application.route('/ajax/get/<resource>')
 def get_items(resource):
-    items= {
-        'total': 0,
-        'rows': []
-    }
+
     sort = request.args.get("sort", default="id")
     order = request.args.get("order", default = "DESC")
     offset = request.args.get("offset", default = 1, type = int )
     limit = request.args.get("limit", default = 10, type = int)
     search = request.args.get("search", default="")
 
-    if order != 'desc' or order != 'asc':
+    if order != 'desc' and order != 'asc':
         order = 'DESC'
     order = order.upper()
 
@@ -39,11 +40,6 @@ def get_items(resource):
     search = re.sub(r'[^\w]', '', search)
     search = "%"+search.lower()+"%"
 
-    filter_str = "SELECT * FROM res_main, res_count \
-                   ORDER BY res_main." + sort + " " + order + " \
-                   OFFSET %s FETCH NEXT %s ROWS ONLY;"
-
-    queries = ()
     if resource == "logs":
        sql = "WITH res_main AS ( \
                    SELECT s.site_name, s.spider_name, l.* FROM log_table \
@@ -53,6 +49,9 @@ def get_items(resource):
                    SELECT COUNT(*) AS total FROM res_main \
                )";
        queries = (search, search, search, offset, limit)
+
+       return get_logs_or_items(sql, sort, order, queries)
+
     elif resource == "items":
        sql = "WITH res_main AS ( \
                   SELECT s.site_name, s.spider_name, i.* FROM item_table \
@@ -63,8 +62,26 @@ def get_items(resource):
                    SELECT COUNT(*) AS total FROM res_main \
               )"
        queries = (search, search, search, search, search, offset, limit)
+
+       return get_logs_or_items(sql, sort, order, queries)
+
+    elif resource == "jobs":
+        return get_jobs()
+
     else:
-        return json.dumps(items)
+        return json.dumps({"status": "Invalid Resource!"})
+
+def get_logs_or_items(sql, sort, order, queries):
+
+    items = {
+        'total': 0,
+        'rows': []
+    }
+
+    filter_str = "SELECT * FROM res_main, res_count \
+                   ORDER BY res_main." + sort + " " + order + " \
+                   OFFSET %s FETCH NEXT %s ROWS ONLY;"
+
     sql += filter_str
 
     try:
@@ -88,6 +105,59 @@ def get_items(resource):
         logger.error(__name__ + " " +str(e))
     return json.dumps(items)
 
+def get_jobs():
+
+    api_url = "http://localhost:6800/listjobs.json?project=scrapeNews"
+
+    items = {
+        'total': 3,
+        'pending': {
+            'total': 0,
+            'rows' : []
+        },
+        'completed': {
+            'total': 0,
+            'rows' : []
+        },
+        'running': {
+            'total': 0,
+            'rows' : []
+        }
+    }
+
+    try:
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            jobs = response.json()
+
+            for job in jobs['pending']:
+                x = {}
+                x['job_id'] = job['id']
+                x['spider_name'] = job['spider']
+                items['pending']['rows'].append(x)
+                items['pending']['total'] += 1
+
+            for job in jobs['running']:
+                x = {}
+                x['job_id'] = job['id']
+                x['spider_name'] = job['spider']
+                x['start_time'] = job['start_time']
+                items['running']['rows'].append(x)
+                items['running']['total'] += 1
+
+            for job in jobs['finished']:
+                x = {}
+                x['job_id'] = job['id']
+                x['spider_name'] = job['spider']
+                x['start_time'] = job['start_time']
+                x['end_time'] = job['end_time']
+                items['completed']['rows'].append(x)
+                items['completed']['total'] += 1
+
+        return json.dumps(items)
+    except Exception as e:
+        logger.error(__name__ + " Unhandled: " + str(e))
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0')
