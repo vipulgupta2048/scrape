@@ -18,6 +18,9 @@ class AsianageSpider(scrapy.Spider):
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.asianage.com/newsmakers?pg='+ str(count+1))
 
+    def closed(self, reason):
+        self.postgres.closeConnection(reason)
+
 
     def start_requests(self):
         for url in self.start_urls:
@@ -27,6 +30,7 @@ class AsianageSpider(scrapy.Spider):
     def parse(self, response):
         newsContainer = response.xpath("//div[contains(@class,'india-news')]/div[@class='singlesunday']")
         for newsBox in newsContainer:
+            self.urls_parsed += 1
             item = ScrapenewsItem()  # Scraper Items
             item['image'] = self.getPageImage(newsBox)
             item['title'] = self.getPageTitle(newsBox)
@@ -34,6 +38,7 @@ class AsianageSpider(scrapy.Spider):
             item['newsDate'] = self.getPageDate(newsBox)
             item['link'] = self.getPageLink(newsBox)
             item['source'] = 115
+            self.urls_scraped += 1
             if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
                 yield item
 
@@ -53,7 +58,7 @@ class AsianageSpider(scrapy.Spider):
 
     def getPageLink(self, newsBox):
         data = 'http://www.asianage.com/newsmakers' + newsBox.xpath('div/a/@href').extract_first()
-        if (data is None):
+        if (data == 'http://www.asianage.com/newsmakers'):
             loggerError.error(newsBox)
             data = 'Error'
         return data
