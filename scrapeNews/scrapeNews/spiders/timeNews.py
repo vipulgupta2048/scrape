@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
-#from scrapeNews.pipelines import InnerSpiderPipeline as pipeline
 from scrapeNews.items import ScrapenewsItem
-from scrapeNews.pipelines import loggerError
+from scrapeNews.settings import logger
 from scrapeNews.db import DatabaseManager,LogsManager
 
 class TimenewsSpider(scrapy.Spider):
@@ -19,27 +18,9 @@ class TimenewsSpider(scrapy.Spider):
     }
 
     start_url = "http://time.com/section/world/?page=1"
-    #def __init__(self, offset=0, pages=4, *args, **kwargs):
-        #self.postgres = pipeline()
-        #self.postgres.openConnection()
-    #    super(TimenewsSpider, self).__init__(*args, **kwargs)
-    #    for count in range(int(offset), int(offset) + int(pages)):
-    #        self.start_urls.append('http://time.com/section/world/?page='+ str(count+1))
-
-    #@classmethod
-    #def from_crawler(cls, crawler, *args, **kwargs):
-    #    spider = super(TimenewsSpider, cls).from_crawler(crawler, *args, **kwargs)
-    #    crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-    #    return spider
-
-    #def spider_closed(self, spider):
-        #self.postgres.closeConnection()
-    #    return True
 
     def start_requests(self):
         yield scrapy.Request(self.start_url, self.parse)
-    #    for url in self.start_urls:
-    #        yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
 
     def parse(self, response):
         try:
@@ -103,7 +84,7 @@ class TimenewsSpider(scrapy.Spider):
         if (data is None):
             data = response.xpath("//span[@class='xxx_oneoff_special_story_v3_headline']/text()").extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            logger.error(__name__ + " Unable to Extract Title: " + response.url)
             data = 'Error'
         return data
 
@@ -111,7 +92,7 @@ class TimenewsSpider(scrapy.Spider):
     def getPageImage(self, response):
         data = response.xpath("//meta[@property='og:image']/@content").extract_first()
         if (data is None):
-            loggerError.error(response.url)
+            logger.error(__name__ + " Unable to Extract Title: " + response.url)
             data = 'Error'
         return data
 
@@ -133,30 +114,28 @@ class TimenewsSpider(scrapy.Spider):
             if (scriptData is not None):
                 data = (scriptData.split('"publish_date":"',1)[1]).split("+",1)[0]
             if (data is None):
-                loggerError.error(response.url)
+                logger.error(__name__ + " Unable to extract Date: " + response.url)
                 data = 'Error'
         except Exception as Error:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+            logger.error(__name__ + " Unable to Extract Date: " + response.url + " : " + str(Error))
             data = 'Error'
         finally:
             return data
 
 
     def getPageContent(self, response):
-        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
-        if not data:
-            data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
-        if not data:
-            data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
-        if not data:
-            data =  response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract_first()
-        if not data:
-            loggerError.error(response.url)
+        try:
+            data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+            if not data:
+                data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
+            if not data:
+                logger.error(__name__ + " Unable to extract Content: " + response.url)
+                data = 'Error'
+        except Exception as Error:
+            logger.error(__name__ + " Unable to extract Content: " + response.url + " : " + str(Error))
             data = 'Error'
-        finally:
-            return data
-    
-    def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+        return data
 
-# DEAD API's Link: 'http://time.com/wp-json/ti-api/v1/posts/?time_section_slug=time-section-newsfeed&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=20&recirc=1&page=2'
+    def closed(self, reason):
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to end log for spider " + self.name + " with stats " + str(self.custom_settings['url_stats']))

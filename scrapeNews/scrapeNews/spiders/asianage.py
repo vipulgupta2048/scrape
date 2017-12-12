@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-from scrapeNews.pipelines import loggerError
+from scrapeNews.settings import logger
 from scrapeNews.db import LogsManager, DatabaseManager
 
 class AsianageSpider(scrapy.Spider):
@@ -18,20 +18,9 @@ class AsianageSpider(scrapy.Spider):
     allowed_domains = ['asianage.com']
     start_url = 'http://www.asianage.com/newsmakers?pg='
 
-    #def __init__(self, offset=0, pages=3, *args, **kwargs):
-    #    super(AsianageSpider, self).__init__(*args, **kwargs)
-    #    for count in range(int(offset), int(offset) + int(pages)):
-    #        self.start_urls.append('http://www.asianage.com/newsmakers?pg='+ str(count+1))
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
 
     def start_requests(self):
         yield scrapy.Request(self.start_url+str(1), self.parse)
-    #    for url in self.start_urls:
-    #        self.custom_settings['url_stats']['parsed'] += 1
-    #        yield scrapy.Request(url, self.parse)
 
 
     def parse(self, response):
@@ -45,7 +34,7 @@ class AsianageSpider(scrapy.Spider):
                 item['content'] = self.getPageContent(newsBox)
                 item['newsDate'] = self.getPageDate(newsBox)
                 item['link'] = self.getPageLink(newsBox)
-                #item['source'] = 115
+
                 if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
                     self.custom_settings['url_stats']['scraped'] += 1
                     yield item
@@ -62,37 +51,38 @@ class AsianageSpider(scrapy.Spider):
     def getPageContent(self, newsBox):
         data = newsBox.xpath('div/p[@class="These"]/text()').extract_first()
         if (data is None):
-            loggerError.error(newsBox.extract())
+            logger.error(__name__ + " Unable to extract Content " + str(newsBox.extract_first()))
             data = 'Error'
         return data
 
     def getPageTitle(self, newsBox):
         data = newsBox.xpath('div/h2/a/text()').extract_first()
         if (data is None):
-            loggerError.error(newsBox.extract())
+            logge.error(__name__ + " Unable to extract Title: " + str(newsBox.extract_first()))
             data = 'Error'
         return data
 
     def getPageLink(self, newsBox):
         data = 'http://www.asianage.com/newsmakers' + newsBox.xpath('div/a/@href').extract_first()
-        if (data == 'http://www.asianage.com/newsmakers'):
-            loggerError.error(newsBox.extract())
+        if (data is None):
+            logger.error(__name__ + " Unable to extract Link: " + str(newsBox.extract_first()))
             data = 'Error'
         return data
 
     def getPageImage(self, newsBox):
         data = newsBox.xpath('div/a/img/@data-src').extract_first()
         if (data is None):
-            loggerError.error(newsBox.extract())
+            logger.error(__name__ + " Unable to extract URL: " + str(newsBox.extract_first()))
             data = 'Error'
         return data
 
     def getPageDate(self, newsBox):
         data = newsBox.xpath('div/p[@class="newDate"]/text()').extract_first()
         if (data is None):
-            loggerError.error(newsBox.extract())
+            logger.error(__name__ + " Unable to extract Date: " + str(newsBox.extract_first()))
             data = 'Error'
         return data
 
     def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to End Log for Spider " + self.name + " with stats: " + str(self.custom_settings['url_stats']))

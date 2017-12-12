@@ -9,7 +9,7 @@ import os
 api_url = "http://localhost:6800/"
 
 logger = logging.getLogger("news18Scheduler")
-handler = logging.FileHandler('news18Scheduler.log')
+handler = logging.FileHandler('logs/news18Scheduler.log')
 formatter = logging.Formatter(
         '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
 handler.setFormatter(formatter)

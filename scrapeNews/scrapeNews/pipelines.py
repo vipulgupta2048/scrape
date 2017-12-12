@@ -4,18 +4,12 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import psycopg2
-import os
 import re
-import logging
-from scrapeNews.items import ScrapenewsItem
 from dateutil import parser
-from .settings import logger, DbDateFormat
+from scrapeNews.settings import logger, DbDateFormat
 from scrapy.exceptions import DropItem, CloseSpider
-from .db import DatabaseManager, LogsManager, ConnectionManager
-#Calling logging module instance
-loggerError = logging.getLogger("scrapeNewsError")
-loggerInfo = logging.getLogger("scrapeNewsInfo")
+from scrapeNews.db import DatabaseManager, LogsManager, ConnectionManager
+import requests
 
 class ScrapenewsPipeline(object):
     """
@@ -30,7 +24,8 @@ class ScrapenewsPipeline(object):
             raise CloseSpider("Unable to Establish a Database Connection!")
         site_id = self.checkSite(spider)
         spider.custom_settings['site_id'] = site_id
-        spider.custom_settings['log_id'] = LogsManager().start_log(site_id)
+        job_id = self.getJobId(spider.name)
+        spider.custom_settings['log_id'] = LogsManager().start_log(site_id, job_id)
 
     def checkSite(self, spider):
         """ Check if website exists in database and fetch site id, else create new """
@@ -40,18 +35,19 @@ class ScrapenewsPipeline(object):
         database = spider.dbconn
 
         #Fetch Current Spider Details
-        spider_name = spider.custom_settings['site_name']
+        spider_name = spider.name
+        site_name = spider.custom_settings['site_name']
         spider_url = spider.custom_settings['site_url']
 
         #Try to get SITE_ID from Database
-        site_id = database.getSiteId(spider_name)
+        site_id = database.getSiteId(site_name)
 
         if site_id == False:
             # SITE_ID == False, Add Site to Database
             try:
-                logger.debug(__name__+" Site "+spider_name+" was Not Found! Creating Now!")
+                logger.debug(__name__+" Site "+site_name+" was Not Found! Creating Now!")
                 if database.connect() != None:
-                    database.cursor.execute(database.insert_site_str, (spider_name, spider_url))
+                    database.cursor.execute(database.insert_site_str, (site_name, spider_url, spider_name))
                     database.conn.commit()
                     site_id = database.cursor.fetchone()['id']
                     #Save SITE_ID to Spider
@@ -64,7 +60,7 @@ class ScrapenewsPipeline(object):
                 database.conn.rollback()
         else:
             # SITE Exists
-            logger.info("Site "+spider_name+" exists in database with id "+ str(site_id))
+            logger.info("Site "+site_name+" exists in database with id "+ str(site_id))
             # Save SITE_ID to Spider
             spider.custom_settings['site_id'] = site_id
 
@@ -74,6 +70,20 @@ class ScrapenewsPipeline(object):
 
         return site_id
 
+    def getJobId(self, spiderName):
+        api_url = "http://127.0.0.1:6800/"
+        payload = {'project':'scrapeNews'}
+        try:
+            response = requests.get(api_url + "listjobs.json", params=payload)
+            if response.status_code == 200:
+                jobs = response.json()
+                for job in jobs['running']:
+                    if job['spider'] == spiderName:
+                        return job['id']
+            return None
+        except Exception as e:
+            logger.error(__name__ + " Unhandled: " + str(e))
+        return None
 
     def close_spider(self, spider):
         #loggerInfo.info(str(self.recordedArticles) + " record(s) were added by " + spider.name + " at")
@@ -167,7 +177,7 @@ class DatabasePipeline(object):
         logger.debug(__name__+" Received Item for SITE_ID: "+str(site_id)) 
 
         try:
-            cur.execute(database.insert_item_str, (item['title'], item['link'], item['content'], item['image'], item['newsDate'], site_id))
+            cur.execute(database.insert_item_str, (item['title'], item['link'], item['content'], item['image'], item['newsDate'], site_id, spider.custom_settings['log_id']))
             database.conn.commit()
             logger.info(__name__+" Finish Scraping "+str(item['link']))
             spider.custom_settings['url_stats']['stored'] += 1

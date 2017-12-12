@@ -15,7 +15,7 @@ BOT_NAME = 'scrapeNews'
 SPIDER_MODULES = ['scrapeNews.spiders']
 NEWSPIDER_MODULE = 'scrapeNews.spiders'
 
-LOG_LEVEL = 'ERROR'  # to only display errors
+LOG_LEVEL = 'ERROR'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrapeNews (+http://www.yourdomain.com)'
 
@@ -34,7 +34,7 @@ ROBOTSTXT_OBEY = True
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -76,14 +76,14 @@ ITEM_PIPELINES = {
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
-# AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = True
 # The initial download delay
 # AUTOTHROTTLE_START_DELAY = 1.0
 # The maximum download delay to be set in case of high latencies
 # AUTOTHROTTLE_MAX_DELAY = 30
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.5
+AUTOTHROTTLE_TARGET_CONCURRENCY = 3
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
 
@@ -101,22 +101,11 @@ DbDateFormat = "%Y-%m-%d %H:%M:%S %z"
 
 # Logger Configuration (scrapeNews)
 logger = logging.getLogger("scrapeNews")
-handler = logging.FileHandler('scrapeNews.log')
+handler = logging.FileHandler('logs/scrapeNews.log')
 formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s [Line %(lineno)d]  %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.ERROR)
-
-#Logger Configuration (scrapeNewsError)
-loggerError = logging.getLogger("scrapeNewsError")
-formatterError = logging.Formatter('%(filename)s[%(lineno)d]: %(message)s')
-fileHandlerError = logging.FileHandler('scrapeNewsError.log')
-streamHandlerError = logging.StreamHandler()
-fileHandlerError.setFormatter(formatterError)
-streamHandlerError.setFormatter(formatterError)
-loggerError.addHandler(fileHandlerError)
-loggerError.addHandler(streamHandlerError)
-
 
 #DATABASE CONFIG
 

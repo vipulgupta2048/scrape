@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-from scrapeNews.pipelines import loggerError
+from scrapeNews.settings import logger
 from scrapeNews.db import DatabaseManager, LogsManager
 
 class IndianexpresstechSpider(scrapy.Spider):
 
     name = 'indianExpressTech'
     allowed_domains = ['indianexpress.com']
-    custom_settings = {
-        'site_id': 101,
-        'site_name': 'Indian Express',
-        'site_url': 'http://indianexpress.com/section/technology/'}
 
     custom_settings = {
         'site_name': "Indian Express",
@@ -25,32 +21,9 @@ class IndianexpresstechSpider(scrapy.Spider):
     start_url = base_url+"page/"
     page_count = 1
 
-    #def __init__(self, offset=0, pages=2, *args, **kwargs):
-        #self.postgres = pipeline()
-        #self.postgres.openConnection()
-    #    super(IndianexpresstechSpider, self).__init__(*args, **kwargs)
-    #    for count in range(int(offset), int(offset) + int(pages)):
-    #        self.start_urls.append('http://indianexpress.com/section/technology/page/'+ str(count+1))
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
 
     def start_requests(self):
         yield scrapy.Request(self.start_url+"1", self.parse)
-    #    for url in self.start_urls:
-    #        yield scrapy.Request(url, self.parse)
-
-
-    #@classmethod
-    #def from_crawler(cls, crawler, *args, **kwargs):
-    #    spider = super(IndianexpresstechSpider, cls).from_crawler(crawler, *args, **kwargs)
-    #    crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-    #    return spider
-
-    #def spider_closed(self, spider):
-        #self.postgres.closeConnection()
-    #    return True
 
     def parse(self, response):
         try:
@@ -76,7 +49,7 @@ class IndianexpresstechSpider(scrapy.Spider):
         item['content'] = self.getPageContent(response)
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
-        #item['source'] = 101
+
         if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
             self.custom_settings['url_stats']['scraped'] += 1
             yield item
@@ -98,7 +71,7 @@ class IndianexpresstechSpider(scrapy.Spider):
     def getPageTitle(self, response):
         data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
         if (data is None):
-            logger.error(__name__ + "Error Extracting Title " + response.url)
+            logger.error(__name__ + " Error Extracting Title " + response.url)
             data = 'Error'
         return data
 
@@ -133,8 +106,8 @@ class IndianexpresstechSpider(scrapy.Spider):
         except Exception as Error:
             logger.error(__name__+" Error Extracting Date: " + response.url + " : " + str(Error))
             data = 'Error'
-        finally:
-            return data
+        return data
 
     def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to end log for spider " + self.name + " with stats " + str(self.custom_settings['url_stats']))

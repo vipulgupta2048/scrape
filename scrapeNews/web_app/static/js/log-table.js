@@ -53,6 +53,16 @@ $(document).ready(function(){
            field: 'shutdown_reason',
            title: 'Status',
            sortable: true
+        },
+        {
+          field: 'job_id',
+          title: 'Job ID',
+          formatter: function(value, row, index, field){
+              if (value == "" || value == "None" || value == "NULL"){
+                  return "Missing JOB ID";
+              }
+              return '<a href="/logfiles/scrapeNews/' + row['spider_name'] + '/' + value + '.log" title="Click to View Log">' + value + '</a>';
+          }
         }]
     });
 

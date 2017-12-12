@@ -39,7 +39,7 @@ def get_items():
     search = re.sub(r'[^\w]', '', search)
     search = "%"+search.lower()+"%"
     sql = "WITH res_main AS ( \
-               SELECT s.site_name, l.* AS total FROM log_table \
+               SELECT s.site_name, s.spider_name, l.* AS total FROM log_table \
                AS l JOIN site_table AS s ON l.site = s.id \
                WHERE LOWER(s.site_name) LIKE %s OR LOWER(l.shutdown_reason) LIKE %s OR l.id::text LIKE %s \
            ), res_count AS ( \

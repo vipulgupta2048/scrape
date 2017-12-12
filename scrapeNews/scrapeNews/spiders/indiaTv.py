@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-from scrapeNews.pipelines import loggerError
+from scrapeNews.settings  import logger
 from scrapeNews.db import DatabaseManager, LogsManager
 
 class IndiatvSpider(scrapy.Spider):
 
     name = 'indiaTv'
-    custom_settings = {
-        'site_id':102,
-        'site_name':'India TV',
-        'site_url':'http://www.indiatvnews.com/india/'}
+    allowed_domains = ['www.indiatvnews.com']
 
     custom_settings = {
         'site_name': "India TV",
@@ -22,31 +19,9 @@ class IndiatvSpider(scrapy.Spider):
 
     start_url = 'http://www.indiatvnews.com/india/'
     page_count = 1
-    #def __init__(self, offset=0, pages=3, *args, **kwargs):
-        #self.postgres = pipeline()
-        #self.postgres.openConnection()
-    #    super(IndiatvSpider, self).__init__(*args, **kwargs)
-    #    for count in range(int(offset), int(offset) + int(pages)):
-    #        self.start_urls.append('http://www.indiatvnews.com/india/' + str(count + 1))
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
 
     def start_requests(self):
         yield scrapy.Request(self.start_url+"1", self.parse)
-    #    for url in self.start_urls:
-    #        yield scrapy.Request(url, self.parse)
-
-
-    #@classmethod
-    #def from_crawler(cls, crawler, *args, **kwargs):
-    #    spider = super(IndiatvSpider,cls).from_crawler(crawler,*args,**kwargs)
-    #    crawler.signals.connect(spider.spider_closed,scrapy.signals.spider_closed)
-    #    return spider
-
-   # def spider_closed(self, spider):
-        #self.postgres.closeConnection()
-   #     return True
 
     def parse(self, response):
         try:
@@ -118,4 +93,5 @@ class IndiatvSpider(scrapy.Spider):
             return data
 
     def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to end log for spider " + self.name + " with stats " + str(self.custom_settings['url_stats']))

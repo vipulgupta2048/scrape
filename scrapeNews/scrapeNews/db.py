@@ -18,11 +18,12 @@ class DatabaseManager(object):
     site_table = "CREATE TABLE IF NOT EXISTS "+site_table_name+"(\
                     id SERIAL PRIMARY KEY,\
                     site_name VARCHAR NOT NULL UNIQUE,\
-                    site_url VARCHAR NOT NULL \
+                    site_url VARCHAR NOT NULL,\
+                    spider_name VARCHAR NOT NULL UNIQUE \
                     );"
 
     insert_site_str = "INSERT INTO "+site_table_name+"\
-                        (site_name, site_url) VALUES (%s, %s) RETURNING id;"
+                        (site_name, site_url, spider_name) VALUES (%s, %s, %s) RETURNING id;"
 
     item_table = "CREATE TABLE IF NOT EXISTS "+item_table_name+"(\
                     id SERIAL PRIMARY KEY,\
@@ -33,24 +34,28 @@ class DatabaseManager(object):
                     newsDate timestamptz NOT NULL, \
                     datescraped timestamptz NOT NULL, \
                     site_id SMALLINT NOT NULL, \
-                    FOREIGN KEY(site_id) REFERENCES "+site_table_name+"(id)\
-                    ON DELETE CASCADE\
+                    log_id INT NOT NULL, \
+                    FOREIGN KEY(site_id) REFERENCES "+site_table_name+"(id) \
+                    ON DELETE CASCADE, \
+                    FOREIGN KEY(log_id) REFERENCES "+logs_table_name+"(id) \
+                    ON DELETE NO ACTION \
                     );"
 
     insert_item_str = "INSERT INTO "+item_table_name+"\
-                        (title, link, content, image, newsDate, datescraped,  site_id) \
-                        VALUES(%s, %s, %s, %s, %s, NOW(), %s) RETURNING id;"
+                        (title, link, content, image, newsDate, datescraped,  site_id, log_id) \
+                        VALUES(%s, %s, %s, %s, %s, NOW(), %s, %s) RETURNING id;"
 
     logs_table = "CREATE TABLE IF NOT EXISTS "+logs_table_name+"(\
                     id SERIAL PRIMARY KEY, \
                     site INT NOT NULL, \
-                    start_time timestamptz NOT NULL, \
+                    start_time timestamptz NOT NULL DEFAULT NOW(), \
                     end_time timestamptz, \
-                    urls_parsed INT, \
-                    urls_scraped INT, \
-                    urls_dropped INT, \
-                    urls_stored INT, \
-                    shutdown_reason VARCHAR, \
+                    urls_parsed INT DEFAULT 0, \
+                    urls_scraped INT DEFAULT 0, \
+                    urls_dropped INT DEFAULT 0, \
+                    urls_stored INT DEFAULT 0, \
+                    shutdown_reason VARCHAR DEFAULT 0, \
+                    job_id VARCHAR DEFAULT 0, \
                     FOREIGN KEY(site) REFERENCES "+site_table_name+"(id) \
                     ON DELETE CASCADE \
                     );"
@@ -85,8 +90,8 @@ class DatabaseManager(object):
                 return False
             # Create Tables
             self.cursor.execute(self.site_table)
-            self.cursor.execute(self.item_table)
             self.cursor.execute(self.logs_table)
+            self.cursor.execute(self.item_table)
             #Commit
             self.conn.commit()
             return True
@@ -157,13 +162,15 @@ class LogsManager(object):
         else:
             self.dbase = connection
 
-    def start_log(self, site):
+    def start_log(self, site, job = None):
         try:
             if self.dbase.connect() == None:
                 return False
-            sql = "INSERT INTO "+self.dbase.logs_table_name+"(site, start_time) VALUES (%s, NOW()) RETURNING id"
+            if job == None:
+                job = ""
+            sql = "INSERT INTO "+self.dbase.logs_table_name+"(site, start_time, job_id) VALUES (%s, NOW(), %s) RETURNING id"
             cur = self.dbase.cursor
-            cur.execute(sql, (site,))
+            cur.execute(sql, (site,job))
             log_id = cur.fetchone()['id']
             return log_id
         except Exception as e:
