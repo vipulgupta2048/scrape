@@ -14,19 +14,20 @@ class HindustanSpider(scrapy.Spider):
             link = somethings.xpath('.//div[contains(@class,"media-body")]/div[1]/a/@href').extract_first()
             yield scrapy.Request(url=link, callback=self.fun)
         self.count += 1
-        print(self.count)
+        
         yield scrapy.Request(url=self.temp+str(self.count), callback=self.parse)
 
 
     def fun(self, response):
         text = response.text
-        yield{
-            'headline' : response.xpath('/html/body/div[1]/section/div[1]/div/div[1]/article/div[1]/h1').extract_first(),
-            'image' : response.css('div.thumbnail img::attr(src)').extract_first(),
-            'body' : response.xpath('//div[@itemprop="articlebody"]/p').extract_first(),
-            'date' : response.css('span.text-dt::text').extract_first(),
-        }
-        
+        text = response.text
+        headline = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
+        images = response.xpath('//div[@class="thumbnail"]/img/@src').extract_first()
+        body = response.xpath('//div[@itemprop="articlebody"]/p').extract_first()
+        date = response.css('span.text-dt::text').extract_first()
+
+        item = {'title': headline, 'link': response.url, 'newsDate': date, 'content': body, 'image': images}
+        yield item
 
     
 
