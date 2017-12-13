@@ -7,6 +7,7 @@
 import psycopg2 
 from scrapy.exceptions import DropItem
 from hindustantimes.database import Database
+from hindustantimes.settings import logger
 
 class HindustantimesPipeline(object):
     def process_item(self, item, spider):
@@ -17,10 +18,10 @@ class Dropitem(object):
     def process_item(self, item, spider):
         variable = item['link']
         if variable:
-            print("not dropping")
+            logger.info(__name__+"Adding to Database")
             return item 
         else:
-            print("Dropped")
+            looger.error(__name__+"Data is emply")
             raise DropItem("no data %s" % item['link'])
 
 class DuplicatePipelines(object):
@@ -28,7 +29,7 @@ class DuplicatePipelines(object):
     def process_item(self, item, spider):
         try:
             if Database().url(item['link']):
-                print("data alredy in table")
+                logger.info(__name__+"[DROPPED]Alredy in Database ")   
                 raise DropItem("[DROPPED] URL "+item['url']+" Already Scraped")
             else:
                 return item
@@ -38,16 +39,16 @@ class DuplicatePipelines(object):
 class DatabasePipeline(object):
 
     def process_item(self, item, spider):
-        print("Pipeline connected")
         database = Database()
         cur = database.connect()
 
         try:
             cur.execute(database.table_item, (item['title'], item['link'], item['date'], item['content'], item['image']))
-            print("working")
+            logger.info("Data commited to database")
             database.conn.commit()
         
         except Exception as e:
-            print("data does not added"+ str(e))
+            logger.error(__name__+" Data does not added "+str(e))
             database.conn.rollback()
         return item 
+

@@ -1,4 +1,5 @@
 import psycopg2
+from hindustantimes.settings import logger
 
 class Database(object):
 
@@ -24,10 +25,10 @@ class Database(object):
             self.conn.autocommit = True
             self.cursor = self.conn.cursor()
             self.Create()
-            print("Connection Established")
+            logger.info(__name__+"Connectioned to Database")
             return self.cursor
         except Exception as e:
-            print("database connection error: "+str(e))
+            looger.critical(__name__+"Not able to Connect"+str(e))
         return None
 
     def Create(self):
@@ -36,7 +37,7 @@ class Database(object):
             self.conn.commit()
             return True 
         except Exception as e:
-            print(__name__ + " Unhandled: " + str(e))
+            logger.critical(__name__+" Not able to CREATE TABLE "+str(e))
             self.conn.rollback()
             return False
     
@@ -52,7 +53,7 @@ class Database(object):
             else:
                 return False
         except Exception as e:
-            print("not able to get url from table"+str(e))
+            logger.critical(__name__+"unable to fetch url from Database"+str(e))
             return False 
 
             
