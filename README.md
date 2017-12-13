@@ -78,17 +78,6 @@ forward-socks5t / 127.0.0.1:9050 .
 	- `createuser YOUR_ROLE_NAME/YOUR_USERNAME --interactive --pwprompt`
 
 - Setup Database:
-<<<<<<< f9c21c32e8e6d2704eb174904e02eb83d1b26a8f
-    - Create file a scrapeNews/envConfig.py; Inside it, Write:
-    ```
-    USERNAME = 'YOUR_ROLE_NAME/YOUR_USERNAME'
-    PASSWORD = 'YOUR_PASSWORD'
-    NEWS_TABLE = 'NEWS_TABLE_NAME'
-    SITE_TABLE = 'SITE_TABLE_NAME'
-    LOG_TABLE = 'LOG_TABLE_NAME'
-    DATABASE_NAME = 'DATABASE_NAME'
-    HOST_NAME = 'HOST_NAME'
-=======
     - Create file a ```add_env.sh```; Inside it, Write:
     ```bash
     #!/bin/bash
@@ -97,7 +86,6 @@ forward-socks5t / 127.0.0.1:9050 .
     export SCRAPER_DB_USER=YOUR_ROLE_NAME/YOUR_USERNAME
     export SCRAPER_DB_PASS=YOUR_PASSWORD
     export SCRAPER_DB_NAME=YOUR_DATABASE_NAME
->>>>>>> (add) Infinite Runs to Spiders, TOR | (fix) Bugs | (update) README
     ```
 
 ### Configuring your spiders
@@ -133,8 +121,7 @@ scrapy crawl SPIDER_NAME
 	3. timeTech
 	4. ndtv
 	5. inshorts
-<<<<<<< f9c21c32e8e6d2704eb174904e02eb83d1b26a8f
-    6. zee
+    6. zeeNews
     7. News18Spider
     8. moneyControl
     9. oneindia
@@ -142,53 +129,10 @@ scrapy crawl SPIDER_NAME
     11. firstpostHindi
     12. firstpostSports
     13. newsx
-    14. hindustan
+    14. hindustantimes
     15. asianage
     16. timeNews
     17. newsNation [In development]
-
-- Options:
-    1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages to scrape).
-	Applicable for:
-        1. indianExpressTech
-    	2. indiaTv  
-    	3. timeTech
-        4. moneyControl
-        5. oneindia
-        6. oneindiaHindi
-        7. firstpostHindi
-        8. firstpostSports
-        9. newsx
-        10. asianage
-		11. ndtv
-        12. timeNews
-
-    2. To set the number of pages to be scraped use  `-a offset = X` (X = Number of pages to skip).
-	Applicable for:
-        1. indianExpressTech
-    	2. indiaTv  
-    	3. timeTech
-        4. moneyControl
-        5. oneindia
-        6. oneindiaHindi
-        7. firstpostHindi
-        8. firstpostSports
-        9. newsx
-        10. asianage
-        11. timeNews
-=======
-        6. zeeNews
-        7. News18Spider
-        8. moneyControl
-        9. oneindia
-        10. oneindiaHindi
-        11. firstpostHindi
-        12. firstpostSports
-        13. newsx
-        14. hindustantimes
-        15. asianage
-        16. timeNews
-        17. newsNation [In development]
 
 ### Additional Utilities 
 
@@ -198,6 +142,5 @@ scrapy crawl SPIDER_NAME
     - Consists Methods for Managing Spider Run Stats
 - scrapeNews.settings.logger
     - Preconfigured Logger, import it and use like ```logger.error(__name__ + " Your_ERROR")```
->>>>>>> (add) Infinite Runs to Spiders, TOR | (fix) Bugs | (update) README
 
 Happy collaborating !!   
