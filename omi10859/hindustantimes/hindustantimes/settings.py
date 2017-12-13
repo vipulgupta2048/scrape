@@ -98,5 +98,6 @@ handler = logging .FileHandler('omi.log')
 formatter = logging.Formatter(
     '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
-logger.setLevel(logging.ERROR)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
 
