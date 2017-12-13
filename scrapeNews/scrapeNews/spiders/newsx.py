@@ -1,80 +1,81 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-from scrapeNews.pipelines import loggerError
-from time import sleep
-
+from scrapeNews.db import DatabaseManager, LogsManager
+from scrapeNews.settings import logger
 
 class NewsxSpider(scrapy.Spider):
 
     name = 'newsx'
     allowed_domains = ['newsx.com']
-    start_urls = ['http://newsx.com/']
+    start_url = 'http://newsx.com/latest-news/page/'
+    page_count = 1
     custom_settings = {
-        'site_id':113,
-        'site_name':'newsx',
-        'site_url':'http://www.newsx.com/latest-news/'}
-
-    def __init__(self, offset=0, pages=4, *args, **kwargs):
-        super(NewsxSpider, self).__init__(*args, **kwargs)
-        for count in range(int(offset), int(offset) + int(pages)):
-            self.start_urls.append('http://www.newsx.com/latest-news/page/'+ str(count+1))
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
+        'site_name': "newsx",
+        'site_url': "http://www.newsx.com/latest-news/",
+        'site_id': -1,
+        'log_id': -1,
+        'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+    }
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
-            sleep(1)
-
-    def errorRequestHandler(self, failure):
-        self.urls_parsed -= 1
-        loggerError.error('Non-200 response at ' + str(failure.request.url))
+         yield scrapy.Request(self.start_url + str(self.page_count) , self.parse)
 
 
     def parse(self, response):
-        newsContainer = response.xpath("//div[contains(@class,'cat-grid-gap')]/div[@class='well ft2']")
-        for newsBox in newsContainer:
-            link = newsBox.xpath('div/a/@href').extract_first()
-            if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
-                sleep(2)
-
+        if response.status == 200:
+            try:
+                newsContainer = response.xpath("//div[contains(@class,'cat-grid-gap')]/div[@class='well ft2']")
+                for newsBox in newsContainer:
+                    link = newsBox.xpath('div/a/@href').extract_first()
+                    if not DatabaseManager().urlExists(link):
+                        self.custom_settings['url_stats']['parsed'] += 1
+                        yield scrapy.Request(url=link, callback=self.parse_article)
+                    else:
+                        self.custom_settings['url_stats']['dropped'] += 1
+                self.page_count += 1
+                yield scrapy.Request(self.start_url + str(self.page_count), self.parse)
+            except Exception as e:
+                logger.error(__name__ + " Unhandled: "+str(e))
+        else:
+            logger.error(__name__ + " Non-200 Response Received " + response.status + " for url " +response.url)
+            return False
 
     def parse_article(self, response):
-        if (response.url == 'http://www.newsx.com'):
-            pass
+        item = ScrapenewsItem()  # Scraper Items
+        item['image'] = self.getPageImage(response)
+        item['title'] = self.getPageTitle(response)
+        item['content'] = self.getPageContent(response)
+        item['newsDate'] = self.getPageDate(response)
+        item['link'] = response.url
+
+        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+            self.custom_settings['url_stats']['scraped'] += 1
+            yield item
         else:
-            item = ScrapenewsItem()  # Scraper Items
-            item['image'] = self.getPageImage(response)
-            item['title'] = self.getPageTitle(response)
-            item['content'] = self.getPageContent(response)
-            item['newsDate'] = self.getPageDate(response)
-            item['link'] = response.url
-            item['source'] = 113
-            if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
-                self.urls_scraped += 1
-                yield item
+            self.custom_settings['url_stats']['dropped'] += 1
+            yield None
 
 
     def getPageTitle(self, response):
         try:
             data = ' '.join(response.xpath("//h1[@itemprop='headline']/text()").extract_first().split())
-        except Exception as Error:
-            loggerError.error(str(Error) +" occured at: "+ response.url)
+        except AttributeError as Error:
+            logger.error(__name__+ " Unable to Extract Title: " + response.url)
             data = 'Error'
-        finally:
-            return data
+        return data
 
     def getPageImage(self, response):
-        data = response.xpath("//head/link[@rel='image_src']/@href").extract_first()
-        if (data is None):
-            data = response.xpath("//div[@class='panel-body story']/div[@class='thumbnail video-thumbnail']/img/@src").extract_first()
-        if (data is None):
-            loggerError.error(response.url)
-            data = 'Error'
+        try:
+            data = response.xpath("//head/link[@rel='image_src']/@href").extract_first()
+            if (data is None):
+                data = response.xpath("//div[@class='panel-body story']/div[@class='thumbnail video-thumbnail']/img/@src").extract_first()
+            if (data is None):
+                logger.error(__name__ + " Unable to extract image: " + response.url)
+                data = 'Error'
+        except Exception as e:
+                logger.error(__name__ + " Unable to extract image: " + response.url + " :: " + str(e))
+                data = 'Error'
         return data
 
     def getPageDate(self, response):
@@ -82,16 +83,23 @@ class NewsxSpider(scrapy.Spider):
             # split & rsplit Used to Spit Data in Correct format!
             data = (response.xpath("//head/meta[@itemprop='datePublished']/@content").extract_first()).rsplit('+',1)[0]
         except Exception as Error:
-            loggerError.error(str(Error) +" occured at: "+ response.url)
-            data = 'Error'
-        finally:
-            return data
-
-    def getPageContent(self, response):
-        data = response.xpath("//div[@class='story-short-title']/h2/text()").extract_first()
-        if (data is None):
-            data = ' '.join(' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract()).split()[:40])
-        if not data:
-            loggerError.error(response.url)
+            logger.error(__name__ + " Unable to Extract Date: " + response.url + " : " + str(Error))
             data = 'Error'
         return data
+
+    def getPageContent(self, response):
+        try:
+            data = response.xpath("//div[@class='story-short-title']/h2/text()").extract_first()
+            if (data is None):
+                data = ' '.join(' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract()).split()[:40])
+                if not data:
+                    logger.error(__name__ + " Unable to Extract Content: " + response.url)
+                    data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " Unable to Extract Content: " + response.url + " :: " + str(e))
+            data = 'Error'
+        return data
+
+    def closed(self, reason):
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to End Log for spider " + self.name + " with stats " + str(self.custom_settings['url_stats']))

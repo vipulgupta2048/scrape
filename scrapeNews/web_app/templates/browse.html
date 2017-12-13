@@ -1,0 +1,33 @@
+{% extends '_base.html' %}
+
+{% block title %}Browse{% endblock %}
+
+{% block css %}
+<style>
+#browse_table_container{
+    font-size:0.8em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center m5 p10">Browse</h1>
+<div class="alert alert-success" role="alert">
+    No Bug Reports For Frontend Script
+</div>
+<div>
+    <a href="/logfiles/scrapeNews.log"><button type="button" class="btn btn-danger">View General Error Log</button></a>
+</div>
+<div class="container-fluid" id="browse_table_container">
+    <div id="browse_table">
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+<script src="{{ url_for('static', filename='js/browse-table.js') }}"></script>
+
+{% endblock %}
+
+

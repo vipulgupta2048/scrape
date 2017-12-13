@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve web_app
+After=network.target
+
+[Service]
+User=lucifer
+Group=www-data
+WorkingDirectory=/home/lucifer/Documents/scrapydServer/scrape/scrapeNews/web_app
+Environment="PATH=/home/lucifer/Documents/scrapydServer/deploy/venv/bin"
+ExecStart=/home/lucifer/Documents/scrapydServer/scrape/scrapeNews/web_app/start
+
+[Install]
+WantedBy=multi-user.target

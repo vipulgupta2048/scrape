@@ -1,0 +1,15 @@
+server {
+    listen 5009;
+    server_name 101.53.136.82;
+    
+    location /static {
+        alias /home/lucifer/Documents/scrapydServer/scrape/scrapeNews/web_app/static;
+        autoindex on;
+        expires max;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/lucifer/Documents/scrapydServer/scrape/scrapeNews/web_app/web_app.sock;
+    }
+}

@@ -1,0 +1,39 @@
+{% extends '_base.html' %}
+
+{% block title %}Jobs{% endblock %}
+
+{% block css %}
+<style>
+#jobs_table_container{
+    font-size:0.8em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center m5 p10">Jobs</h1>
+<div class="alert alert-success" role="alert">
+    No Bug Report For Frontend Script
+</div>
+<div>
+    <a href="/logfiles/scrapeNews.log"><button type="button" class="btn btn-danger">View General Error Log</button></a>
+</div>
+<div class="container-fluid" id="jobs_table_container">
+    <h3 class="text-center m5 p10">Running</h3>
+    <div id="running_jobs_table">
+    </div>
+    <h3 class="text-center m5 p10">Pending</h3>
+    <div id="pending_jobs_table">
+    </div>
+    <h3 class="text-center m5 p10">Completed</h3>
+    <div id="completed_jobs_table">
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+<script src="{{ url_for('static', filename='js/jobs-table.js') }}"></script>
+
+{% endblock %}
+

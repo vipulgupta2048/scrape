@@ -13,6 +13,10 @@ Clone the repository (or download it). Then, follow the installation steps to ru
 ```
 python3 -m venv VENV_NAME
 ```
+or
+```
+virtualenv -p python3 VENV_NAME
+```
 
 ### Activate the venv
 Windows: `VENV_NAME/Scripts/activate`
@@ -20,12 +24,14 @@ Windows: `VENV_NAME/Scripts/activate`
 Linux: `source VENV_NAME/bin/activate`
 
 ### Install the requirements
-Navigate to repository: `pip3 install -r requirements.txt`
+Navigate to repository: `pip install -r requirements.txt`
 
 - Requirements(For scraping):
     - scrapy
     - requests
     - python-dateutil
+    - TOR
+    - Privoxy
 
 - Requirements(For database):
     - psycopg2
@@ -33,15 +39,30 @@ Navigate to repository: `pip3 install -r requirements.txt`
 - Requirements(For flask Application):
     - flask
 
+- Requirements(for Deploying)
+   - Scrapyd
+   - Scrapyd-Client ( Use ```pip install git+https://github.com/scrapy/scrapyd-client```
+
+
+### Install TOR and Privoxy
+
+#### Install TOR
+```
+sudo apt-get install tor
+```
+#### Install Privoxy
+```
+sudo apt-get install privoxy
+```
+#### Configure Privoxy to route TOR
+Add following lines at the end of  ```/etc/privoxy/config```
+```
+forward-socks5  / 127.0.0.1:9050 .
+forward-socks4a / 127.0.0.1:9050 .
+forward-socks5t / 127.0.0.1:9050 .
+```
+
 ### Database Setup (PostgreSQL)
-
-**Note: You can comment out the following code in settings.py to avoid using pipelines.**
-
-```
-ITEM_PIPELINES = {
-   'scrapeNews.pipelines.ScrapenewsPipeline': 300
-}
-```
 
 - Installation in Debian: `sudo apt-get install postgresql postgresql-contrib`
 
@@ -57,18 +78,39 @@ ITEM_PIPELINES = {
 	- `createuser YOUR_ROLE_NAME/YOUR_USERNAME --interactive --pwprompt`
 
 - Setup Database:
-    - Create file a scrapeNews/envConfig.py; Inside it, Write:
-    ```
-    USERNAME = 'YOUR_ROLE_NAME/YOUR_USERNAME'
-    PASSWORD = 'YOUR_PASSWORD'
-    NEWS_TABLE = 'NEWS_TABLE_NAME'
-    SITE_TABLE = 'SITE_TABLE_NAME'
-    LOG_TABLE = 'LOG_TABLE_NAME'
-    DATABASE_NAME = 'DATABASE_NAME'
-    HOST_NAME = 'HOST_NAME'
+    - Create file a ```add_env.sh```; Inside it, Write:
+    ```bash
+    #!/bin/bash
+
+    export SCRAPER_DB_HOST=localhost
+    export SCRAPER_DB_USER=YOUR_ROLE_NAME/YOUR_USERNAME
+    export SCRAPER_DB_PASS=YOUR_PASSWORD
+    export SCRAPER_DB_NAME=YOUR_DATABASE_NAME
     ```
 
-## Run Spiders
+### Configuring your spiders
+
+Add the following inside your spider class,
+
+```python
+
+from scrapeNews.db import LogsManager
+
+custom_settings = {
+    'site_name': "asianage",
+    'site_url': "http://www.asianage.com/newsmakers",
+    'site_id': -1,
+    'log_id': -1,
+    'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+}
+
+def closed(self, reason):
+    LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+
+```
+
+
+### Run Spiders
 **Note: Navigate to the folder containing scrapy.cfg**
 ```
 scrapy crawl SPIDER_NAME
@@ -79,7 +121,7 @@ scrapy crawl SPIDER_NAME
 	3. timeTech
 	4. ndtv
 	5. inshorts
-    6. zee
+    6. zeeNews
     7. News18Spider
     8. moneyControl
     9. oneindia
@@ -87,39 +129,18 @@ scrapy crawl SPIDER_NAME
     11. firstpostHindi
     12. firstpostSports
     13. newsx
-    14. hindustan
+    14. hindustantimes
     15. asianage
     16. timeNews
     17. newsNation [In development]
 
-- Options:
-    1. To set the number of pages to be scraped use  `-a pages = X` (X = Number of pages to scrape).
-	Applicable for:
-        1. indianExpressTech
-    	2. indiaTv  
-    	3. timeTech
-        4. moneyControl
-        5. oneindia
-        6. oneindiaHindi
-        7. firstpostHindi
-        8. firstpostSports
-        9. newsx
-        10. asianage
-		11. ndtv
-        12. timeNews
+### Additional Utilities 
 
-    2. To set the number of pages to be scraped use  `-a offset = X` (X = Number of pages to skip).
-	Applicable for:
-        1. indianExpressTech
-    	2. indiaTv  
-    	3. timeTech
-        4. moneyControl
-        5. oneindia
-        6. oneindiaHindi
-        7. firstpostHindi
-        8. firstpostSports
-        9. newsx
-        10. asianage
-        11. timeNews
+- scrapeNews.db.DatabaseManager
+    - Consists of Various Database Related Utilities
+- scrapeNews.db.LogsManager
+    - Consists Methods for Managing Spider Run Stats
+- scrapeNews.settings.logger
+    - Preconfigured Logger, import it and use like ```logger.error(__name__ + " Your_ERROR")```
 
 Happy collaborating !!   

@@ -1,17 +1,19 @@
 import scrapy
-import json
 import re
 from scrapeNews.settings import logger
 from scrapeNews.items import ScrapenewsItem
-from dateutil import parser
+from scrapeNews.db import DatabaseManager, LogsManager
 
 class News18Spider(scrapy.Spider):
     name = "News18Spider"
 
     custom_settings = {
-        'site_id':107,
-        'site_name':'News18',
-        'site_url':'http://www.news18.com/news/'}
+        'site_name': "News18",
+        'site_url': "https://www.news18.com",
+        'site_id': -1,
+        'log_id': -1,
+        'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
+    }
 
     xpaths = {
         'default': {
@@ -37,24 +39,14 @@ class News18Spider(scrapy.Spider):
     start_url = "http://www.news18.com/news/"
     ignoreClasses = ["photoiconb", "photoicons", "vodeoiconb", "vodeoicons"]
 
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
-
     def start_requests(self):
         yield scrapy.Request(url = self.start_url, callback=self.parse)
 
-    def log_ip(self, response):
-        ip = response.xpath("//body/text()").extract_first()
-        logger.debug(__name__+" "+ip)
-        yield None
-
     def parse(self, response):
         if response.status != 200:
-            logger.error(__name__+" HTTP ERROR "+response.status)
-            yield None
-        else:
-            # yield scrapy.Request(url="http://checkip.dyndns.org/", callback=self.log_ip) # Logs IP (for tor use) (Experiment)
+            logger.error(__name__+" Non-200 Response Received : " + response.status)
+            return False
+        try:
             news_sections = response.xpath('//div[contains(@class,"blog-list-blog")]')
             for section in news_sections:
                 news_type = section.xpath("./a[1]/@class").extract_first()
@@ -70,37 +62,53 @@ class News18Spider(scrapy.Spider):
 
                 href = response.urljoin(section.xpath("./p/a[1]/@href").extract_first())
 
-                yield scrapy.Request(url = href, callback=self.parse_news) #Let Pipeline Handle duplicates (Consumes more bandwidth)
+                if not DatabaseManager().urlExists(href):
+                    self.custom_settings['url_stats']['parsed'] += 1
+                    yield scrapy.Request(url = href, callback=self.parse_news) #Let Pipeline Handle duplicates (Consumes more bandwidth)
+                else:
+                    self.custom_settings['url_stats']['dropped'] += 1
 
             next_page = response.xpath('//div[contains(@class, "pagination")]/ul/li[contains(@class,"next")]/a/@href').extract_first();
             if next_page is not None:
                 logger.debug(__name__+" Moving to Next Page")
                 yield scrapy.Request(url = response.urljoin(next_page))
+        except Exception as e:
+            logger.error(__name__ + " Unhandled: " + str(e))
 
     def parse_news(self, response):
+        try:
+            news_url = response.url
+            news_parser = "default"
 
-        news_url = response.url
-        news_parser = "default"
+            for parser_str in self.xpaths:
+                match = r'\/'+re.escape(parser_str)+r'\/'
+                if re.search(match, news_url) is not None:
+                    news_parser = parser_str
+                    break
 
-        for parser_str in self.xpaths:
-            match = r'\/'+re.escape(parser_str)+r'\/'
-            if re.search(match, news_url) is not None:
-                news_parser = parser_str
-                break
+            news_title = response.xpath(self.xpaths[news_parser]['title']).extract_first()
+            news_description = response.xpath(self.xpaths[news_parser]['description']).extract_first()
+            news_picture = response.xpath(self.xpaths[news_parser]['image']).extract_first()
+            news_date = response.xpath(self.xpaths[news_parser]['date']).extract_first()
 
-        news_title = response.xpath(self.xpaths[news_parser]['title']).extract_first()
-        news_description = response.xpath(self.xpaths[news_parser]['description']).extract_first()
-        news_picture = response.xpath(self.xpaths[news_parser]['image']).extract_first()
-        news_date = response.xpath(self.xpaths[news_parser]['date']).extract_first()
+            if news_title == None or news_description == None or news_picture == None or news_date == None:
+                logger.error(__name__+" Error Extracting Data for URL " + news_url)
+                self.custom_settings['url_stats']['dropped'] += 1    
+                yield None
+                return
+            elif len(news_picture) == 0 or len(news_description) == 0 or len(news_picture) == 0 or len(news_date) == 0:
+                logger.error(__name__+" Empty Data for URL "+news_url)
+                self.custom_settings['url_stats']['dropped'] += 1
+                yield None
+                return
 
-        if news_title == None or news_description == None or news_picture == None or news_date == None:
-            logger.error(__name__+" Error Extracting Data for URL " + news_url)
-            yield None
-            return
-        elif len(news_picture) == 0 or len(news_description) == 0 or len(news_picture) == 0 or len(news_date) == 0:
-            logger.error(__name__+" Empty Data for URL "+news_url)
-            yield None
-            return
-        news_date = parser.parse(news_date, ignoretz=False)
-        item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date, 'source': self.custom_settings['site_id']})
-        yield item
+            item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date})
+
+            self.custom_settings['url_stats']['scraped'] += 1
+            yield item
+        except Exception as e:
+            logger.error(__name__ + " Unhandled <" + response.url + ">: " + str(e))
+
+    def closed(self, reason):
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to end log for spider " + self.name + " with url stats " + str(self.custom_settings['url_stats']))
