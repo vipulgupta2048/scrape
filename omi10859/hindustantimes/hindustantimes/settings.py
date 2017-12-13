@@ -8,13 +8,12 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+import logging
 
 BOT_NAME = 'hindustantimes'
 
 SPIDER_MODULES = ['hindustantimes.spiders']
 NEWSPIDER_MODULE = 'hindustantimes.spiders'
-
-LOG_LEVEL = 'ERROR'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'hindustantimes (+http://www.yourdomain.com)'
@@ -92,3 +91,12 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+#Logger Configuration (omi)
+logger = logging.getLogger("OMI")
+handler = logging .FileHandler('omi.log')
+formatter = logging.Formatter(
+    '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.setLevel(logging.ERROR)
+
