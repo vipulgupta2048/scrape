@@ -17,28 +17,10 @@ class TimetechSpider(scrapy.Spider):
 
     start_url = "http://time.com/section/tech/?page=1"
 
-    #def __init__(self, offset=0, pages=4, *args, **kwargs):
-        #self.postgres = pipeline()
-        #self.postgres.openConnection()
-    #    super(TimetechSpider, self).__init__(*args, **kwargs)
-    #    for count in range(int(offset), int(offset) + int(pages)):
-    #        self.start_urls.append('http://time.com/section/tech/?page='+ str(count+1))
-
-    #@classmethod
-    #def from_crawler(cls, crawler, *args, **kwargs):
-    #    spider = super(TimetechSpider, cls).from_crawler(crawler, *args, **kwargs)
-    #    crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-    #    return spider
-
-    #def spider_closed(self, spider):
-        #self.postgres.closeConnection()
-    #    return True
-
-    #def start_requests(self):
-        # Spider Disabled due to error
-        #yield scrapy.Request(self.start_url, self.parse)
-
     def parse(self, response):
+        if response.status != 200:
+            logger.error(__name__ + " Non-200 Response Received " + response.status + " for url" + response.url)
+            return False
         try:
 
             next_page = response.xpath("//a[@rel='next']/@href").extract_first()
@@ -148,16 +130,18 @@ class TimetechSpider(scrapy.Spider):
             data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
             if not data:
                 data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
-            if not data:
-                logger.error(__name__ + " Unable to Extract Content : " + response.url)
-                data = 'Error'
+                if not data:
+                    data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+                    if not data:
+                        data =  response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract_first()
+                        if not data:
+                            logger.error(__name__ + " Unable to Extract Content : " + response.url)
+                            data = 'Error'
         except Exception as Error:
-            logger.error(__name__ + " Unable to Extract Content : " + response.url)
+            logger.error(__name__ + " Unable to Extract Content : " + response.url + " :: " + str(Error))
             data = 'Error'
         return data
 
     def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
-
-
-# DEAD API's Link: 'http://time.com/wp-json/ti-api/v1/posts?time_section_slug=time-section-tech&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=30&page1'
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to end log for spider " + self.name + " with url stats: " + str(self.custom_settings['url_stats']))

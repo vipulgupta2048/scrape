@@ -1,20 +1,11 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.db import LogsManager
-
+from scrapeNews.settings import logger
 
 class zeespider(scrapy.Spider):
     name = "zee"
     start_urls = ['http://zeenews.india.com/india',]
-    custom_settings = {
-        'site_id':106,
-        'site_name':'Zee News',
-        'site_url':'http://zeenews.india.com/india'}
-
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
 
     custom_settings = {
         'site_name': "Zee News",
@@ -26,6 +17,9 @@ class zeespider(scrapy.Spider):
 
     #Scraping the main page for article links
     def parse(self, response):
+        if reponse.status != 200:
+            logger.error(__name__ + " Non-200 Response Received " + response.status + " for url " + response.url)
+            return False
         try:
             articles = response.xpath('//section[contains(@class, "maincontent")]//div[contains(@class, "section-article")]') #extracts HTML from the start_url
             for article in articles:
@@ -59,11 +53,16 @@ class zeespider(scrapy.Spider):
             yield None
 
     def getcontent(self,response):
-        data = response.xpath('//div[contains(@class, "article")]/div[contains(@class, "field")]//p/text()').extract_first()
-        if (data is None):
-            logger.error(__name__ + " Unable to Extract Content : " + response.url)
+        try:
+            data = response.xpath('//div[contains(@class, "article")]/div[contains(@class, "field")]//p/text()').extract_first()
+            if (data is None):
+                logger.error(__name__ + " Unable to Extract Content : " + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " Unable to Extract Content : " + response.url + " :: " + str(e))
             data = 'Error'
         return data
 
     def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to end log for spider " + self.name +" with url stats : " + str(self.custom_settings['url_stats']))

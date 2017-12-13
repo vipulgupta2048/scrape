@@ -37,7 +37,9 @@ class NewsxSpider(scrapy.Spider):
                 yield scrapy.Request(self.start_url + str(self.page_count), self.parse)
             except Exception as e:
                 logger.error(__name__ + " Unhandled: "+str(e))
-
+        else:
+            logger.error(__name__ + " Non-200 Response Received " + response.status + " for url " +response.url)
+            return False
 
     def parse_article(self, response):
         item = ScrapenewsItem()  # Scraper Items
@@ -61,16 +63,19 @@ class NewsxSpider(scrapy.Spider):
         except AttributeError as Error:
             logger.error(__name__+ " Unable to Extract Title: " + response.url)
             data = 'Error'
-        finally:
-            return data
+        return data
 
     def getPageImage(self, response):
-        data = response.xpath("//head/link[@rel='image_src']/@href").extract_first()
-        if (data is None):
-            data = response.xpath("//div[@class='panel-body story']/div[@class='thumbnail video-thumbnail']/img/@src").extract_first()
-        if (data is None):
-            logger.error(__name__ + " Unable to extract image: " + response.url)
-            data = 'Error'
+        try:
+            data = response.xpath("//head/link[@rel='image_src']/@href").extract_first()
+            if (data is None):
+                data = response.xpath("//div[@class='panel-body story']/div[@class='thumbnail video-thumbnail']/img/@src").extract_first()
+            if (data is None):
+                logger.error(__name__ + " Unable to extract image: " + response.url)
+                data = 'Error'
+        except Exception as e:
+                logger.error(__name__ + " Unable to extract image: " + response.url + " :: " + str(e))
+                data = 'Error'
         return data
 
     def getPageDate(self, response):
@@ -80,13 +85,18 @@ class NewsxSpider(scrapy.Spider):
         except Exception as Error:
             logger.error(__name__ + " Unable to Extract Date: " + response.url + " : " + str(Error))
             data = 'Error'
-        finally:
-            return data
+        return data
 
     def getPageContent(self, response):
-        data = response.xpath("//div[@class='story-short-title']/h2/text()").extract_first()
-        if (data is None):
-            logger.error(__name__ + " Unable to Extract Content: " + response.url)
+        try:
+            data = response.xpath("//div[@class='story-short-title']/h2/text()").extract_first()
+            if (data is None):
+                data = ' '.join(' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract()).split()[:40])
+                if not data:
+                    logger.error(__name__ + " Unable to Extract Content: " + response.url)
+                    data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " Unable to Extract Content: " + response.url + " :: " + str(e))
             data = 'Error'
         return data
 

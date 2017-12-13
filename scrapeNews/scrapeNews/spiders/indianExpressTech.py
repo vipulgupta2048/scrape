@@ -26,6 +26,9 @@ class IndianexpresstechSpider(scrapy.Spider):
         yield scrapy.Request(self.start_url+"1", self.parse)
 
     def parse(self, response):
+        if response.status != 200:
+            logger.error(__name__ + " Non-200 Response Received : " + response.status + " for url " + response.url)
+            return False
         try:
             if response.url != self.base_url:
                 newsContainer = response.xpath('//div[@class="top-article"]/ul[@class="article-list"]/li')
@@ -63,7 +66,7 @@ class IndianexpresstechSpider(scrapy.Spider):
             data = response.xpath("//div[@class='full-details']/p/text()").extract_first()
         if (data is None):
             data = ' '.join(' '.join(response.xpath("//div[@class='body-article']/p/text()").extract()).split()[:40])
-        if (data is None):
+        if not data:
             logger.error(__name__+" Error Extracting Content " + response.url)
             data = 'Error'
         return data
@@ -85,24 +88,12 @@ class IndianexpresstechSpider(scrapy.Spider):
                 data = ((response.xpath('//div[@class="lead-article"]/@style').extract_first()).split('url(',1)[1]).split(')',1)[0]
             except Exception as Error:
                 logger.error(__name__+" Error Extracting Image:  " + response.url + " : " +str(Error))
+                data = 'Error'
         return data
 
     def getPageDate(self, response):
         try:
-            # Relax, This line Will parse the date and remove unnecessary
-            # details out of the string provided!
-            data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Published:')[1]).split("'")[0].split('\t')[0].split(' ',1)[1])
-        except IndexError:
-            try:
-                # Relax, This line Will parse the date and remove unnecessary
-                # details out of the string provided!
-                data = ''.join((str(response.xpath('//span[@itemprop="dateModified"]/text()').extract_first()).split('Updated: ')[1]).split("'")[0].split('\t')[0])
-            except IndexError:
-                loggerError.error(response.url)
-                data = 'Error'
-            except Exception as Error:
-                logger.error(__name__ + " Error Extracting Date: " + response.url + " : " + str(Error))
-                data = 'Error'
+            data = response.xpath('//meta[@itemprop="datePublished"]/@content').extract_first()
         except Exception as Error:
             logger.error(__name__+" Error Extracting Date: " + response.url + " : " + str(Error))
             data = 'Error'

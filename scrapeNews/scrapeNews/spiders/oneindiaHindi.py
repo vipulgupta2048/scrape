@@ -61,8 +61,11 @@ class OneindiahindiSpider(scrapy.Spider):
     def getPageContent(self, response):
         try:
             data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
-        except:
-            logger.error(__name__ + " Error Extracting Content : " + response.url)
+            if not data:
+                logger.error(__name__ + " Error Extracting Content : " + response.url)
+                data = 'Error'    
+        except Exception as e:
+            logger.error(__name__ + " Error Extracting Content : " + response.url + " :: " + str(e))
             data = 'Error'
         return data
 
@@ -75,13 +78,17 @@ class OneindiahindiSpider(scrapy.Spider):
 
 
     def getPageImage(self, response):
-        data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
-        if (data is None):
-            data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
-        if (data is None):
-            logger.error(__name__ + " Error Extracting Image: " + response.url)
-            data = 'Error'
-        return data
+        try:
+            data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
+        except Exception as Error:
+            try:
+                data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
+            except Exception as Error:
+                data = response.xpath("//link[@rel='image_src']/@href").extract_first()
+                if not data:
+                    logger.error(__name__ + " Error Extracting Image: " + response.url + " :: " + str(Error))
+                    data = 'Error'
+            return data
 
     def getPageDate(self, response):
         try:

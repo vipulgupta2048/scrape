@@ -24,6 +24,9 @@ class InshortsSpider(scrapy.Spider):
 
 
     def parse(self, response):
+        if response.status != 200:
+            logger.error(__name__ + " Non-200 Response Received : " + response.status + " for url " + response.url)
+            return False
         try:
             response_data = json.loads(response.text)
 
@@ -50,4 +53,5 @@ class InshortsSpider(scrapy.Spider):
             logger.error(__name__+" Unhandled: "+str(e))
 
     def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to end log for spider " + self.name + " with url stats " + str(self.custom_settings['url_stats']))

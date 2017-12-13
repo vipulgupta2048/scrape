@@ -49,12 +49,10 @@ class HindustanSpider(scrapy.Spider):
 
             self.custom_settings['url_stats']['scraped'] += 1
             yield item
+
         except Exception as e:
             logger.error(__name__ + " Unhandled: " + str(e))
 
     def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
-
-        item = ScrapenewsItem({'title': headline, 'link': response.url, 'newsDate': date, 'content': body, 'image': images,  'source': 114 })
-        self.urls_scraped += 1
-        yield item
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to End Log for spider " + self.name + " with url stats " + str(self.custom_settings['url_stats']))

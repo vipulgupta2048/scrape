@@ -23,17 +23,8 @@ class NdtvSpider(scrapy.Spider):
         'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
     }
 
-
-    #def __init__(self, pages=1, *args, **kwargs):
-    #    super(NdtvSpider, self).__init__(*args, **kwargs)
-    #    self.pages = pages
-
     def start_requests(self):
         yield scrapy.Request(self.start_url + str(self.page_counter), self.parse)
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
 
     def parse(self, response):
         if response.status == 200:
@@ -57,7 +48,9 @@ class NdtvSpider(scrapy.Spider):
                 yield scrapy.Request(next_page, callback=self.parse)
             except Exception as e:
                 logger.error(__name__+" Unhandled: "+str(e))
-
+        else:
+            logger.error(__name__ + " Non-200 Response Received : " + response.status + " for url " + response.url)
+            return False
 
     def parse_date(self, link):
         page = requests.get(link)
@@ -79,4 +72,5 @@ class NdtvSpider(scrapy.Spider):
             return None
 
     def closed(self, reason):
-        LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)
+        if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):
+            logger.error(__name__ + " Unable to end log for spider " + self.name + " with url stats " + str(self.custom_settings['url_stats']))

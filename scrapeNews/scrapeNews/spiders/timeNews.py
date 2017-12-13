@@ -23,6 +23,9 @@ class TimenewsSpider(scrapy.Spider):
         yield scrapy.Request(self.start_url, self.parse)
 
     def parse(self, response):
+        if response.status != 200:
+            logger.error(__name__ + " Non-200 Response Received " + response.status + " for url " + response.url)
+            return False
         try:
             next_page = response.xpath("//a[@rel='next']/@href").extract_first()
             if next_page != None:
@@ -76,23 +79,30 @@ class TimenewsSpider(scrapy.Spider):
             yield None
 
     def getPageTitle(self, response):
-        data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
-        if (data is None):
-            data = response.xpath("//h1[contains(@class,'headline')]/text()").extract_first()
-        if (data is None):
-            data = response.xpath("//h1[@class='_8UFs4BVE']/text()").extract_first()
-        if (data is None):
-            data = response.xpath("//span[@class='xxx_oneoff_special_story_v3_headline']/text()").extract_first()
-        if (data is None):
-            logger.error(__name__ + " Unable to Extract Title: " + response.url)
+        try:
+            data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
+            if (data is None):
+                data = response.xpath("//h1[contains(@class,'headline')]/text()").extract_first()
+            if (data is None):
+                data = response.xpath("//h1[@class='_8UFs4BVE']/text()").extract_first()
+            if (data is None):
+                data = response.xpath("//span[@class='xxx_oneoff_special_story_v3_headline']/text()").extract_first()
+            if (data is None):
+                logger.error(__name__ + " Unable to Extract Title: " + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " Unable to Extract Title: " + response.url + " :: " + str(e))
             data = 'Error'
         return data
 
-
     def getPageImage(self, response):
-        data = response.xpath("//meta[@property='og:image']/@content").extract_first()
-        if (data is None):
-            logger.error(__name__ + " Unable to Extract Title: " + response.url)
+        try:
+            data = response.xpath("//meta[@property='og:image']/@content").extract_first()
+            if (data is None):
+                logger.error(__name__ + " Unable to Extract Title: " + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " Unable to Extract Title: " + response.url + " :: " + str(e))
             data = 'Error'
         return data
 
@@ -128,9 +138,13 @@ class TimenewsSpider(scrapy.Spider):
             data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
             if not data:
                 data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
-            if not data:
-                logger.error(__name__ + " Unable to extract Content: " + response.url)
-                data = 'Error'
+                if not data:
+                    data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+                    if not data:
+                        data =  response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract_first()
+                        if not data:
+                            logger.error(__name__ + " Unable to extract Content: " + response.url)
+                            data = 'Error'
         except Exception as Error:
             logger.error(__name__ + " Unable to extract Content: " + response.url + " : " + str(Error))
             data = 'Error'

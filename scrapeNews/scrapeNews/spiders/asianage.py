@@ -6,6 +6,10 @@ from scrapeNews.db import LogsManager, DatabaseManager
 
 class AsianageSpider(scrapy.Spider):
 
+
+    name = 'asianage'
+    allowed_domains = ['asianage.com']
+    start_url = 'http://www.asianage.com/newsmakers?pg='
     custom_settings = {
         'site_name': "asianage",
         'site_url': "http://www.asianage.com/newsmakers",
@@ -14,16 +18,15 @@ class AsianageSpider(scrapy.Spider):
         'url_stats': {'parsed': 0, 'scraped': 0, 'dropped': 0, 'stored': 0}
     }
 
-    name = 'asianage'
-    allowed_domains = ['asianage.com']
-    start_url = 'http://www.asianage.com/newsmakers?pg='
-
 
     def start_requests(self):
         yield scrapy.Request(self.start_url+str(1), self.parse)
 
 
     def parse(self, response):
+        if response.status != 200:
+            logger.error(__name__ + " Non-200 Response Received: " + response.status + " for url " + response.url)
+            return False
         try:
             newsContainer = response.xpath("//div[contains(@class,'india-news')]/div[@class='singlesunday']")
             for newsBox in newsContainer:

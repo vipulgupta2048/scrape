@@ -21,31 +21,13 @@ class FirstposthindiSpider(scrapy.Spider):
     }
 
     start_url = "https://hindi.firstpost.com/category/latest/page-1/"
-    #def __init__(self, offset=0, pages=3, *args, **kwargs):
-    #    #self.postgres = pipeline()
-    #    #self.postgres.openConnection()
-    #    super(FirstposthindiSpider, self).__init__(*args, **kwargs)
-    #    for count in range(int(offset), int(offset) + int(pages)):
-    #        self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count+1))
-
-    #@classmethod
-    #def from_crawler(cls, crawler, *args, **kwargs):
-    #    spider = super(FirstposthindiSpider, cls).from_crawler(crawler, *args, **kwargs)
-    #    crawler.signals.connect(spider.spider_closed, scrapy.signals.spider_closed)
-    #    return spider
-
-    #def spider_closed(self, spider):
-    #    #self.postgres.closeConnection()
-    #    return True
-
 
     def start_requests(self):
         yield scrapy.Request(self.start_url, self.parse)
-    #    for url in self.start_urls:
-    #        yield scrapy.Request(url, self.parse)
-
 
     def parse(self, response):
+        if response.status != 200:
+            logger.error(__name__ + " Non-200 Response Received : " + response.status + " for url " + response.url)
         newsContainer = response.xpath("//ul[@id='more_author_story']/li")
         for newsBox in newsContainer:
             link = newsBox.xpath('h2/a/@href').extract_first()
@@ -68,7 +50,7 @@ class FirstposthindiSpider(scrapy.Spider):
             item['content'] = self.getPageContent(response)
             item['newsDate'] = self.getPageDate(response)
             item['link'] = response.url
-            #item['source'] = 111
+
             if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
                 self.custom_settings['url_stats']['scraped'] += 1
                 yield item
@@ -105,12 +87,24 @@ class FirstposthindiSpider(scrapy.Spider):
 
     def getPageContent(self, response):
         try:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/p/text()").extract())).split(' ')[:40])
-        except Exception as Error:
-            logger.error(__name__+" Unhandled: "+str(Error) + ' occured at: ' + response.url)
-            data = 'Error'
-        finally:
-            return data
+            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/p//text()").extract())).split(' ')[:40])
+            if not data:
+                    data = ' '.join((' '.join(response.xpath("//div[contains(@class,'aXjCH')]/div/p//text()").extract())).split(' ')[:40])
+                    if not data:
+                        data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/div/p/text()").extract())).split(' ')[:40])
+                        if not data:		
+                            data = response.xpath("//div[@class='fulstorysharecomment']/text()").extract_first()		
+                            if not data:		
+                                data =  ' '.join((' '.join(response.xpath("//div[@class='fullstorydivstorycomment']/p/text()").extract())).split(' ')[:40])		
+                                if not data:		
+                                    data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/div[not(@class)]/text()").extract())).split(' ')[:40])		
+                                    if not data:		
+                                        logger.error(__name__ + " Unable to Extract Content for url : " + response.url)
+                                        data = 'Error'
+                                        return data
+        except Exception as e:
+            logger.error(__name__ + " Unhandled: " + str(e))
+            return "Error"
 
     def closed(self, reason):
         LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason)

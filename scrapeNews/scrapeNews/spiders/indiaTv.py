@@ -24,6 +24,9 @@ class IndiatvSpider(scrapy.Spider):
         yield scrapy.Request(self.start_url+"1", self.parse)
 
     def parse(self, response):
+        if response.status != 200:
+            logger.error(__name__ + " Non-200 Response Received : " + response.status + " for url " + response.url)
+            return False
         try:
             if response.url != self.start_url:
                 newsContainer = response.xpath("//ul[@class='newsListfull']/li")
@@ -79,8 +82,7 @@ class IndiatvSpider(scrapy.Spider):
         except Exception as Error:
             logger.error(__name__+" Error Extracting Date: "+response.url+" : "+str(Error))
             data = 'Error'
-        finally:
-            return data
+        return data
 
 
     def getPageContent(self, response):
@@ -89,8 +91,7 @@ class IndiatvSpider(scrapy.Spider):
         except Exception as Error:
             logger.error(__name__+" Error Extracting Content: "+response.url+" : "+str(Error))
             data = 'Error'
-        finally:
-            return data
+        return data
 
     def closed(self, reason):
         if not LogsManager().end_log(self.custom_settings['log_id'], self.custom_settings['url_stats'], reason):

@@ -23,6 +23,9 @@ class OneindiaSpider(scrapy.Spider):
         yield scrapy.Request(self.start_url+"1", self.parse)
 
     def parse(self, response):
+        if response.status != 200:
+            logger.error(__name__ + " Non-200 Response Received " + response.status + " for url " + response.url)
+            return False
         try:
             newsContainer = response.xpath('//div[@id="collection-wrapper"]/article')
             for newsBox in newsContainer:
@@ -60,6 +63,9 @@ class OneindiaSpider(scrapy.Spider):
     def getPageContent(self, response):
         try:
             data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
+            if not data:
+                logger.error(__name__ + " Error Extracting Content : "+ response.url)
+                data = 'Error'    
         except Exception as Error:
             logger.error(__name__ + " Error Extracting Content : "+ response.url + " : " + str(Error))
             data = 'Error'
@@ -74,10 +80,18 @@ class OneindiaSpider(scrapy.Spider):
 
 
     def getPageImage(self, response):
-        data = 'https://www.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
-        if (data is None):
-            logger.error(__name__ + " Error Extracting Image: " + response.url)
-            data = 'Error'
+        try:
+            data = 'https://www.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
+        except Exception as Error:
+            try:
+                data = 'https://www.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()		
+            except Exception as Error:		
+                data = response.xpath("//link[@rel='image_src']/@href").extract_first()		
+                if not data:		
+                    data = response.xpath("//div[@class='assigned_video']/img/@src").extract_first()		
+                    if not data:
+                        logger.error(__name__ + " Error Extracting Image: " + response.url + " :: " + str(Error))
+                        data = 'Error'
         return data
 
 
