@@ -16,4 +16,11 @@ class HindustantimesItem(scrapy.Item):
     description = scrapy.Field()
     image = scrapy.Field()
     date = scrapy.Field()
+
+class NdtvScraperSpider(scrapy.Item):
+    url = scrapy.Field()
+    title = scrapy.Field()
+    description = scrapy.Field()
+    image = scrapy.Field()
+    date = scrapy.Field()
     

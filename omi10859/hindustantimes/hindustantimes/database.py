@@ -11,7 +11,7 @@ class Database(object):
                   id SERIAL NOT NULL PRIMARY KEY, \
                   title TEXT NOT NULL,\
                   link TEXT NOT NULL,\
-                  newsdate TIMESTAMP,\
+                  newsdate TEXT,\
                   content TEXT NOT NULL,\
                   image TEXT NOT NULL\
                   );"
