@@ -49,7 +49,7 @@ class FirstposthindiSpider(scrapy.Spider):
             item['newsDate'] = self.getPageDate(response)
             item['link'] = response.url
             item['source'] = 111
-            if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+            if item['title'] is not 'Error' and item['content'] is not 'Error' and item['link'] is not 'Error' and item['newsDate'] is not 'Error':
                 self.urls_scraped += 1
                 yield item
         else:

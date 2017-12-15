@@ -66,6 +66,7 @@ ITEM_PIPELINES = {
     LOG_TABLE = 'LOG_TABLE_NAME'
     DATABASE_NAME = 'DATABASE_NAME'
     HOST_NAME = 'HOST_NAME'
+    sudoPassword = 'YOUR_SUDO_PASSWORD' # Required to restart postgres pragatically if it fails due to some external reason.
     ```
 
 ## Run Spiders

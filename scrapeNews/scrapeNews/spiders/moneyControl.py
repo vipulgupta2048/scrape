@@ -2,6 +2,7 @@
 import scrapy
 from scrapeNews.items import ScrapenewsItem
 from scrapeNews.pipelines import loggerError
+from time import sleep
 
 
 class MoneycontrolSpider(scrapy.Spider):
@@ -25,6 +26,7 @@ class MoneycontrolSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
+            sleep(2)
 
     def errorRequestHandler(self, failure):
         self.urls_parsed -= 1
@@ -41,7 +43,7 @@ class MoneycontrolSpider(scrapy.Spider):
                 item['content'] = self.getPageContent(newsBox)
                 item['newsDate'] = self.getPageDate(newsBox)
                 item['source'] = 108
-                if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+                if item['title'] is not 'Error' and item['content'] is not 'Error' and item['link'] is not 'Error' and item['newsDate'] is not 'Error':
                     self.urls_scraped += 1
                     yield item
 

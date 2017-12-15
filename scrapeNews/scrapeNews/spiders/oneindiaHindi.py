@@ -48,13 +48,15 @@ class OneindiahindiSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 110
-        if item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
             self.urls_scraped += 1
             yield item
 
 
     def getPageContent(self, response):
         data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
+        if not data:
+            data = ' '.join((''.join(response.xpath("//div[contains(@id,'slider0')]/p/text()").extract())).split(' ')[:40])
         if not data:
             loggerError.error(response.url)
             data = 'Error'
@@ -70,15 +72,15 @@ class OneindiahindiSpider(scrapy.Spider):
 
     def getPageImage(self, response):
         try:
-            data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
+            data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
         except Exception as Error:
-            try:
-                data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@data-pagespeed-lazy-src").extract_first()
-            except Exception as Error:
                 data = response.xpath("//link[@rel='image_src']/@href").extract_first()
                 if not data:
-                    loggerError.error(str(Error) +' occured at: '+ response.url)
-                    data = 'Error'
+                    try:
+                        data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
+                    except Exception as Error:
+                            loggerError.error(str(Error) +' occured at: '+ response.url)
+                            data = 'Error'
         return data
 
     def getPageDate(self, response):
