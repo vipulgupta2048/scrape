@@ -17,8 +17,13 @@ class InshortsSpider(scrapy.Spider):
         'site_name':'Inshorts',
         'site_url':'http://www.inshorts.com/en/read/'}
 
-    def __init__(self, pages=3, *args, **kwargs):
+    def __init__(self, pages=3, toInfinityAndBeyond=False ,*args, **kwargs):
+        '''
+        Set 'pages' to set the number of pages to scrape [Default=3]
+        Set 'toInfinityAndBeyond' to set infinite scraping [Default=False]
+        '''
         super(InshortsSpider, self).__init__(*args, **kwargs)
+        self.infinite = (toInfinityAndBeyond == "True")
         self.pages = int(pages)
         self.news_id = ''
 
@@ -45,9 +50,12 @@ class InshortsSpider(scrapy.Spider):
         js = response.xpath('//script[@type="text/javascript"]/text()').extract()[-1]
         self.news_id = pattern.search(js).group(1)
 
-        while(self.pages > 1):
+        while (self.pages > 1 and not self.infinite):
             yield FormRequest('https://www.inshorts.com/en/ajax/more_news', formdata={'news-offset' : self.news_id}, callback=self.parse_more_news, errback=self.errorRequestHandler, dont_filter=True)
             self.pages -= 1
+
+        while (self.infinite):
+            yield FormRequest('https://www.inshorts.com/en/ajax/more_news', formdata={'news-offset' : self.news_id}, callback=self.parse_more_news, errback=self.errorRequestHandler, dont_filter=True)
 
     def parse_more_news(self, response):
         ajax_response = json.loads(response.text)
