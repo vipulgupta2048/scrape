@@ -1,7 +1,7 @@
 import scrapy
+from scrapeNews.items import ScrapenewsItem
 
-
-class nnation(scrapy.Spider):
+class nation(scrapy.Spider):
     name = "nnation"
     start_urls = ['http://www.newsnation.in/business-news',]
 
@@ -17,11 +17,12 @@ class nnation(scrapy.Spider):
             yield response.follow(next_page, callback = self.parse)
 
     def parse_article(self,response):
-        i = NnationItem()
-        i['headline'] = response.xpath("//h1/text()").extract_first()
+        i = ScrapenewsItem()
+        i['title'] = response.xpath("//h1/text()").extract_first()
         i['link'] = response.url 
-        i['images'] = response.xpath('//div[contains(@itemprop, "image")]//img/@src').extract_first()
-        i['date'] = response.xpath('//span[contains(@itemprop, "date")]/text()').extract_first()
-        i['summary'] = response.xpath('//div[@itemprop ="articleBody"]//p/text()').extract()
+        i['image'] = response.xpath('//div[contains(@itemprop, "image")]//img/@src').extract_first()
+        i['newsDate'] = response.xpath('//span[contains(@itemprop, "date")]/text()').extract_first()
+        i['content'] = response.xpath('//div[@itemprop ="articleBody"]//p/text()').extract()
+        i['source'] = 117
         
         yield i
