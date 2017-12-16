@@ -54,7 +54,7 @@ class NewsxSpider(scrapy.Spider):
             item['newsDate'] = self.getPageDate(response)
             item['link'] = response.url
             item['source'] = 113
-            if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+            if item['title'] is not 'Error' and item['content'] is not 'Error' and item['link'] is not 'Error' and item['newsDate'] is not 'Error':
                 self.urls_scraped += 1
                 yield item
 
@@ -88,9 +88,11 @@ class NewsxSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        data = response.xpath("//div[@class='story-short-title']/h2/text()").extract_first()
-        if (data is None):
-            data = ' '.join(' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract()).split()[:40])
+        data = ' '.join(response.xpath("//div[@class='story-short-title']/h2/text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/p//text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/div//text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'

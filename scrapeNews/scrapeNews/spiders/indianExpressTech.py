@@ -48,16 +48,16 @@ class IndianexpresstechSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 101
-        if item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
             self.urls_scraped += 1
             yield item
 
     def getPageContent(self, response):
-        data = response.xpath('//h2[@class="synopsis"]/text()').extract_first()
-        if (data is None):
-            data = response.xpath("//div[@class='full-details']/p/text()").extract_first()
-        if (data is None):
-            data = ' '.join(' '.join(response.xpath("//div[@class='body-article']/p/text()").extract()).split()[:40])
+        data = ' '.join(response.xpath('//h2[@class="synopsis"]/text()').extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@class='full-details']/p/text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@class='body-article']/p/text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'

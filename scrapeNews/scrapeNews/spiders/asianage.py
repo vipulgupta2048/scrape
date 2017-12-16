@@ -32,51 +32,53 @@ class AsianageSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        item = ScrapenewsItem()  # Scraper Items
-        newsContainer = response.xpath("//div[contains(@class,'india-news')]/div[@class='singlesunday']")
+        newsContainer = response.xpath("//div[@class='singlesunday']")
         for newsBox in newsContainer:
-            item['image'] = self.getPageImage(newsBox)
-            if not self.postgres.checkUrlExists(item['link']):
-                item['title'] = self.getPageTitle(newsBox)
-                item['content'] = self.getPageContent(newsBox)
-                item['newsDate'] = self.getPageDate(newsBox)
-                item['link'] = self.getPageLink(newsBox)
-                item['source'] = 115
-                if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
-                    self.urls_scraped += 1
-                    yield item
+            link = 'http://www.asianage.com' + newsBox.xpath('div/h2/a/@href').extract_first()
+            if not self.postgres.checkUrlExists(link):
+                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
 
-    def getPageContent(self, newsBox):
-        data = newsBox.xpath('div/p[@class="These"]/text()').extract_first()
+
+    def parse_article(self, response):
+        item = ScrapenewsItem()  # Scraper Items
+        item['image'] = self.getPageImage(response)
+        item['title'] = self.getPageTitle(response)
+        item['content'] = self.getPageContent(response)
+        item['newsDate'] = self.getPageDate(response)
+        item['link'] = response.url
+        item['source'] = 115
+        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
+            self.urls_scraped += 1
+            yield item
+
+
+    def getPageTitle(self, response):
+        data = response.xpath("head/title/text()").extract_first()
         if (data is None):
-            loggerError.error(newsBox.extract())
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
-    def getPageTitle(self, newsBox):
-        data = newsBox.xpath('div/h2/a/text()').extract_first()
+    def getPageImage(self, response):
+        data = response.xpath("/html/head/meta[@property='og:image']/@content").extract_first()
         if (data is None):
-            loggerError.error(newsBox.extract())
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
-    def getPageLink(self, newsBox):
-        data = 'http://www.asianage.com/newsmakers' + newsBox.xpath('div/a/@href').extract_first()
-        if (data == 'http://www.asianage.com/newsmakers'):
-            loggerError.error(newsBox.extract())
+    def getPageDate(self, response):
+        try:
+            # split & rsplit Used to Spit Data in Correct format!
+            data = (response.xpath("//head/meta[@property='article:published_time']/@content").extract_first())
+        except Exception as Error:
+            loggerError.error(Error, response.url)
             data = 'Error'
-        return data
+        finally:
+            return data
 
-    def getPageImage(self, newsBox):
-        data = newsBox.xpath('div/a/img/@data-src').extract_first()
-        if (data is None):
-            loggerError.error(newsBox.extract())
-            data = 'Error'
-        return data
-
-    def getPageDate(self, newsBox):
-        data = newsBox.xpath('div/p[@class="newDate"]/text()').extract_first()
-        if (data is None):
-            loggerError.error(newsBox.extract())
+    def getPageContent(self, response):
+        data = ' '.join(response.xpath("//div[@id='storyBody']/p/text()").extract())
+        if not data:
+            loggerError.error(response.url)
             data = 'Error'
         return data

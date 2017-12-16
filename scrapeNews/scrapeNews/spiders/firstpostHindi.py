@@ -49,7 +49,7 @@ class FirstposthindiSpider(scrapy.Spider):
             item['newsDate'] = self.getPageDate(response)
             item['link'] = response.url
             item['source'] = 111
-            if item['title'] is not 'Error' or item['content'] is not 'Error' or item['link'] is not 'Error' or item['newsDate'] is not 'Error':
+            if item['title'] is not 'Error' and item['content'] is not 'Error' and item['link'] is not 'Error' and item['newsDate'] is not 'Error':
                 self.urls_scraped += 1
                 yield item
         else:
@@ -82,17 +82,17 @@ class FirstposthindiSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/p//text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/p//text()").extract())
         if not data:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'aXjCH')]/div/p//text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'aXjCH')]/div/p//text()").extract())
         if not data:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/div/p/text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/div/p/text()").extract())
         if not data:
-            data = response.xpath("//div[@class='fulstorysharecomment']/text()").extract_first()
+            data = ' '.join(response.xpath("//div[@class='fulstorysharecomment']/text()").extract())
         if not data:
-            data =  ' '.join((' '.join(response.xpath("//div[@class='fullstorydivstorycomment']/p/text()").extract())).split(' ')[:40])
+            data =  ' '.join(response.xpath("//div[@class='fullstorydivstorycomment']/p/text()").extract())
         if not data:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/div[not(@class)]/text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/div[not(@class)]/text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'

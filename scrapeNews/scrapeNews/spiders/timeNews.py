@@ -65,7 +65,7 @@ class TimenewsSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 116
-        if item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
             self.urls_scraped += 1
             yield item
 
@@ -119,16 +119,17 @@ class TimenewsSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())
         if not data:
-            data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//section[@class='chapter']//text()").extract())
         if not data:
-            data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract())
         if not data:
-            data =  response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract_first()
+            data = ' '.join(response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'
         return data
+
 
 # DEAD API's Link: 'http://time.com/wp-json/ti-api/v1/posts/?time_section_slug=time-section-newsfeed&_embed=wp:meta,wp:term,fortune:featured,fortune:primary_section,fortune:primary_tag,fortune:primary_topic&per_page=20&recirc=1&page=2'

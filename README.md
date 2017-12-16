@@ -122,4 +122,4 @@ scrapy crawl SPIDER_NAME
         10. asianage
         11. timeNews
 
-Happy collaborating !!   
+Happy collaborating !!
