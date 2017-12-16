@@ -79,7 +79,7 @@ scrapy crawl SPIDER_NAME
 	3. timeTech
 	4. ndtv
 	5. inshorts
-    6. zeeNews
+    6. zee
     7. News18Spider
     8. moneyControl
     9. oneindia
@@ -87,7 +87,7 @@ scrapy crawl SPIDER_NAME
     11. firstpostHindi
     12. firstpostSports
     13. newsx
-    14. hindustantimes
+    14. hindustan
     15. asianage
     16. timeNews
     17. newsNation [In development]
@@ -122,4 +122,4 @@ scrapy crawl SPIDER_NAME
         10. asianage
         11. timeNews
 
-Happy collaborating !!   
+Happy collaborating !!

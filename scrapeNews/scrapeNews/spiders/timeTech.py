@@ -5,10 +5,11 @@ from scrapeNews.pipelines import loggerError
 
 
 class TimetechSpider(scrapy.Spider):
+
     name = 'timeTech'
     custom_settings = {
         'site_id':103,
-        'site_name':'Time(Tech)',
+        'site_name':'timeTech',
         'site_url':'http://time.com/section/tech/'}
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
@@ -22,8 +23,11 @@ class TimetechSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+            yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
 
+    def errorRequestHandler(self, failure):
+        self.urls_parsed -= 1
+        loggerError.error('Non-200 response at ' + str(failure.request.url))
 
     def parse(self, response):
 
@@ -31,15 +35,15 @@ class TimetechSpider(scrapy.Spider):
         try:
             newsBox = 'http://www.time.com' + response.xpath("//div[@class='partial hero']/article/a/@href").extract_first()
             if not self.postgres.checkUrlExists(newsBox):
-                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
         except Exception as Error:
             if newsBox.xpath("//main[contains(@class,'content article')]"):
-                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
             elif newsBox.xpath("//div[contains(@class,'_29M-6C9w')]"):
                 newsContainer = newsBox.xpath("//div[contains(@class,'_29M-6C9w')]//div[contains(@class,'_2cCPyP5f')]//a[@class='_2S9ChopF']/@href")
                 for link in newsContainer:
                     if not self.postgres.checkUrlExists(link):
-                        yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                        yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
             else:
                 loggerError.error(response.url)
 
@@ -48,7 +52,7 @@ class TimetechSpider(scrapy.Spider):
         for newsBox in newsContainer:
             link = 'http://www.time.com' + newsBox.xpath('a/@href').extract_first()
             if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
 
 
     def parse_article(self, response):
@@ -59,8 +63,8 @@ class TimetechSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 103
-        self.urls_scraped += 1
-        if item['image'] is not 'Error' or item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
+            self.urls_scraped += 1
             yield item
 
 
@@ -113,11 +117,13 @@ class TimetechSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())
         if not data:
-            data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//section[@class='chapter']//text()").extract())
         if not data:
-            data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'

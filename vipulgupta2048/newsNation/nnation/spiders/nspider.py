@@ -1,7 +1,7 @@
 import scrapy
-from nnation.items import NnationItem
 
-class nation(scrapy.Spider):
+
+class nnation(scrapy.Spider):
     name = "nnation"
     start_urls = ['http://www.newsnation.in/business-news',]
 

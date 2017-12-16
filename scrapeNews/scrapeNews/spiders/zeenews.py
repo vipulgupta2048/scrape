@@ -30,7 +30,6 @@ class zeespider(scrapy.Spider):
 
     #For scraping a particular article listed on the main page
     def parse_news(self,response):
-        self.urls_parsed += 1
         i = ScrapenewsItem()
         i['title'] = response.xpath('//h1[contains(@class, "article-heading margin")]/text()').extract_first() #scrapes headline
         i['newsDate'] = response.xpath('//span[contains(@class, "date")]/text()').extract_first()[10:-4] #scrapes datetime
@@ -38,7 +37,6 @@ class zeespider(scrapy.Spider):
         i['content'] = self.getcontent(response)
         i['link'] = response.url #scrapes link; article page
         i['source'] = 106
-        self.urls_scraped += 1
 
         yield i
 
