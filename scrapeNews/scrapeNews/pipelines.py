@@ -41,8 +41,12 @@ def createDatabase():
         connection.close()
     except psycopg2.ProgrammingError as Error:
         pass
+    except psycopg2.Error as Error:
+        print (Error)
+        loggerError.error("("+str(Error.pgcode)+") "+str(Error))
     except Exception as Error:
         loggerError.error(Error)
+
 
 # Calling to create database if it doesn't exist already!
 createDatabase()
@@ -71,7 +75,7 @@ class ScrapenewsPipeline(object):
 class postgresSQL(object):
     # postgresSQL class will be the class that has connection when the with postgresSQL
     # and all database related operations must take place here, (In favour of keeping the
-    # number of connections low )
+    # number of connections low)
     def openConnection(self, spider):
         # Makes a connection with postgresSQL using pyscopg2
         self.spider = spider
@@ -85,7 +89,7 @@ class postgresSQL(object):
             self.connection.set_session(autocommit=True)
             commands = [
                 "CREATE TABLE IF NOT EXISTS "+os.environ['SITE_TABLE']+" (id SMALLINT PRIMARY KEY, site_name VARCHAR NOT NULL, site_url VARCHAR NOT NULL, status_check TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW())",
-                "CREATE TABLE IF NOT EXISTS "+os.environ['NEWS_TABLE']+" (id SERIAL PRIMARY KEY, title VARCHAR NOT NULL, content VARCHAR NOT NULL, link VARCHAR NOT NULL UNIQUE, image VARCHAR NOT NULL, newsDate TIMESTAMP WITHOUT TIME ZONE NOT NULL, datescraped TIMESTAMP WITHOUT TIME ZONE, site_id SMALLINT NOT NULL REFERENCES site_table (id) ON DELETE CASCADE)",
+                "CREATE TABLE IF NOT EXISTS "+os.environ['NEWS_TABLE']+" (id SERIAL PRIMARY KEY, title VARCHAR NOT NULL CHECK (title <> 'Error'), content VARCHAR NOT NULL CHECK (content <> 'Error'), link VARCHAR NOT NULL UNIQUE, image VARCHAR NOT NULL, newsDate TIMESTAMP WITHOUT TIME ZONE NOT NULL, datescraped TIMESTAMP WITHOUT TIME ZONE, site_id SMALLINT NOT NULL REFERENCES site_table (id) ON DELETE CASCADE)",
                 "CREATE TABLE IF NOT EXISTS "+os.environ['LOG_TABLE']+" (id SERIAL PRIMARY KEY, spider_id SMALLINT REFERENCES site_table (id) ON DELETE CASCADE, process_id SMALLINT NOT NULL, start_time TIMESTAMP WITHOUT TIME ZONE, end_time TIMESTAMP WITHOUT TIME ZONE, urls_parsed SMALLINT, urls_scraped SMALLINT, urls_dropped SMALLINT, urls_stored SMALLINT, close_reason VARCHAR)"
             ]
             for command in commands:
@@ -109,6 +113,8 @@ class postgresSQL(object):
                 spider.custom_settings['site_id'],
                 os.getpid(),
                 spider.start_time))
+        except psycopg2.Error as Error:
+                loggerError.error("("+str(Error.pgcode)+") " + str(Error))
         except Exception as Error:
             loggerError.error(Error)
 
@@ -130,6 +136,8 @@ class postgresSQL(object):
             self.connection.close()
             if self.spider.urls_stored > 0:
                 print (str(self.spider.urls_stored) + " record(s) were added by " + self.spider.name + " at " + parser.datetime.datetime.strftime(parser.datetime.datetime.now(),'%I:%M:%S'))
+        except psycopg2.Error as Error:
+                loggerError.error("("+str(Error.pgcode)+") "+str(Error))
         except Exception as Error:
             loggerError.error(Error)
 
@@ -137,10 +145,11 @@ class postgresSQL(object):
     def insertIntoNewsTable(self, item):
         # Insert item into NEWS_TABLE after all the processing.
         try:
-            if (self.connection.status != 1):
+            if ((self.connection.status != 1) or ((os.popen("systemctl status postgresql.service").read()).find("active (exited)") == -1)):
+                loggerError.error("Reconnecting...")
                 self.openConnection(self.spider)
             postgresQuery = "INSERT INTO " + os.environ['NEWS_TABLE'] + " (title, content, image, link, newsDate, site_id, datescraped) VALUES (%s, %s, %s, %s, %s, %s, NOW())"
-            processedDate = str(parser.parse(item.get('newsDate'), ignoretz=False))
+            processedDate = str(parser.parse(item.get('newsDate'), ignoretz=False, fuzzy=True))
             self.cursor.execute(postgresQuery,
                 (item.get('title'),
                 item.get('content'),
@@ -149,24 +158,25 @@ class postgresSQL(object):
                 processedDate,
                 item.get('source')))
             self.spider.urls_stored += 1
-        except psycopg2.IntegrityError as Error:
+        except psycopg2.Error as Error:
             # If the link already exists, this exception will be invoked
-            if (Error.pgcode == '23505'):
+            if (str(Error.pgcode) == '23505'):
                 pass
             else:
-                loggerError.error(str(Error) + " occured at " + str(item.get('link')))
+                loggerError.error("("+str(Error.pgcode)+") "+str(Error)+" occured at "+str(item.get('link')))
         except Exception as Error:
-            loggerError.error(str(Error) + " occured at " + str(item.get('link')))
+            loggerError.error(Error)
         finally:
             return item
 
 
     def checkUrlExists(self, link):
-        self.spider.urls_parsed += 1
         # Check if the url already exists in the database.
+        self.spider.urls_parsed += 1
         postgresQuery = "SELECT link from " + os.environ['NEWS_TABLE'] + " where link= %s"
         try:
-            if (self.connection.status != 1):
+            if ((self.connection.status != 1) or ((os.popen("systemctl status postgresql.service").read()).find("active (exited)") == -1)):
+                loggerError.error("Reconnecting...")
                 self.openConnection(self.spider)
             self.cursor.execute(postgresQuery, (link,))
             if self.cursor.fetchall():
@@ -174,6 +184,9 @@ class postgresSQL(object):
                 return True
             else:
                 return False
+        except psycopg2.Error as Error:
+            loggerError.error("("+str(Error.pgcode)+") "+str(Error)+" occured at "+link)
+            return True
         except Exception as Error:
             loggerError.error(Error)
             return True

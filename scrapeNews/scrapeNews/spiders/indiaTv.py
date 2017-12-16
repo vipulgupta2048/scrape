@@ -45,7 +45,7 @@ class IndiatvSpider(scrapy.Spider):
         item['newsDate'] = self.getPageDate(response)
         item['link'] = response.url
         item['source'] = 102
-        if item['title'] is not 'Error' or item['content'] is not 'Error' or item['newsDate'] is not 'Error':
+        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
             self.urls_scraped += 1
             yield item
 
@@ -78,8 +78,8 @@ class IndiatvSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data = ' '.join((' '.join(response.xpath("//div[@class='content']/p/text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[@class='content']/p/text()").extract())
         if not data:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
