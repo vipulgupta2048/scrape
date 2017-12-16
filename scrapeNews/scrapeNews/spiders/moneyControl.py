@@ -32,54 +32,57 @@ class MoneycontrolSpider(scrapy.Spider):
         self.urls_parsed -= 1
         loggerError.error('Non-200 response at ' + str(failure.request.url))
 
+
     def parse(self, response):
-        item = ScrapenewsItem()  # Scraper Items
         newsContainer = response.xpath("//ul[@id='cagetory']/li[@class='clearfix']")
         for newsBox in newsContainer:
-            item['link'] = self.getPageLink(newsBox)
-            if not self.postgres.checkUrlExists(item['link']):
-                item['image'] = self.getPageImage(newsBox)
-                item['title'] = self.getPageTitle(newsBox)
-                item['content'] = self.getPageContent(newsBox)
-                item['newsDate'] = self.getPageDate(newsBox)
-                item['source'] = 108
-                if item['title'] is not 'Error' and item['content'] is not 'Error' and item['link'] is not 'Error' and item['newsDate'] is not 'Error':
-                    self.urls_scraped += 1
-                    yield item
+            link = newsBox.xpath('a/@href').extract_first()
+            if not self.postgres.checkUrlExists(link):
+                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
 
-    def getPageContent(self, newsBox):
-        data = newsBox.xpath('p/text()').extract_first()
+
+    def parse_article(self, response):
+        item = ScrapenewsItem()  # Scraper Items
+        item['image'] = self.getPageImage(response)
+        item['title'] = self.getPageTitle(response)
+        item['content'] = self.getPageContent(response)
+        item['newsDate'] = self.getPageDate(response)
+        item['link'] = response.url
+        item['source'] = 108
+        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
+            self.urls_scraped += 1
+            yield item
+
+
+    def getPageTitle(self, response):
+        data = response.xpath("/html/head/meta[@property='og:title']/@content").extract_first()
         if (data is None):
-            data = newsBox.xpath('h2/a/@title').extract_first()
-        if (data is None):
-            loggerError.error(newsBox.extract())
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
-    def getPageTitle(self, newsBox):
-        data = newsBox.xpath('h2/a/text()').extract_first()
+    def getPageImage(self, response):
+        data = response.xpath("/html/head/meta[@property='og:image']/@content").extract_first()
         if (data is None):
-            loggerError.error(newsBox.extract())
+            loggerError.error(response.url)
             data = 'Error'
         return data
 
-    def getPageLink(self, newsBox):
-        data = newsBox.xpath('a/@href').extract_first()
-        if (data is None):
-            loggerError.error(newsBox.extract())
+    def getPageDate(self, response):
+        try:
+            # split & rsplit Used to Spit Data in Correct format!
+            data = response.xpath("/html/head/meta[@name='Last-Modified']/@content").extract_first()
+        except Exception as Error:
+            loggerError.error(Error, response.url)
             data = 'Error'
-        return data
+        finally:
+            return data
 
-    def getPageImage(self, newsBox):
-        data = newsBox.xpath('a/img/@src').extract_first()
-        if (data is None):
-            loggerError.error(newsBox.extract())
-            data = 'Error'
-        return data
-
-    def getPageDate(self, newsBox):
-        data = newsBox.xpath('span/text()').extract_first()
-        if (data is None):
-            loggerError.error(newsBox.extract())
+    def getPageContent(self, response):
+        data = ' '.join(response.xpath("//div[@id='article-main']/p/text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//meta[@property='og:description']/@content").extract())
+        if not data:
+            loggerError.error(response.url)
             data = 'Error'
         return data

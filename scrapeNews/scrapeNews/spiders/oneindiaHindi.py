@@ -35,7 +35,7 @@ class OneindiahindiSpider(scrapy.Spider):
     def parse(self, response):
         newsContainer = response.xpath('//div[@id="collection-wrapper"]/article')
         for newsBox in newsContainer:
-            link = 'https://hindi.oneindia.com/news/india/' + newsBox.xpath('div/h2/a/@href').extract_first()
+            link = 'https://hindi.oneindia.com' + newsBox.xpath('div/h2/a/@href').extract_first()
             if not self.postgres.checkUrlExists(link):
                 yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
 
@@ -54,9 +54,9 @@ class OneindiahindiSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())
         if not data:
-            data = ' '.join((''.join(response.xpath("//div[contains(@id,'slider0')]/p/text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//div[contains(@id,'slider0')]/p/text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'
@@ -79,8 +79,8 @@ class OneindiahindiSpider(scrapy.Spider):
                     try:
                         data = 'https://hindi.oneindia.com' + response.xpath("//img[contains(@class,'image_listical')]/@src").extract_first()
                     except Exception as Error:
-                            loggerError.error(str(Error) +' occured at: '+ response.url)
-                            data = 'Error'
+                        loggerError.error(str(Error) +' occured at: '+ response.url)
+                        data = 'Error'
         return data
 
     def getPageDate(self, response):

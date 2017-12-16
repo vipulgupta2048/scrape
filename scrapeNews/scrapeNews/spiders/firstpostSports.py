@@ -87,8 +87,8 @@ class FirstpostsportsSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        data = ' '.join((' '.join(response.xpath("//div[contains(@class,'article-full-content')]/p/text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[contains(@class,'article-full-content')]/p/text()").extract())
         if not data:
-            loggerError.error(Error, response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data

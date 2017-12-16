@@ -11,7 +11,7 @@ class OneindiaSpider(scrapy.Spider):
     custom_settings = {
         'site_id':109,
         'site_name':'oneindia',
-        'site_url':'https://www.oneindia.com/india/'}
+        'site_url':'https://www.oneindia.com/india'}
 
     def __init__(self, offset=0, pages=2, *args, **kwargs):
         super(OneindiaSpider, self).__init__(*args, **kwargs)
@@ -54,7 +54,7 @@ class OneindiaSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data = ' '.join((''.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())
         if not data:
             loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'

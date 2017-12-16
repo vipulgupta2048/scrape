@@ -27,8 +27,6 @@ def createDatabase():
     # This function is creating the database, it is different that others because it uses a
     # different connection (because you cannot create a database while on it, duh!)
     # It can be called anytime to create the database and is called automatically when scrapy crawls
-    if (os.popen("systemctl status postgresql.service").read()).find("active (exited)") == -1:
-        os.system('echo %s|sudo -S %s' % (envConfig.sudoPassword, "/etc/init.d/postgresql restart"))
     try:
         connection = psycopg2.connect(
             host= os.environ['HOST_NAME'],
@@ -81,8 +79,6 @@ class postgresSQL(object):
     def openConnection(self, spider):
         # Makes a connection with postgresSQL using pyscopg2
         self.spider = spider
-        if (os.popen("systemctl status postgresql.service").read()).find("active (exited)") == -1:
-            os.system('echo %s|sudo -S %s' % (envConfig.sudoPassword, "/etc/init.d/postgresql restart"))
         try:
             self.connection = psycopg2.connect(
                 host= os.environ['HOST_NAME'],
@@ -150,9 +146,10 @@ class postgresSQL(object):
         # Insert item into NEWS_TABLE after all the processing.
         try:
             if ((self.connection.status != 1) or ((os.popen("systemctl status postgresql.service").read()).find("active (exited)") == -1)):
+                loggerError.error("Reconnecting...")
                 self.openConnection(self.spider)
             postgresQuery = "INSERT INTO " + os.environ['NEWS_TABLE'] + " (title, content, image, link, newsDate, site_id, datescraped) VALUES (%s, %s, %s, %s, %s, %s, NOW())"
-            processedDate = str(parser.parse(item.get('newsDate'), ignoretz=False))
+            processedDate = str(parser.parse(item.get('newsDate'), ignoretz=False, fuzzy=True))
             self.cursor.execute(postgresQuery,
                 (item.get('title'),
                 item.get('content'),
@@ -179,6 +176,7 @@ class postgresSQL(object):
         postgresQuery = "SELECT link from " + os.environ['NEWS_TABLE'] + " where link= %s"
         try:
             if ((self.connection.status != 1) or ((os.popen("systemctl status postgresql.service").read()).find("active (exited)") == -1)):
+                loggerError.error("Reconnecting...")
                 self.openConnection(self.spider)
             self.cursor.execute(postgresQuery, (link,))
             if self.cursor.fetchall():

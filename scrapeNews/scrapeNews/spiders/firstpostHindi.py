@@ -82,17 +82,17 @@ class FirstposthindiSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/p//text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/p//text()").extract())
         if not data:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'aXjCH')]/div/p//text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'aXjCH')]/div/p//text()").extract())
         if not data:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/div/p/text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/div/p/text()").extract())
         if not data:
-            data = response.xpath("//div[@class='fulstorysharecomment']/text()").extract_first()
+            data = ' '.join(response.xpath("//div[@class='fulstorysharecomment']/text()").extract())
         if not data:
-            data =  ' '.join((' '.join(response.xpath("//div[@class='fullstorydivstorycomment']/p/text()").extract())).split(' ')[:40])
+            data =  ' '.join(response.xpath("//div[@class='fullstorydivstorycomment']/p/text()").extract())
         if not data:
-            data = ' '.join((' '.join(response.xpath("//div[contains(@class,'csmpn')]/div[not(@class)]/text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/div[not(@class)]/text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'

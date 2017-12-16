@@ -117,13 +117,13 @@ class TimetechSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data =  ' '.join((''.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())
         if not data:
-            data =  ' '.join((''.join(response.xpath("//section[@class='chapter']//text()").extract())).split(' ')[:40])
+            data = ' '.join(response.xpath("//section[@class='chapter']//text()").extract())
         if not data:
-            data =  ' '.join(''.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract()).split()[:40])
+            data = ' '.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract())
         if not data:
-            data =  response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract_first()
+            data = ' '.join(response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'

@@ -27,7 +27,7 @@ class NewsxSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)
-            sleep(2)
+            sleep(1)
 
     def errorRequestHandler(self, failure):
         self.urls_parsed -= 1
@@ -88,11 +88,11 @@ class NewsxSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        data = response.xpath("//div[@class='story-short-title']/h2/text()").extract_first()
-        if (data is None):
-            data = ' '.join(' '.join(response.xpath("//div[@itemprop='articleBody']/p//text()").extract()).split()[:40])
-        if (data is None):
-            data = ' '.join(' '.join(response.xpath("//div[@itemprop='articleBody']/div//text()").extract()).split()[:40])
+        data = ' '.join(response.xpath("//div[@class='story-short-title']/h2/text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/p//text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/div//text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'

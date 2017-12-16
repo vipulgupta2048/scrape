@@ -78,8 +78,8 @@ class IndiatvSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data = ' '.join((' '.join(response.xpath("//div[@class='content']/p/text()").extract())).split(' ')[:40])
+        data = ' '.join(response.xpath("//div[@class='content']/p/text()").extract())
         if not data:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+            loggerError.error(response.url)
             data = 'Error'
         return data
