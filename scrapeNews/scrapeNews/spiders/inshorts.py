@@ -51,11 +51,19 @@ class InshortsSpider(scrapy.Spider):
         self.news_id = pattern.search(js).group(1)
 
         while (self.pages > 1 and not self.infinite):
-            yield FormRequest('https://www.inshorts.com/en/ajax/more_news', formdata={'news-offset' : self.news_id}, callback=self.parse_more_news, errback=self.errorRequestHandler, dont_filter=True)
+            yield FormRequest('https://www.inshorts.com/en/ajax/more_news',
+                                formdata={'news-offset' : self.news_id},
+                                callback=self.parse_more_news,
+                                errback=self.errorRequestHandler,
+                                dont_filter=True)
             self.pages -= 1
 
         while (self.infinite):
-            yield FormRequest('https://www.inshorts.com/en/ajax/more_news', formdata={'news-offset' : self.news_id}, callback=self.parse_more_news, errback=self.errorRequestHandler, dont_filter=True)
+            yield FormRequest('https://www.inshorts.com/en/ajax/more_news',
+                                formdata={'news-offset' : self.news_id},
+                                callback=self.parse_more_news,
+                                errback=self.errorRequestHandler,
+                                dont_filter=True)
 
     def parse_more_news(self, response):
         ajax_response = json.loads(response.text)
