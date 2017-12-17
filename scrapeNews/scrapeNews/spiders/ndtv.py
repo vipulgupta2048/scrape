@@ -6,7 +6,6 @@ from dateutil import parser
 
 
 class NdtvSpider(scrapy.Spider):
-
     name = 'ndtv'
     custom_settings = {
         'site_id': 104,
@@ -33,15 +32,7 @@ class NdtvSpider(scrapy.Spider):
 
     def parse(self, response):
         for article_url in response.xpath('//div[@class="nstory_header"]/a/@href').extract():
-            yield scrapy.Request(url=   article_url, callback=self.parse_article, errback=self.errorRequestHandler)
-                # if news.xpath('.//div[@class="nstory_header"]/a/text()')
-                    # item['image'] = news.xpath('.//img/@src').extract_first()
-                    # item['title'] = news.xpath('.//div[@class="nstory_header"]/a/text()').extract_first().strip()
-                    # item['content'] = news.xpath('.//div[@class="nstory_intro"]/text()').extract_first()
-                    # item['link'] = news.xpath('.//div[@class="nstory_header"]/a/@href').extract_first()
-                    # item['newsDate'] = self.parse_date(item['link'])
-                    # item['source'] = 104
-                    # yield item
+            yield scrapy.Request(url=article_url, callback=self.parse_article, errback=self.errorRequestHandler)
 
     def parse_article(self, response):
         item = ScrapenewsItem()  # Scraper Items
@@ -71,7 +62,7 @@ class NdtvSpider(scrapy.Spider):
             return response.xpath('///div[@id="story_pic"]/div/img/@src').extract_first()
         else:
             loggerError.error('Check for parsing IMAGE at ' + response.url)
-            return ' '
+            return None
 
     def parse_title(self, response):
         if 'gadgets.ndtv.com' in response.url:
@@ -94,23 +85,23 @@ class NdtvSpider(scrapy.Spider):
         if 'gadgets.ndtv.com' in response.url:
             content_fragmented = response.css('div.content_text>p::text').extract()
             for c in content_fragmented:
-                content += c
+                content += c.strip()
         elif 'www.ndtv.com' in response.url:
             content_fragmented = response.xpath('//div[@itemprop="articleBody"]/text()').extract()
             for c in content_fragmented:
-                content += c
+                content += c.strip()
         elif 'auto.ndtv.com' in response.url or 'sports.ndtv.com' in response.url:
             content_fragmented = response.xpath('//div[@itemprop="articleBody"]/p/text()').extract()
             for c in content_fragmented:
-                content += c
+                content += c.strip()
         elif 'food.ndtv.com' in response.url or 'profit.ndtv.com' in response.url:
             content_fragmented = response.xpath('//span[@itemprop="articleBody"]/text()').extract()
             for c in content_fragmented:
-                content += c
+                content += c.strip()
         elif 'doctor.ndtv.com' in response.url:
             content_fragmented = response.xpath('//div[@class="article_storybody"]/p/text()').extract()
             for c in content_fragmented:
-                content += c
+                content += c.strip()
         else:
             loggerError.error('Could not handle parsing CONTENT at ' + response.url)
             return None
