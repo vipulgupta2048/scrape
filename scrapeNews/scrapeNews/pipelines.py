@@ -69,8 +69,8 @@ class ScrapenewsPipeline(object):
         pass
 
     def process_item(self, item, spider):
-        spider.postgres.insertIntoNewsTable(item)
-
+        item = spider.postgres.insertIntoNewsTable(item)
+        return item
 
 class postgresSQL(object):
     # postgresSQL class will be the class that has connection when the with postgresSQL

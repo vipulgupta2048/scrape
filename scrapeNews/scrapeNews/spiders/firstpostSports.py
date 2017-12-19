@@ -87,7 +87,19 @@ class FirstpostsportsSpider(scrapy.Spider):
             return data
 
     def getPageContent(self, response):
-        data = ' '.join(response.xpath("//div[contains(@class,'article-full-content')]/p/text()").extract())
+        data = ' '.join(response.xpath("//div[contains(@class,'article-full-content')]/p//text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[contains(@class,'article-full-content')]/div/p/text()").extract())
+        if not data:
+            data  =' '.join(response.xpath("//div[contains(@class,'article-full-content')]/div[not(@class)]//text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[contains(@class,'article')]/p[not(@class) and not(@id)]/text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/p/span/text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/div[not(@class)]//text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@class='consumption']/p//text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'
