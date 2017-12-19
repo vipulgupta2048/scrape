@@ -78,7 +78,7 @@ class IndiatvSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data = ' '.join(response.xpath("//div[@class='content']/p/text()").extract())
+        data = ' '.join(response.xpath("//div[@class='content']//*[not(self::script)]/text()").extract())
         if not data:
             loggerError.error(response.url)
             data = 'Error'

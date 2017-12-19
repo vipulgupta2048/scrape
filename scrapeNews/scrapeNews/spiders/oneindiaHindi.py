@@ -54,9 +54,12 @@ class OneindiahindiSpider(scrapy.Spider):
 
 
     def getPageContent(self, response):
-        data = ' '.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())
+        data = ' '.join(response.xpath("//div[contains(@class,'io-article-body')]//text()").extract())
         if not data:
             data = ' '.join(response.xpath("//div[contains(@id,'slider0')]/p/text()").extract())
+        if not data:
+            data = response.xpath("//article//*[not(self::script) and not(self::style)]/text()").extract()
+            data = ' '.join([x for x in data if x != ' ' and x!=u'\xa0']) # Removing all the blank spaces & joining list
         if not data:
             loggerError.error(response.url)
             data = 'Error'

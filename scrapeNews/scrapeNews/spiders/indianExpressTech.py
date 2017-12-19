@@ -53,11 +53,12 @@ class IndianexpresstechSpider(scrapy.Spider):
             yield item
 
     def getPageContent(self, response):
-        data = ' '.join(response.xpath('//h2[@class="synopsis"]/text()').extract())
+        data = ' '.join(response.xpath("//div[@class='body-article']/p/text()").extract())
         if not data:
             data = ' '.join(response.xpath("//div[@class='full-details']/p/text()").extract())
         if not data:
-            data = ' '.join(response.xpath("//div[@class='body-article']/p/text()").extract())
+            data = ' '.join(response.xpath('//h2[@class="synopsis"]/text()').extract())
+            loggerError.error(response.url)
         if not data:
             loggerError.error(response.url)
             data = 'Error'

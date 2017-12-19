@@ -86,11 +86,19 @@ class FirstposthindiSpider(scrapy.Spider):
         if not data:
             data = ' '.join(response.xpath("//div[contains(@class,'aXjCH')]/div/p//text()").extract())
         if not data:
-            data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/div/p/text()").extract())
+            data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/div[not(@class) or @class='alltake_head']//text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract())
         if not data:
             data = ' '.join(response.xpath("//div[@class='fulstorysharecomment']/text()").extract())
         if not data:
-            data =  ' '.join(response.xpath("//div[@class='fullstorydivstorycomment']/p/text()").extract())
+            data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/ul/li/text()").extract())
+        if not data:
+            data =  ' '.join(response.xpath("//div[@class='fullstorydivstorycomment' or @class='fullstorydivstory' or @class='fulstorytext']//text()").extract())
+        if not data:
+            data =  ' '.join(response.xpath("//div[@class='_1mf _1mj' or @class='ttl']//text()").extract())
+        if not data:
+            data =  ' '.join(response.xpath("//p[@class='news-intro']//text()").extract())
         if not data:
             data = ' '.join(response.xpath("//div[contains(@class,'csmpn')]/div[not(@class)]/text()").extract())
         if not data:
