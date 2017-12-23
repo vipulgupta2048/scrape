@@ -81,6 +81,8 @@ class MoneycontrolSpider(scrapy.Spider):
     def getPageContent(self, response):
         data = ' '.join(response.xpath("//div[@id='article-main']/p/text()").extract())
         if not data:
+            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract())
+        if not data:
             data = ' '.join(response.xpath("//meta[@property='og:description']/@content").extract())
         if not data:
             loggerError.error(response.url)

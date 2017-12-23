@@ -79,6 +79,8 @@ class AsianageSpider(scrapy.Spider):
     def getPageContent(self, response):
         data = ' '.join(response.xpath("//div[@id='storyBody']/p/text()").extract())
         if not data:
+            data = ' '.join(response.xpath("//div[@id='storyBody']/p//text()").extract())
+        if not data:
             loggerError.error(response.url)
             data = 'Error'
         return data

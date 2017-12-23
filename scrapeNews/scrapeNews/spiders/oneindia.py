@@ -13,6 +13,7 @@ class OneindiaSpider(scrapy.Spider):
         'site_name':'oneindia',
         'site_url':'https://www.oneindia.com/india'}
 
+
     def __init__(self, offset=0, pages=2, *args, **kwargs):
         super(OneindiaSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
@@ -56,12 +57,17 @@ class OneindiaSpider(scrapy.Spider):
     def getPageContent(self, response):
         data = ' '.join(response.xpath("//div[contains(@class,'io-article-body')]/p/text()").extract())
         if not data:
+            data = response.xpath("//meta[@property='og:description']/@content").extract_first()
+        if data is None:
             loggerError.error(str(Error) + ' occured at: ' + response.url)
             data = 'Error'
         return data
 
+
     def getPageTitle(self, response):
         data = response.xpath("//h1[contains(@class,'heading')]/text()").extract_first()
+        if (data is None):
+            data = response.xpath("//meta[@property='og:title']/@content").extract_first()
         if (data is None):
             loggerError.error(response.url)
             data = 'Error'
