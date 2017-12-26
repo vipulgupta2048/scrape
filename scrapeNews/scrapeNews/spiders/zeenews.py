@@ -28,6 +28,7 @@ class zeespider(scrapy.Spider):
         #For scraping the links on the next page of the website
         next_page = response.xpath('//link[@rel = "next"]/@href').extract_first()
         if next_page is not None:
+           print("==============Switching Page======================")
            yield response.follow(next_page, callback = self.parse)
 
     #For scraping a particular article listed on the main page
