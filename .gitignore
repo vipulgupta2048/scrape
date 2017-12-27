@@ -15,3 +15,6 @@ scrapeNews/envConfig.py
 
 #ignore .sh files
 *.sh
+
+#ignore vscode files
+**/.vscode

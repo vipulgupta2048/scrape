@@ -9,6 +9,8 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 import logging
+import envConfig
+
 BOT_NAME = 'scrapeNews'
 
 SPIDER_MODULES = ['scrapeNews.spiders']
@@ -107,3 +109,17 @@ fileHandlerError.setFormatter(formatterError)
 streamHandlerError.setFormatter(formatterError)
 loggerError.addHandler(fileHandlerError)
 loggerError.addHandler(streamHandlerError)
+
+try{
+    DB_INFO['USERNAME'] = envConfig.USERNAME
+    DB_INFO['PASSWORD'] = envConfig.PASSWORD
+    DB_INFO['NEWS_TABLE'] = envConfig.NEWS_TABLE
+    DB_INFO['SITE_TABLE'] = envConfig.SITE_TABLE
+    DB_INFO['LOG_TABLE'] = envConfig.LOG_TABLE
+    DB_INFO['DATABASE_NAME'] = envConfig.DATABASE_NAME
+    DB_INFO['HOST_NAME'] = envConfig.HOST_NAME
+}
+except Exception as e{
+    logger.critical(__name__ + " Getting Environment Variabled Failed! Msg: " + str(e))
+    exit()
+}
