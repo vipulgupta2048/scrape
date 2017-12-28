@@ -33,6 +33,33 @@ Navigate to repository: `pip3 install -r requirements.txt`
 - Requirements(For flask Application):
     - flask
 
+
+### Install TOR and Privoxy
+#### Install TOR
+```bash
+sudo apt-get install tor
+```
+
+#### Install Privoxy
+```bash
+sudo apt-get install privoxy
+```
+
+#### Configure Privoxy to route TOR
+
+Add following lines at the end of ```/etc/privoxy/config```
+```bash
+forward-socks5  / 127.0.0.1:9050 .
+forward-socks4a / 127.0.0.1:9050 .
+forward-socks5t / 127.0.0.1:9050 .
+```
+
+#### Start TOR And Privoxy
+```bash
+sudo service tor start
+sudo service privoxy start
+```
+
 ### Database Setup (PostgreSQL)
 
 **Note: You can comment out the following code in settings.py to avoid using pipelines.**

@@ -9,12 +9,14 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 import logging
+import envConfig
+
 BOT_NAME = 'scrapeNews'
 
 SPIDER_MODULES = ['scrapeNews.spiders']
 NEWSPIDER_MODULE = 'scrapeNews.spiders'
 
-LOG_LEVEL = 'CRITICAL'  # to only display errors
+LOG_LEVEL = 'ERROR'  # to only display errors
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrapeNews (+http://www.yourdomain.com)'
 
@@ -52,9 +54,10 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'scrapeNews.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
+HTTP_PROXY = 'http://127.0.0.1:8118'
+DOWNLOADER_MIDDLEWARES = {
+    'scrapeNews.middlewares.TorProxyMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -106,3 +109,17 @@ fileHandlerError.setFormatter(formatterError)
 streamHandlerError.setFormatter(formatterError)
 loggerError.addHandler(fileHandlerError)
 loggerError.addHandler(streamHandlerError)
+
+try{
+    DB_INFO['USERNAME'] = envConfig.USERNAME
+    DB_INFO['PASSWORD'] = envConfig.PASSWORD
+    DB_INFO['NEWS_TABLE'] = envConfig.NEWS_TABLE
+    DB_INFO['SITE_TABLE'] = envConfig.SITE_TABLE
+    DB_INFO['LOG_TABLE'] = envConfig.LOG_TABLE
+    DB_INFO['DATABASE_NAME'] = envConfig.DATABASE_NAME
+    DB_INFO['HOST_NAME'] = envConfig.HOST_NAME
+}
+except Exception as e{
+    logger.critical(__name__ + " Getting Environment Variabled Failed! Msg: " + str(e))
+    exit()
+}
