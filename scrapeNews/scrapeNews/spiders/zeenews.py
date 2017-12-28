@@ -10,11 +10,6 @@ class zeespider(scrapy.Spider):
         'site_name':'Zee News',
         'site_url':'http://zeenews.india.com/india'}
 
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
-
     #Scraping the main page for article links
     def parse(self, response):
         articles = response.xpath('//section[contains(@class, "maincontent")]//div[contains(@class, "section-article")]') #extracts HTML from the start_url

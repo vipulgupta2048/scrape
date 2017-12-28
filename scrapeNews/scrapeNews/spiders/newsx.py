@@ -20,10 +20,6 @@ class NewsxSpider(scrapy.Spider):
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.newsx.com/latest-news/page/'+ str(count+1))
 
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
-
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)

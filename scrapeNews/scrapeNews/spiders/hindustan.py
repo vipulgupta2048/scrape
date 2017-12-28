@@ -12,9 +12,6 @@ class HindustanSpider(scrapy.Spider):
         'site_name':'hindustantimes',
         'site_url':'http://www.hindustantimes.com/editors-pick/'}
 
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
     temp = 'http://www.hindustantimes.com/Fragment/HT/Web/Components/home-editors-pick.dwc?style=/PortalConfig/www.ns.hindustantimes.com/jpt-ns/include/fragments/show-more-fragment.jpt&offset='
     start_urls = [temp+'1']
     count = 1

@@ -18,10 +18,6 @@ class TimenewsSpider(scrapy.Spider):
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://time.com/section/world/?page='+ str(count+1))
 
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
-
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)

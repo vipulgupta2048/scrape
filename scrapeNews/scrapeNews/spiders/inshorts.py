@@ -78,6 +78,3 @@ class InshortsSpider(scrapy.Spider):
             item['link'] = news.css('div.read-more>a::attr(href)').extract_first()
             item['source'] = 105
             yield item
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)

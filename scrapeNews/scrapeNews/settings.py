@@ -16,7 +16,7 @@ BOT_NAME = 'scrapeNews'
 SPIDER_MODULES = ['scrapeNews.spiders']
 NEWSPIDER_MODULE = 'scrapeNews.spiders'
 
-LOG_LEVEL = 'ERROR'  # to only display errors
+LOG_LEVEL = 'DEBUG'  # to only display errors
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrapeNews (+http://www.yourdomain.com)'
 
@@ -95,10 +95,10 @@ ITEM_PIPELINES = {
 # Logger Configuration (scrapeNews)
 logger = logging.getLogger("scrapeNews")
 handler = logging.FileHandler('scrapeNews.log')
-formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+formatter = logging.Formatter('%(asctime)s %(name)-12s [%(lineno)d]%(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.DEBUG)
 
 #Logger Configuration (scrapeNewsError)
 loggerError = logging.getLogger("scrapeNewsError")
@@ -109,8 +109,8 @@ fileHandlerError.setFormatter(formatterError)
 streamHandlerError.setFormatter(formatterError)
 loggerError.addHandler(fileHandlerError)
 loggerError.addHandler(streamHandlerError)
-
-try{
+DB_INFO = {}
+try:
     DB_INFO['USERNAME'] = envConfig.USERNAME
     DB_INFO['PASSWORD'] = envConfig.PASSWORD
     DB_INFO['NEWS_TABLE'] = envConfig.NEWS_TABLE
@@ -118,8 +118,6 @@ try{
     DB_INFO['LOG_TABLE'] = envConfig.LOG_TABLE
     DB_INFO['DATABASE_NAME'] = envConfig.DATABASE_NAME
     DB_INFO['HOST_NAME'] = envConfig.HOST_NAME
-}
-except Exception as e{
+except Exception as e:
     logger.critical(__name__ + " Getting Environment Variabled Failed! Msg: " + str(e))
     exit()
-}

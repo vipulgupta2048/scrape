@@ -37,10 +37,6 @@ class News18Spider(scrapy.Spider):
     start_url = "http://www.news18.com/news/"
     ignoreClasses = ["photoiconb", "photoicons", "vodeoiconb", "vodeoicons"]
 
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
-
     def start_requests(self):
         yield scrapy.Request(url = self.start_url, callback=self.parse)
 
