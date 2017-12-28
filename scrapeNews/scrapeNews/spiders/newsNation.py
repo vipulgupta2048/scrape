@@ -26,50 +26,72 @@ class nation(scrapy.Spider):
         #For scraping the links on the next page of the website
         next_page = response.xpath('//a[@rel="next"]/@href').extract_first()
         if next_page is not None:
-            print("==============Switching Page======================")
+            print("=================Switching Page==================")
             yield response.follow(next_page, callback = self.parse)
 
     #For scraping a particular article listed on the main page
     def parse_article(self,response):
         i = ScrapenewsItem()
         i['title'] = self.gettitle(response)
-        i['link'] = response.url
+        i['link'] = self.getlink(response) #response.url 
         i['image'] = self.getimage(response)
         i['newsDate'] = self.getdatetime(response)
         i['content'] = self.getcontent(response)
         i['source'] = 117
         
-        yield i
+        if i['title'] is not 'Error' and i['content'] is not 'Error' and i['link'] is not 'Error' and i['newsDate'] is not 'Error':
+                self.urls_scraped += 1
+                yield i
+        else:
+            self.urls_parsed -= 1
+            yield None
 
     def gettitle(self,response):
         data = response.xpath("//h1/text()").extract_first() 
-        if (data is None):
+        if data is None:
+            return 0
+        if not data:
             loggerError.error(response.url)
             data = 'Error'
         return data   
 
     def getdatetime(self,response):
-        data = response.xpath('//span[contains(@itemprop, "date")]/text()').extract_first() 
-        z = (datetime.strptime(data," %d %b , %Y , %H:%M %p")).strftime("%Y-%m-%d %H:%M:%S")
-        if (z is None):
+        try:
+            data = response.xpath('//span[contains(@itemprop, "date")]/text()').extract_first() 
+            if data is None:
+                return 0
+            z = (datetime.strptime(data," %d %b , %Y , %H:%M %p")).strftime("%Y-%m-%d %H:%M:%S")
+            
+        except Exception as Error:
             loggerError.error(response.url)
             data = 'Error'
-        return data   
-
+        finally:
+            return data
+            
     def getcontent(self,response):
         data = response.xpath('//div[@itemprop ="articleBody"]//p/text()').extract()
         if not data:
             data = response.xpath('//div[@itemprop ="articleBody"]//span/text()').extract()
-        if not data:    
+        if not data or data is None:    
             loggerError.error(response.url)
             data = 'Error'
-        if data is none: 
-            yield none
         return data
-
+        
     def getimage(self,response):
         data = response.xpath('//div[contains(@itemprop, "image")]//img/@src').extract_first()
+        if data is None:
+            return 0
+        if not data:
+            data = response.xpath("//meta[@property='og:image']/@content").extract_first()
         if not data:    
             loggerError.error(response.url)
             data = 'Error'
         return data
+        
+    def getlink(self,response):
+        data = response.url
+        if data == start_urls:
+            loggerError.error(response.url)
+            data = 'Error'
+        return data
+ 
