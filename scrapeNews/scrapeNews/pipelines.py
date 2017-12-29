@@ -9,8 +9,8 @@ import os
 from scrapy import signals
 from scrapeNews.settings import DB_INFO, logger
 from scrapeNews.db import postgresSQL, createDatabase
-from scrapy.exceptions import CloseSpider
-
+from scrapy.exceptions import CloseSpider, DropItem
+from dateutil import parser
 # Setting Environment Variables
 
 os.environ['USERNAME'] = DB_INFO['USERNAME']
@@ -57,6 +57,7 @@ class ScrapenewsPipeline(object):
             raise CloseSpider(" Unable to Start Log!")
 
     def checkSite(self, spider):
+        """ Verifies if site exist in database, add otherwise """
         # Verify Database Connection
         if not spider.postgres.checkConnection():
             logger.error(__name__ + " No Database Connection Found!")
@@ -77,26 +78,17 @@ class ScrapenewsPipeline(object):
             logger.error(__name__ + " Unable to add site to Database! Msg: " + str(e))
             raise CloseSpider("Unable to add site to Database")
 
-    def process_item(self, item, spider):
-
-        # Insert Item to Database
-        if not spider.postgres.insertIntoNewsTable(item, spider.log_id):
-            # If Error, Update Dropped Count
-            spider.urls_dropped += 1
-        else:
-            # Update Stored Count
-            spider.urls_stored += 1
-        
-        return item
-    
     # Special Methods Below, Read about them before altering
     @classmethod
     def from_crawler(cls, crawler):
         temp = cls()
         crawler.signals.connect(temp.spider_closed, signal=signals.spider_closed)
+        crawler.signals.connect(temp.item_dropped, signal=signals.item_dropped)
         return temp
 
     def spider_closed(self, spider, reason):
+        # Calls After Spider is closed
+
         # Check Connection
         if not spider.postgres.checkConnection():
             raise CloseSpider("Unable to Establish a Database Connection")
@@ -115,4 +107,72 @@ class ScrapenewsPipeline(object):
         
         # Close the database connection
         spider.postgres.connection.close()
-        logger.info(__name__ + spider.name +" SPIDER CLOSED")
+        logger.info(__name__ + " [" + spider.name + "] SPIDER CLOSED")
+    
+    def item_dropped(self, item, response, exception, spider):
+        # Calls When DropItem Exception is raised
+        spider.urls_dropped += 1
+        logger.info(__name__ + " [Dropped] <Spider>: " + spider.name + " <Reason>: " + str(exception) + " <Link>: " + str(item['link']))
+
+class DuplicatesPipeline(object):
+    """ Drops any accidentally sent Duplicate URLs """
+    def process_item(self, item, spider):
+
+        if not spider.postgres.checkConnection():
+            raise CloseSpider("Unable to Establish a Database Connection")
+        
+        if spider.postgres.checkUrlExists(item['link']):
+            raise DropItem("Url " + item['link'] + " Exists in Database")
+        
+        return item
+
+class DataFormatterPipeline(object):
+    """ Formats/Cleans Item Data to Specified Format """
+
+    def process_item(self, item, spider):
+        
+        self.checkInvalidKeys(item)
+        item['newsDate'] = self.process_date(item['newsDate'])
+        
+        return item
+
+    def process_date(self, date):
+        """ Processes Date and tries to convert it to Valid Python DateTime Object. Returns Formatted String """
+        try:
+            parsed_date = parser.parse(date, ignoretz=False, fuzzy=True)
+            return str(parsed_date)
+        except Exception as e:
+            logger.error(__name__ + " Unable to Parse Date (Input: "+ str(date) + ") due to " + str(e))
+            raise DropItem("Unable to Parse Date due to " + str(e))
+    
+    def checkInvalidKeys(self, item):
+        """ Checks Keys For Invalid Entries Such as None/Empty """        
+        allowedKeys = {
+            'None': ["image"],
+            'Empty': ["image"]
+        }
+        for key in item:
+            try:
+                if (item[key] == None or item[key] == "Error") and key not in allowedKeys['None']:
+                    raise DropItem("Required Key " + str(key) + " is None")
+
+                if(item[key] == "" and key not in allowedKeys['Empty']):
+                    raise DropItem("Required Key " + str(key) + " is Empty")
+            
+            except Exception as e:
+                pass
+
+class DatabasePipeline(object):
+    """ Communicates with Database and Stores Finalised Items """
+
+    def process_item(self, item, spider):
+
+        # Insert Item to Database
+        if not spider.postgres.insertIntoNewsTable(item, spider.log_id):
+            # If Error, Update Dropped Count
+            spider.urls_dropped += 1
+        else:
+            # Update Stored Count
+            spider.urls_stored += 1
+        
+        return item

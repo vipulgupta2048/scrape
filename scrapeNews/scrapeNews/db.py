@@ -1,7 +1,6 @@
 import psycopg2
 from scrapeNews.settings import DB_INFO
 from scrapeNews.settings import logger
-from dateutil import parser
 from psycopg2.extras import DictCursor
 
 class postgresSQL(object):
@@ -151,15 +150,14 @@ class postgresSQL(object):
             # Prepare the Query
             postgresQuery = "INSERT INTO " + DB_INFO['NEWS_TABLE'] + " (title, content, image, link, newsDate, site_id, log_id, datescraped) VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())"
 
-            processedDate = str(parser.parse(item.get('newsDate'), ignoretz=False, fuzzy=True))
             # Execute the Query
             self.cursor.execute(postgresQuery,
-                (item.get('title'),
-                item.get('content'),
-                item.get('image'),
-                item.get('link'),
-                processedDate,
-                item.get('source'),
+                (item['title'],
+                item['content'],
+                item['image'],
+                item['link'],
+                item['newsDate'],
+                item['source'],
                 log_id))
             return True
         except psycopg2.Error as Error:

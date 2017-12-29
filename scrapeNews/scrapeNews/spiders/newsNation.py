@@ -5,6 +5,11 @@ class nation(scrapy.Spider):
     name = "nnation"
     start_urls = ['http://www.newsnation.in/business-news',]
 
+    custom_settings = {
+        'site_id':117,
+        'site_name':'Newsnation',
+        'site_url':'http://www.newsnation.in/business-news/'}
+
     def parse(self,response):
         newsBox = response.xpath('//ul[contains(@class, "ciln")]/li')
         for box in newsBox:
