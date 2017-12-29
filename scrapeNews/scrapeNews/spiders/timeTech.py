@@ -12,7 +12,7 @@ class TimetechSpider(scrapy.Spider):
         'site_name':'timeTech',
         'site_url':'http://time.com/section/tech/'}
 
-    def __init__(self, offset=0, pages=4, *args, **kwargs):
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
         super(TimetechSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://time.com/section/tech/?page='+ str(count+1))

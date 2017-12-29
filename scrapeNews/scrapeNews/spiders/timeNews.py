@@ -13,7 +13,7 @@ class TimenewsSpider(scrapy.Spider):
         'site_name':'timeNews',
         'site_url':'http://time.com/section/world/'}
 
-    def __init__(self, offset=0, pages=4, *args, **kwargs):
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
         super(TimenewsSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://time.com/section/world/?page='+ str(count+1))
