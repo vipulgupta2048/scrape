@@ -1,0 +1,21 @@
+# Tested on ubuntu 14.04
+# Minimum Requirements
+    # Ubuntu > 12.04
+    # Vagrant >= 1.7.0
+
+---
+- hosts: testBench
+  become: yes
+  vars:
+    user: atb00ker
+    destination: /home/{{ user }}/scrape
+    repository: https://github.com/vipulgupta2048/scrape.git
+    envFileToSend: filesToSend/envConfig.py
+    flaskFileToSend: filesToSend/flask_server
+    database_user: scrapeuser
+    database_password: simple
+  tasks:
+  # - name: Install tmux
+  #   apt: name=tmux state=present
+  - name: Make tmux session
+    shell: "tmux kill-session -t server; tmux new-session -s server -d && tmux send -t server 'source {{ destination }}/venv/bin/activate && gunicorn {{ destination }}/app:' ENTER"

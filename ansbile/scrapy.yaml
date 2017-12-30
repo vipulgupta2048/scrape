@@ -1,0 +1,80 @@
+# Tested on ubuntu 14.04
+# Minimum Requirements
+    # Ubuntu > 12.04
+    # Vagrant >= 1.7.0
+
+---
+- hosts: scrapy-server
+  become: yes
+  vars:
+    user:  atb00ker
+    destination: /home/{{ user }}/scrape
+    repository: https://github.com/atb00ker/scrape.git
+    branch: atb00ker
+    envFileToSend: filesToSend/envConfig.py
+    flaskFileToSend: filesToSend/flask_server
+    pg_user: scrapeuser
+    pg_password: simple
+  tasks:
+  - name: Update and Upgrade apt packages
+    apt:
+      upgrade: yes
+      update_cache: yes
+  - name: Install Basic Applications
+    apt: pkg={{ item }} state=latest
+    with_items:
+        - curl
+        - nano
+        - nginx
+  - name: Copy flask_server to sites_avaiable
+    copy:
+      src: "{{ flaskFileToSend }}"
+      dest: "/etc/nginx/sites-available/"
+  - name: Clean sites-enabled
+    file:
+      state: absent
+      path: "/etc/nginx/sites-enabled/flask_server"
+  - name: Link sites-available
+    shell: "sudo ln -s /etc/nginx/sites-available/flask_server /etc/nginx/sites-enabled"
+  - name: restart nginx
+    service: name=nginx state=restarted
+  - name: Install Git
+    apt: pkg=git state=latest
+  - name: Clone/Update Repository
+    git:
+      repo: "{{ repository }}"
+      dest: "{{ destination }}"
+      version: "{{ branch }}"
+  - name: Copy envConfig.py to remote server
+    copy:
+      src: "{{ envFileToSend }}"
+      dest: "{{ destination }}/scrapeNews/"
+  - name: Install Python & Python Requirements
+    apt: pkg={{ item }}
+    with_items:
+        - python3
+        - python3-pip
+        - python3-dev
+        - build-essential
+        - python-virtualenv
+        - python-psycopg2
+  - name: Make environment and Install Requirements
+    pip:
+      requirements: "{{ destination }}/requirements.txt"
+      virtualenv: "{{ destination }}/venv"
+      virtualenv_python: python3
+  - name: Install PostgreSQL
+    apt: name=postgresql state=latest
+  - name: Create PostgreSQL Role
+    postgresql_user: name={{ pg_user }} password={{ pg_password }} role_attr_flags=SUPERUSER,REPLICATION,BYPASSRLS
+    become: yes
+    become_user: postgres
+  - name: Install tmux
+    apt: name=tmux state=present
+  - name: Make tmux session
+    shell: "tmux kill-session -t server; tmux new-session -s server -d && tmux send -t server 'source {{ destination }}/venv/bin/activate && cd {{ destination }}/app && gunicorn app:app' ENTER"
+  - cron:
+      name: "Set hourly run for spiders"
+      user: "{{ user }}"
+      minute: "0"
+      job: "cd {{ destination }}/scrapeNews/ && sh run.sh"

@@ -1,0 +1,7 @@
+USERNAME = 'scrapeuser'
+PASSWORD = 'simple'
+NEWS_TABLE = 'news_table'
+SITE_TABLE = 'site_table'
+LOG_TABLE = 'log_table'
+DATABASE_NAME = 'scraped_news'
+HOST_NAME = 'localhost'
