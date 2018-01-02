@@ -19,10 +19,6 @@ class MoneycontrolSpider(scrapy.Spider):
         for count in range(1 , int(pages)+1):
             self.start_urls.append('http://www.moneycontrol.com/news/business/page-'+ str(count))
 
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
-
     def start_requests(self):
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errorRequestHandler)

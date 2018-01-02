@@ -28,11 +28,6 @@ class OneindiaSpider(scrapy.Spider):
         self.urls_parsed -= 1
         loggerError.error('Non-200 response at ' + str(failure.request.url))
 
-
-    def closed(self, reason):
-        self.postgres.closeConnection(reason)
-
-
     def parse(self, response):
         newsContainer = response.xpath('//div[@id="collection-wrapper"]/article')
         for newsBox in newsContainer:
