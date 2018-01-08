@@ -167,7 +167,7 @@ class postgresSQL(object):
             else:
                 logger.error(__name__ + "(" + str(Error.pgcode) + ") " + str(Error) + " occured at " + str(item.get('link')))
         except Exception as Error:
-            logger.error(__name__ + str(Error))
+            logger.error(__name__ + " Error While Inserting to Database : " + str(Error))
         
         return False
 

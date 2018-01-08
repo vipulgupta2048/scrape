@@ -156,11 +156,14 @@ class DataFormatterPipeline(object):
                 if (item[key] == None or item[key] == "Error") and key not in allowedKeys['None']:
                     raise DropItem("Required Key " + str(key) + " is None")
 
-                if(item[key] == "" and key not in allowedKeys['Empty']):
-                    raise DropItem("Required Key " + str(key) + " is Empty")
-            
-            except Exception as e:
+                if(type(item[key]) is str and key not in allowedKeys['Empty']):
+                    if len(item[key]) == 0:
+                        raise DropItem("Required Key " + str(key) + " is Empty")
+            except DropItem:
                 pass
+            except Exception as e:
+                logger.error(__name__ + " Exception: " + str(e))
+                continue
 
 class DatabasePipeline(object):
     """ Communicates with Database and Stores Finalised Items """

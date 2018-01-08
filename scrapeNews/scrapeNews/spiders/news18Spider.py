@@ -74,34 +74,40 @@ class News18Spider(scrapy.Spider):
 
     def parse_news(self, response):
         try:
-            news_url = response.url
+            item = ScrapenewsItem()
+
+            item['link'] = response.url
+            item['source'] = self.custom_settings['site_id']
             news_parser = "default"
 
             for parser_str in self.xpaths:
                 match = r'\/'+re.escape(parser_str)+r'\/'
-                if re.search(match, news_url) is not None:
+                if re.search(match, item['link']) is not None:
                     news_parser = parser_str
                     break
 
-            news_title = response.xpath(self.xpaths[news_parser]['title']).extract_first()
-            news_description = response.xpath(self.xpaths[news_parser]['description']).extract_first()
-            news_picture = response.xpath(self.xpaths[news_parser]['image']).extract_first()
-            news_date = response.xpath(self.xpaths[news_parser]['date']).extract_first()
+            logger.debug(__name__ + " Using " + news_parser + " parser for url " + response.url)
 
-            if news_title == None or news_description == None or news_picture == None or news_date == None:
-                logger.error(__name__+" Error Extracting Data for URL " + news_url)
-                self.urls_dropped += 1    
-                yield None
-                return
-            elif len(news_picture) == 0 or len(news_description) == 0 or len(news_picture) == 0 or len(news_date) == 0:
-                logger.error(__name__+" Empty Data for URL "+news_url)
-                self.urls_dropped += 1
-                yield None
-                return
+            item['title'] = response.xpath(self.xpaths[news_parser]['title']).extract_first()
+            item['content'] = response.xpath(self.xpaths[news_parser]['description']).extract()[0]
+            logger.debug(__name__ + item['content'])
+            item['image'] = response.xpath(self.xpaths[news_parser]['image']).extract_first()
+            item['newsDate'] = response.xpath(self.xpaths[news_parser]['date']).extract_first()
+            
+            # Remove Escaped Characters
+            item['content'] = re.sub(r"[\t\r\n]{0,}", "", item['content'])
 
-            item = ScrapenewsItem({'link': news_url, 'title': news_title, 'content': news_description, 'image': news_picture, 'newsDate': news_date, 'source': self.custom_settings['site_id']})
+            # Remove Unwanted Spaces from start and end
+            item['content'] = re.sub(r"^\s{0,}|\s{0,}$", "", item['content'])
+
+            for key in item:
+                if item[key] == None and key != 'image':
+                    logger.error(__name__ + " A Required Key wasn't extracted: " + key)
+                    self.urls_dropped += 1
+                    yield None
 
             self.urls_scraped += 1
             yield item
+
         except Exception as e:
             logger.error(__name__ + " Unhandled <" + response.url + ">: " + str(e))
