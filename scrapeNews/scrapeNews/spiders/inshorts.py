@@ -16,6 +16,7 @@ class InshortsSpider(scrapy.Spider):
         'site_id':105,
         'site_name':'Inshorts',
         'site_url':'http://www.inshorts.com/en/read/'}
+    download_delay = 1
 
     def __init__(self, pages=3, toInfinityAndBeyond=False ,*args, **kwargs):
         '''
