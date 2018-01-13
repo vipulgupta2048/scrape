@@ -10,6 +10,7 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 import logging
 import envConfig
+import os
 
 BOT_NAME = 'scrapeNews'
 
@@ -114,13 +115,13 @@ loggerError.addHandler(fileHandlerError)
 loggerError.addHandler(streamHandlerError)
 DB_INFO = {}
 try:
-    DB_INFO['USERNAME'] = envConfig.USERNAME
-    DB_INFO['PASSWORD'] = envConfig.PASSWORD
-    DB_INFO['NEWS_TABLE'] = envConfig.NEWS_TABLE
-    DB_INFO['SITE_TABLE'] = envConfig.SITE_TABLE
-    DB_INFO['LOG_TABLE'] = envConfig.LOG_TABLE
-    DB_INFO['DATABASE_NAME'] = envConfig.DATABASE_NAME
-    DB_INFO['HOST_NAME'] = envConfig.HOST_NAME
+    DB_INFO['USERNAME'] = os.environ['SCRAPER_DB_USER']
+    DB_INFO['PASSWORD'] = os.environ['SCRAPER_DB_PASS']
+    DB_INFO['NEWS_TABLE'] = os.environ['SCRAPER_DB_TABLE_NEWS']
+    DB_INFO['SITE_TABLE'] = os.environ['SCRAPER_DB_TABLE_SITE']
+    DB_INFO['LOG_TABLE'] = os.environ['SCRAPER_DB_TABLE_LOG']
+    DB_INFO['DATABASE_NAME'] = os.environ['SCRAPER_DB_NAME']
+    DB_INFO['HOST_NAME'] = os.environ['SCRAPER_DB_HOST']
 except Exception as e:
     logger.critical(__name__ + " Getting Environment Variabled Failed! Msg: " + str(e))
     exit()
