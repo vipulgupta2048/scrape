@@ -11,9 +11,6 @@ from scrapeNews.db import postgresSQL, createDatabase
 from scrapy.exceptions import CloseSpider, DropItem
 from dateutil import parser
 
-# Calling logging module instance
-loggerError = logging.getLogger("scrapeNewsError")
-
 #Calling to create database if it doesn't exist already!
 createDatabase()
 

@@ -102,17 +102,8 @@ handler = logging.FileHandler('scrapeNews.log')
 formatter = logging.Formatter('%(asctime)s %(name)-12s [%(lineno)d]%(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
-#Logger Configuration (scrapeNewsError)
-loggerError = logging.getLogger("scrapeNewsError")
-formatterError = logging.Formatter('%(filename)s[%(lineno)d]: %(message)s')
-fileHandlerError = logging.FileHandler('scrapeNewsError.log')
-streamHandlerError = logging.StreamHandler()
-fileHandlerError.setFormatter(formatterError)
-streamHandlerError.setFormatter(formatterError)
-loggerError.addHandler(fileHandlerError)
-loggerError.addHandler(streamHandlerError)
 DB_INFO = {}
 try:
     DB_INFO['USERNAME'] = os.environ['SCRAPER_DB_USER']
