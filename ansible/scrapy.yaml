@@ -40,3 +40,5 @@
       user: "{{ user }}"
       minute: "0"
       job: "cd {{ destination }}/scrapeNews/ && sh run.sh"
+  - name: run all the spider once
+    shell: "cd {{ destination }}/scrapeNews/ && sudo -u {{ user }} sh run.sh"

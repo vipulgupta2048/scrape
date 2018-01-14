@@ -4,6 +4,6 @@
   remote_user: root
   tasks:
   - include_vars: dir=defaults
+- import_playbook: PostgreSQL.yaml
 - import_playbook: scrapy.yaml
 - import_playbook: nginx.yaml
-- import_playbook: PostgreSQL.yaml

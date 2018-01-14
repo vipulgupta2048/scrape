@@ -57,11 +57,8 @@ class IndianexpresstechSpider(scrapy.Spider):
         if not data:
             data = ' '.join(response.xpath("//div[@class='full-details']/p/text()").extract())
         if not data:
-<<<<<<< HEAD
-=======
             data = ' '.join(response.xpath("//div[@class='blog-content']/p/text()").extract())
         if not data:
->>>>>>> 87d34aa1fd30b715c9db6c1ea8c34b7044343792
             data = ' '.join(response.xpath('//h2[@class="synopsis"]/text()').extract())
             loggerError.error(response.url)
         if not data:

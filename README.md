@@ -10,6 +10,7 @@ If you are familiar with ansible, you can use the change the variables in `ansib
 
 ## Manual Installation
 **Note: Quick Installation is prefered.**
+
 Clone the repository (or download it). Then, follow the installation steps to run the spiders.
 
 ### Create a Virtual Environemnt

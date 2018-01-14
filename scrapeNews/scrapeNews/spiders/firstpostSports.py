@@ -79,7 +79,7 @@ class FirstpostsportsSpider(scrapy.Spider):
     def getPageDate(self, response):
         try:
             # split & rsplit Used to Spit Data in Correct format!
-            data = (response.xpath("//head/meta[@property='article:published_time']/@content").extract_first()).rsplit('+',1)[0]
+            data = (response.xpath("//meta[@property='article:published_time']/@content").extract_first()).rsplit('+',1)[0]
         except Exception as Error:
             loggerError.error(Error, response.url)
             data = 'Error'

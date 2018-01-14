@@ -21,12 +21,3 @@ timeout 30m sudo scrapy crawl inshorts;
 timeout 30m sudo scrapy crawl ndtv -a pages=5;
 
 deactivate;
-
-
-# pip install gunicorn
-# sudo nano scraper.service
-# sudo chmod 777 /etc/systemd/system/scraper.service
-# sudo systemctl daemon-reload
-# sudo systemctl start scraper.service
-# sh start
-# sudo chmod 777 start
