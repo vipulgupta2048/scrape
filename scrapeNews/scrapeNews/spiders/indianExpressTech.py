@@ -14,7 +14,7 @@ class IndianexpresstechSpider(scrapy.Spider):
         'site_url': 'http://indianexpress.com/section/technology/'}
 
 
-    def __init__(self, offset=0, pages=2, *args, **kwargs):
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
         super(IndianexpresstechSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://indianexpress.com/section/technology/page/'+ str(count+1))
@@ -56,6 +56,8 @@ class IndianexpresstechSpider(scrapy.Spider):
         data = ' '.join(response.xpath("//div[@class='body-article']/p/text()").extract())
         if not data:
             data = ' '.join(response.xpath("//div[@class='full-details']/p/text()").extract())
+        if not data:
+            data = ' '.join(response.xpath("//div[@class='blog-content']/p/text()").extract())
         if not data:
             data = ' '.join(response.xpath('//h2[@class="synopsis"]/text()').extract())
             loggerError.error(response.url)

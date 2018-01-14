@@ -13,7 +13,7 @@ class FirstposthindiSpider(scrapy.Spider):
         'site_url':'https://hindi.firstpost.com/category/latest/'}
 
 
-    def __init__(self, offset=0, pages=3, *args, **kwargs):
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
         super(FirstposthindiSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('https://hindi.firstpost.com/category/latest/page-'+ str(count+1))

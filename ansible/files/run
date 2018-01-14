@@ -1,0 +1,23 @@
+#!bin/bash
+
+activate () {
+  . ../venv/bin/activate
+}
+
+activate
+
+timeout 30m sudo scrapy crawl indianExpressTech;
+timeout 30m sudo scrapy crawl indiaTv;
+timeout 30m sudo scrapy crawl timeTech;
+timeout 30m sudo scrapy crawl oneindia;
+timeout 30m sudo scrapy crawl moneyControl;
+timeout 30m sudo scrapy crawl oneindiaHindi;
+timeout 30m sudo scrapy crawl firstpostHindi;
+timeout 30m sudo scrapy crawl firstpostSports;
+timeout 30m sudo scrapy crawl newsx;
+timeout 30m sudo scrapy crawl asianage;
+timeout 30m sudo scrapy crawl timeNews;
+timeout 30m sudo scrapy crawl inshorts;
+timeout 30m sudo scrapy crawl ndtv -a pages=5;
+
+deactivate;

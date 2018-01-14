@@ -13,7 +13,7 @@ class IndiatvSpider(scrapy.Spider):
         'site_url':'http://www.indiatvnews.com/india/'}
 
 
-    def __init__(self, offset=0, pages=3, *args, **kwargs):
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
         super(IndiatvSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.indiatvnews.com/india/' + str(count + 1))

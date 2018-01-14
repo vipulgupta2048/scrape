@@ -15,7 +15,7 @@ class NewsxSpider(scrapy.Spider):
         'site_name':'newsx',
         'site_url':'http://www.newsx.com/latest-news/'}
 
-    def __init__(self, offset=0, pages=4, *args, **kwargs):
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
         super(NewsxSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.newsx.com/latest-news/page/'+ str(count+1))
@@ -80,7 +80,7 @@ class NewsxSpider(scrapy.Spider):
     def getPageDate(self, response):
         try:
             # split & rsplit Used to Spit Data in Correct format!
-            data = (response.xpath("//head/meta[@itemprop='datePublished']/@content").extract_first()).rsplit('+',1)[0]
+            data = (response.xpath("//meta[@property='article:published_time']/@content").extract_first()).rsplit('+',1)[0]
         except Exception as Error:
             loggerError.error(str(Error) +" occured at: "+ response.url)
             data = 'Error'

@@ -1,0 +1,44 @@
+---
+- hosts: all
+  become: yes
+  remote_user: root
+  handlers:
+  - import_tasks: handlers/main.yml
+  tasks:
+  - include_tasks: tasks/apt_upgrade.yml
+# For Nginx
+  - name: Install Nginx
+    apt: pkg=nginx state=present
+  - name: Copy flask_server to sites_avaiable
+    copy:
+      src: "{{ flaskFileToSend }}"
+      dest: "/etc/nginx/sites-available/flask_server"
+  - name: Clean sites-enabled
+    file:
+      state: absent
+      path: "/etc/nginx/sites-enabled/{{ item }}"
+    with_items:
+      - flask_server
+      - default
+  - name: Link sites-available
+    file:
+      src: /etc/nginx/sites-available/flask_server
+      dest: /etc/nginx/sites-enabled/flask_server
+      state: link
+    notify: restart nginx
+# For Gunicorn
+  - name: Copy start gunicorn service script
+    copy:
+      src: "{{ gunicornServiceScript }}"
+      dest: "{{ destination }}/app/start"
+      mode: 0777
+  - name: Copy scraper.service for systemd
+    copy:
+      src: "{{ scraperServiceScipt }}"
+      dest: "/etc/systemd/system/scraper.service"
+      mode: 0755
+  - name: Start scraper.service
+    systemd:
+      state: started
+      daemon_reload: yes
+      name: scraper.service

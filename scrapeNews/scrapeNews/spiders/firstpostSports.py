@@ -13,7 +13,7 @@ class FirstpostsportsSpider(scrapy.Spider):
         'site_name':'firstpost(sports)',
         'site_url':'http://www.firstpost.com/category/sports/'}
 
-    def __init__(self, offset=0, pages=3, *args, **kwargs):
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
         super(FirstpostsportsSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.firstpost.com/category/sports/page/'+ str(count+1))
@@ -79,7 +79,7 @@ class FirstpostsportsSpider(scrapy.Spider):
     def getPageDate(self, response):
         try:
             # split & rsplit Used to Spit Data in Correct format!
-            data = (response.xpath("//head/meta[@property='article:published_time']/@content").extract_first()).rsplit('+',1)[0]
+            data = (response.xpath("//meta[@property='article:published_time']/@content").extract_first()).rsplit('+',1)[0]
         except Exception as Error:
             loggerError.error(Error, response.url)
             data = 'Error'
