@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>Spiders</title>
-        <link rel="stylesheet" href="{{ url_for('static',filename='css/main.css')}}">
-        <link rel='stylesheet' href="{{ url_for('static',filename='css/bootstrap.min.css')}}">
-        <link rel='stylesheet' href="{{ url_for('static',filename='css/bootstrap-theme.min.css')}}">
-        <script src="{{ url_for('static',filename='js/function.js') }}"></script>
-    </head>
-    <body>
+{% extends '_base.html' %}
+
+{% block title %}Spiders{% endblock %}
+        
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/main.css')}}">
+{% endblock %}
+{% block content %}
         <div class="absolute-center">
-          <h1 align='center'>Statistics table</h1>
+          <h1 class="text-center">Statistics table</h1>
           <table class="table table-striped table-hover">
             <thead>
               <tr>
@@ -40,5 +37,21 @@
             </tbody>
           </table>
         </div>
-    </body>
-</html>
+{% endblock %}
+{% block script %}
+<script>
+function sendResetRequest(spider_id) {
+    $.ajax({
+        type: 'POST',
+        url: '/resetRequest',
+        data: spider_id,
+        dataType: 'JSON',
+        success: function(response){
+            if(response.status == "ok"){
+                location.reload();
+            }
+        }
+    });
+}
+</script>
+{% end block %}

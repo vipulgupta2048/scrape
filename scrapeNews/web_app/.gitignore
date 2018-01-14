@@ -1,0 +1,3 @@
+web_app.sock
+*.log
+**/__pycache__

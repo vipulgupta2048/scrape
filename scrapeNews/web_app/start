@@ -1,0 +1,25 @@
+#!/bin/bash
+
+########################################################################################
+#                                                                                      #
+# This Script Activates the VirtualEnv, configures env, and start the gunicorn server  #
+#                                                                                      #
+# P.S. File Permissions must be set to: u+r+w+x g+r+w+x o+r+x                          #
+########################################################################################
+
+# Activate the Virtual Environment
+source /home/lucifer/extdrive/Documents/thisisayush/venv/bin/activate
+
+#Set The Environment Variables
+export SCRAPER_DB_HOST=""
+export SCRAPER_DB_USER=""
+export SCRAPER_DB_PASS=""
+export SCRAPER_DB_NAME=""
+export SCRAPER_DB_TABLE_NEWS=""
+export SCRAPER_DB_TABLE_SITE=""
+export SCRAPER_DB_TABLE_LOG=""
+export FLASK_APP="server.py"
+
+#Start Gunicorn at current path
+gunicorn --workers 3 --bind unix:web_app.sock -m 007 wsgi:application
+

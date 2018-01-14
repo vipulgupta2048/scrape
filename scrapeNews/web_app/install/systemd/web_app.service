@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve web_app
+After=network.target
+
+[Service]
+User=lucifer
+Group=www-data
+WorkingDirectory=/path/to/web_app
+Environment="PATH=/path/to/venv/bin"
+ExecStart=/path/to/web_app/start
+
+[Install]
+WantedBy=multi-user.target

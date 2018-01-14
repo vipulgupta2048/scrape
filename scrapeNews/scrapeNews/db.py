@@ -44,6 +44,9 @@ class postgresSQL(object):
     insert_site_str = "INSERT INTO " + DB_INFO['SITE_TABLE'] + " \
                        (id, site_name, site_url, spider_name) VALUES (%s, %s, %s, %s)"
 
+    def __init__(self):
+        self.connect()
+
     def connect(self):
         # Check if connection already exists
         if self.connection != None:
