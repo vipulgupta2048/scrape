@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-from scrapeNews.pipelines import loggerError
+from scrapeNews.settings import logger
 from time import sleep
 
 
@@ -25,42 +25,60 @@ class MoneycontrolSpider(scrapy.Spider):
             sleep(2)
 
     def errorRequestHandler(self, failure):
-        self.urls_parsed -= 1
-        loggerError.error('Non-200 response at ' + str(failure.request.url))
+        logger.error(__name__ + ' NON-200 response at ' + str(failure.request.url))
 
 
     def parse(self, response):
-        newsContainer = response.xpath("//ul[@id='cagetory']/li[@class='clearfix']")
-        for newsBox in newsContainer:
-            link = newsBox.xpath('a/@href').extract_first()
-            if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
-
+        try:
+            newsContainer = response.xpath("//ul[@id='cagetory']/li[@class='clearfix']")
+            for newsBox in newsContainer:
+                link = newsBox.xpath('a/@href').extract_first()
+                if not self.postgres.checkUrlExists(link):
+                    self.urls_parsed += 1
+                    yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
+                else:
+                    self.urls_dropped += 1
+        except Exception as e:
+            logger.error(__name__+ " [UNHANDLED] " + str(e) + " for response url " + response.url)
 
     def parse_article(self, response):
-        item = ScrapenewsItem()  # Scraper Items
-        item['image'] = self.getPageImage(response)
-        item['title'] = self.getPageTitle(response)
-        item['content'] = self.getPageContent(response)
-        item['newsDate'] = self.getPageDate(response)
-        item['link'] = response.url
-        item['source'] = 108
-        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
-            self.urls_scraped += 1
-            yield item
-
+        try:
+            item = ScrapenewsItem()  # Scraper Items
+            item['image'] = self.getPageImage(response)
+            item['title'] = self.getPageTitle(response)
+            item['content'] = self.getPageContent(response)
+            item['newsDate'] = self.getPageDate(response)
+            item['link'] = response.url
+            item['source'] = 108
+            if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
+                self.urls_scraped += 1
+                yield item
+            else:
+                self.urls_dropped += 1
+                yield None
+        except Exception as e:
+            logger.error(__name__ + " [UNHANDLED] " + str(e) + " for response url "+ response.url)
+            self.urls_dropped += 1
 
     def getPageTitle(self, response):
-        data = response.xpath("/html/head/meta[@property='og:title']/@content").extract_first()
-        if (data is None):
-            loggerError.error(response.url)
+        try:
+            data = response.xpath("/html/head/meta[@property='og:title']/@content").extract_first()
+            if (data is None):
+                logger.error(__name__ + " Unable to Extract Page Title : " + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " [UNHANLDED] Unable to Extract Page Title : " + str(e) + " : " + response.url)
             data = 'Error'
         return data
 
     def getPageImage(self, response):
-        data = response.xpath("/html/head/meta[@property='og:image']/@content").extract_first()
-        if (data is None):
-            loggerError.error(response.url)
+        try:
+            data = response.xpath("/html/head/meta[@property='og:image']/@content").extract_first()
+            if (data is None):
+                logger.error(__name__ + " Unable to Extract Image : s" + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " [UNHANDLED] Unable to Extract Image " + str(e) + " : " + response.url)
             data = 'Error'
         return data
 
@@ -69,18 +87,21 @@ class MoneycontrolSpider(scrapy.Spider):
             # split & rsplit Used to Spit Data in Correct format!
             data = response.xpath("/html/head/meta[@name='Last-Modified']/@content").extract_first()
         except Exception as Error:
-            loggerError.error(Error, response.url)
+            logger.error(__name__ + " [UNHANDLED] Unable to Extract Date : " + str(Error) + " : " + response.url)
             data = 'Error'
-        finally:
-            return data
+        return data
 
     def getPageContent(self, response):
-        data = ' '.join(response.xpath("//div[@id='article-main']/p/text()").extract())
-        if not data:
-            data = ' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract())
-        if not data:
-            data = ' '.join(response.xpath("//meta[@property='og:description']/@content").extract())
-        if not data:
-            loggerError.error(response.url)
+        try:
+            data = ' '.join(response.xpath("//div[@id='article-main']/p/text()").extract())
+            if not data:
+                data = ' '.join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract())
+            if not data:
+                data = ' '.join(response.xpath("//meta[@property='og:description']/@content").extract())
+            if not data:
+                logger.error(__name__ + " Unable to Extract Content : " + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " [UNHANDLED] Unable to Extract Content : " + str(e) + " : " + response.url)
             data = 'Error'
         return data
