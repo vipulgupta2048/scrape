@@ -70,7 +70,7 @@ class News18Spider(scrapy.Spider):
                 logger.debug(__name__+" Moving to Next Page")
                 yield scrapy.Request(url = response.urljoin(next_page))
         except Exception as e:
-            logger.error(__name__ + " Unhandled: " + str(e))
+            logger.error(__name__ + " [UNHANDLED] " + str(e) + " for response url " + response.url)
 
     def parse_news(self, response):
         try:
@@ -90,7 +90,6 @@ class News18Spider(scrapy.Spider):
 
             item['title'] = response.xpath(self.xpaths[news_parser]['title']).extract_first()
             item['content'] = response.xpath(self.xpaths[news_parser]['description']).extract()[0]
-            logger.debug(__name__ + item['content'])
             item['image'] = response.xpath(self.xpaths[news_parser]['image']).extract_first()
             item['newsDate'] = response.xpath(self.xpaths[news_parser]['date']).extract_first()
             
@@ -106,8 +105,9 @@ class News18Spider(scrapy.Spider):
                     self.urls_dropped += 1
                     yield None
 
-            self.urls_scraped += 1
             yield item
+            self.urls_scraped += 1
 
         except Exception as e:
-            logger.error(__name__ + " Unhandled <" + response.url + ">: " + str(e))
+            logger.error(__name__ + " [UNHANDLED] : " + str(e) + " for response url " + response.url)
+            self.urls_dropped += 1
