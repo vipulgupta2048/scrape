@@ -1,0 +1,13 @@
+---
+    user:  vagrant
+    destination: /home/{{ user }}/scrape
+    repository: https://github.com/atb00ker/scrape.git
+    branch: atb00ker
+    pgUser: scrapeuser
+    pgPassword: simple
+# Don't Edit unless you really know what you are doing.
+    envFileToSend: files/envConfig.py
+    flaskFileToSend: files/flask_server
+    cronRunFileToSend: files/run
+    gunicornServiceScript: files/start
+    scraperServiceScipt: files/scraper.service

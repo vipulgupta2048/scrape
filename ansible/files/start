@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Activate the Virtual Environment
+source /home/vagrant/scrape/venv/bin/activate
+# Start Gunicorn at current path
+gunicorn app:app

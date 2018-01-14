@@ -5,8 +5,11 @@ This repository holds the code for scrapers built under the project "Scrape the 
 - Language used for scraping : Python3.X.X
 
 **Minutes of the meeting:** http://bit.ly/scrapeThePlanet
+## Quick Installation
+If you are familiar with ansible, you can use the change the variables in `ansible/defaults/main.yml` and run  `ansible/main.yaml` on your localhost to quicksetup.
 
-## Installation
+## Manual Installation
+**Note: Quick Installation is prefered.**
 Clone the repository (or download it). Then, follow the installation steps to run the spiders.
 
 ### Create a Virtual Environemnt
@@ -32,6 +35,7 @@ Navigate to repository: `pip3 install -r requirements.txt`
 
 - Requirements(For flask Application):
     - flask
+    - gunicorn (For serving flask application to nginx/apache2)
 
 ### Database Setup (PostgreSQL)
 

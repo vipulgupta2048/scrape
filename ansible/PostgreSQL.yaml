@@ -1,0 +1,14 @@
+---
+- hosts: all
+  become: yes
+  remote_user: root
+  tasks:
+  - include_tasks: tasks/apt_upgrade.yml
+  - name: Install PostgreSQL
+    apt: name=postgresql state=present
+  - name: Install Create User Dependancies
+    apt: pkg=python-psycopg2 state=present
+  - name: Create PostgreSQL Role
+    postgresql_user: name={{ pgUser }} password={{ pgPassword }} role_attr_flags=SUPERUSER,REPLICATION,BYPASSRLS
+    become: yes
+    become_user: postgres

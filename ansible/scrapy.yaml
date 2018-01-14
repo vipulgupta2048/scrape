@@ -1,0 +1,42 @@
+---
+- hosts: all
+  become: yes
+  remote_user: root
+  tasks:
+  - include_tasks: tasks/apt_upgrade.yml
+  - name: Install Git
+    apt: pkg=git state=present
+  - name: Clone/Update Repository
+    git:
+      repo: "{{ repository }}"
+      dest: "{{ destination }}"
+      version: "{{ branch }}"
+  - name: Copy envConfig.py to remote server
+    copy:
+      src: "{{ envFileToSend }}"
+      dest: "{{ destination }}/scrapeNews/"
+  - name: Install Python & Python Requirements
+    apt: pkg={{ item }} state=present
+    with_items:
+      - python3
+      - python3-pip
+      - python3-dev
+      - build-essential
+      - python-virtualenv
+      - python-psycopg2
+      - python-gunicorn
+  - name: Make environment and Install Requirements
+    pip:
+      requirements: "{{ destination }}/requirements.txt"
+      virtualenv: "{{ destination }}/venv"
+      virtualenv_python: python3
+  - name: Move the crontab file to server
+    copy:
+      src: "{{ cronRunFileToSend }}"
+      dest: "{{ destination }}/scrapeNews/run.sh"
+  - name: Set crontab to run spiders
+    cron:
+      name: "Set hourly run for spiders"
+      user: "{{ user }}"
+      minute: "0"
+      job: "cd {{ destination }}/scrapeNews/ && sh run.sh"

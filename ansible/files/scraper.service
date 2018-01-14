@@ -1,0 +1,12 @@
+[Unit]
+Description=Gunicorn instance to serve flask_app
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/home/vagrant/scrape/app
+ExecStart=/home/vagrant/scrape/app/start
+
+[Install]
+WantedBy=multi-user.target
