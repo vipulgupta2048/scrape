@@ -13,7 +13,7 @@ class FirstpostsportsSpider(scrapy.Spider):
         'site_name':'firstpost(sports)',
         'site_url':'http://www.firstpost.com/category/sports/'}
 
-    def __init__(self, offset=0, pages=3, *args, **kwargs):
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
         super(FirstpostsportsSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('http://www.firstpost.com/category/sports/page/'+ str(count+1))

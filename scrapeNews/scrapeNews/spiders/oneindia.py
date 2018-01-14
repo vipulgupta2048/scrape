@@ -14,7 +14,11 @@ class OneindiaSpider(scrapy.Spider):
         'site_url':'https://www.oneindia.com/india'}
 
 
+<<<<<<< HEAD
     def __init__(self, offset=0, pages=2, *args, **kwargs):
+=======
+    def __init__(self, offset=0, pages=10, *args, **kwargs):
+>>>>>>> 87d34aa1fd30b715c9db6c1ea8c34b7044343792
         super(OneindiaSpider, self).__init__(*args, **kwargs)
         for count in range(int(offset), int(offset) + int(pages)):
             self.start_urls.append('https://www.oneindia.com/india/?page-no='+ str(count+1))
