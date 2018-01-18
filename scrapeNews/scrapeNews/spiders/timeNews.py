@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapeNews.items import ScrapenewsItem
-from scrapeNews.pipelines import loggerError
+from scrapeNews.settings import logger
 
 
 class TimenewsSpider(scrapy.Spider):
@@ -11,7 +11,8 @@ class TimenewsSpider(scrapy.Spider):
     custom_settings = {
         'site_id':116,
         'site_name':'timeNews',
-        'site_url':'http://time.com/section/world/'}
+        'site_url':'http://time.com/section/world/'
+    }
 
     def __init__(self, offset=0, pages=4, *args, **kwargs):
         super(TimenewsSpider, self).__init__(*args, **kwargs)
@@ -23,67 +24,91 @@ class TimenewsSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
 
     def errorRequestHandler(self, failure):
-        self.urls_parsed -= 1
-        loggerError.error('Non-200 response at ' + str(failure.request.url))
+        logger.error(__name__ + ' Non-200 response at ' + str(failure.request.url))
 
 
     def parse(self, response):
-
-        # For the large newsBox in top of all the pages. (In Normal Pages) or sends all request for all the articles in API page or sends the request for the special page.
         try:
-            newsBox = 'http://www.time.com' + response.xpath("//div[@class='partial hero']/article/a/@href").extract_first()
-            if not self.postgres.checkUrlExists(newsBox):
-                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
-        except Exception as Error:
-            if newsBox.xpath("//main[contains(@class,'content article')]"):
-                yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
-            elif newsBox.xpath("//div[contains(@class,'_29M-6C9w')]"):
-                newsContainer = newsBox.xpath("//div[contains(@class,'_29M-6C9w')]//div[contains(@class,'_2cCPyP5f')]//a[@class='_2S9ChopF']/@href")
-                for link in newsContainer:
-                    if not self.postgres.checkUrlExists(link):
-                        yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
-            else:
-                loggerError.error(response.url)
+            # For the large newsBox in top of all the pages. (In Normal Pages) or sends all request for all the articles in API page or sends the request for the special page.
+            try:
+                newsBox = 'http://www.time.com' + response.xpath("//div[@class='partial hero']/article/a/@href").extract_first()
+                if not self.postgres.checkUrlExists(newsBox):
+                    self.urls_parsed += 1
+                    yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                else:
+                    self.urls_dropped += 1
+            except Exception as Error:
+                if newsBox.xpath("//main[contains(@class,'content article')]"):
+                    self.urls_parsed += 1
+                    yield scrapy.Request(url=newsBox, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'})
+                elif newsBox.xpath("//div[contains(@class,'_29M-6C9w')]"):
+                    newsContainer = newsBox.xpath("//div[contains(@class,'_29M-6C9w')]//div[contains(@class,'_2cCPyP5f')]//a[@class='_2S9ChopF']/@href")
+                    for link in newsContainer:
+                        if not self.postgres.checkUrlExists(link):
+                            self.urls_parsed += 1
+                            yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
+                        else:
+                            self.urls_dropped += 1
+                else:
+                    logger.error(__name__ + " Error Extracting Links for Large NewsBox for url " + response.url + " : " + str(Error))
 
-        # For the rest of the boxes
-        newsContainer = response.xpath("//div[@class='partial marquee']/article")
-        for newsBox in newsContainer:
-            link = 'http://www.time.com' + newsBox.xpath('a/@href').extract_first()
-            if not self.postgres.checkUrlExists(link):
-                yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
+            # For the rest of the boxes
+            newsContainer = response.xpath("//div[@class='partial marquee']/article")
+            for newsBox in newsContainer:
+                link = 'http://www.time.com' + newsBox.xpath('a/@href').extract_first()
+                if not self.postgres.checkUrlExists(link):
+                    self.urls_parsed += 1
+                    yield scrapy.Request(url=link, callback=self.parse_article, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'}, errback=self.errorRequestHandler)
+                else:
+                    self.urls_dropped += 1
+        
+        except Exception as e:
+            logger.error(__name__ + " [UNHANDLED] " + str(e) + " for response url " + response.url)
 
 
     def parse_article(self, response):
-        item = ScrapenewsItem()  # Scraper Items
-        item['image'] = self.getPageImage(response)
-        item['title'] = self.getPageTitle(response)
-        item['content'] = self.getPageContent(response)
-        item['newsDate'] = self.getPageDate(response)
-        item['link'] = response.url
-        item['source'] = 116
-        if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
-            self.urls_scraped += 1
-            yield item
-
+        try:
+            item = ScrapenewsItem()  # Scraper Items
+            item['image'] = self.getPageImage(response)
+            item['title'] = self.getPageTitle(response)
+            item['content'] = self.getPageContent(response)
+            item['newsDate'] = self.getPageDate(response)
+            item['link'] = response.url
+            item['source'] = 116
+            if item['title'] is not 'Error' and item['content'] is not 'Error' and item['newsDate'] is not 'Error':
+                self.urls_scraped += 1
+                yield item
+            else:
+                self.urls_dropped += 1
+        except Exception as e:
+            logger.error(__name__ + " [UNHANDLED] " + str(e) + " for response url " + response.url)
+            self.urls_dropped += 1
 
     def getPageTitle(self, response):
-        data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
-        if (data is None):
-            data = response.xpath("//h1[contains(@class,'headline')]/text()").extract_first()
-        if (data is None):
-            data = response.xpath("//h1[@class='_8UFs4BVE']/text()").extract_first()
-        if (data is None):
-            data = response.xpath("//span[@class='xxx_oneoff_special_story_v3_headline']/text()").extract_first()
-        if (data is None):
-            loggerError.error(response.url)
+        try:
+            data = response.xpath('//h1[@itemprop="headline"]/text()').extract_first()
+            if (data is None):
+                data = response.xpath("//h1[contains(@class,'headline')]/text()").extract_first()
+            if (data is None):
+                data = response.xpath("//h1[@class='_8UFs4BVE']/text()").extract_first()
+            if (data is None):
+                data = response.xpath("//span[@class='xxx_oneoff_special_story_v3_headline']/text()").extract_first()
+            if (data is None):
+                logger.error(__name__ + " Error Extracting Title : " + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " [UNHANDLED] Error Extracting Title : " + str(e) + " : " + response.url)
             data = 'Error'
         return data
 
-
     def getPageImage(self, response):
-        data = response.xpath("//meta[@property='og:image']/@content").extract_first()
-        if (data is None):
-            loggerError.error(response.url)
+        try:
+            data = response.xpath("//meta[@property='og:image']/@content").extract_first()
+            if (data is None):
+                logger.error(__name__ + " Unable to Extract Image : " + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " [UNHANDLED] Unable to extract Image : " + str(e) + " : " + response.url)
             data = 'Error'
         return data
 
@@ -105,25 +130,28 @@ class TimenewsSpider(scrapy.Spider):
             if (scriptData is not None):
                 data = (scriptData.split('"publish_date":"',1)[1]).split("+",1)[0]
             if (data is None):
-                loggerError.error(response.url)
+                logger.error(__name__ + " Unable to extract Date : " + response.url)
                 data = 'Error'
         except Exception as Error:
-            loggerError.error(str(Error) + ' occured at: ' + response.url)
+            logger.error(__name__ + " [UNHANDLED] Unable to Extract Date : " + str(Error) + ' : ' + response.url)
             data = 'Error'
-        finally:
-            return data
+        return data
 
 
     def getPageContent(self, response):
-        data = ' '.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())
-        if not data:
-            data = ' '.join(response.xpath("//section[@class='chapter']//text()").extract())
-        if not data:
-            data = ' '.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract())
-        if not data:
-            data = ' '.join(response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract())
-        if not data:
-            loggerError.error(response.url)
+        try:
+            data = ' '.join(response.xpath("//div[@id='article-body']/div/p/text()").extract())
+            if not data:
+                data = ' '.join(response.xpath("//section[@class='chapter']//text()").extract())
+            if not data:
+                data = ' '.join(response.xpath("//div[contains(@class,'-5s7sjXv')]/div/div/article/p/text()").extract())
+            if not data:
+                data = ' '.join(response.xpath("//div[contains(@class,'_1Joi0PLr')]//span/text()").extract())
+            if not data:
+                logger.error(__name__ + " Unable to extract content : " + response.url)
+                data = 'Error'
+        except Exception as e:
+            logger.error(__name__ + " [UNHANDLED] Unable to Extract Content : " + str(e) + " : " + response.url)
             data = 'Error'
         return data
 
