@@ -17,7 +17,7 @@ BOT_NAME = 'scrapeNews'
 SPIDER_MODULES = ['scrapeNews.spiders']
 NEWSPIDER_MODULE = 'scrapeNews.spiders'
 
-LOG_LEVEL = 'DEBUG'  # to only display errors
+LOG_LEVEL = 'ERROR'  # to only display errors
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrapeNews (+http://www.yourdomain.com)'
 
