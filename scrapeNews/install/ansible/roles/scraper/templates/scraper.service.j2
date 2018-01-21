@@ -5,8 +5,8 @@ After=network.target
 [Service]
 User=root
 Group=www-data
-WorkingDirectory=/home/{{ user_name }}/deploy
-ExecStart=/home/{{ user_name }}/deploy/start
+WorkingDirectory={{ deploy_base }}
+ExecStart={{ deploy_base }}/start
 
 [Install]
 WantedBy=multi-user.target

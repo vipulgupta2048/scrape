@@ -3,13 +3,13 @@ server {
     server_name {{ nginx_server_addr }};
     
     location /static {
-        alias /home/{{ user_name }}/deploy/web/web_app/static;
+        alias {{ deploy_base }}/web/web_app/static;
         autoindex on;
         expires max;
     }
 
     location /logfiles {
-        alias /home/{{ user_name }}/deploy/logs;
+        alias {{ deploy_base }}/logs;
         autoindex on;
         
         location ~* \.log{
@@ -19,6 +19,6 @@ server {
 
     location / {
         include proxy_params;
-        proxy_pass http://unix:/home/{{ user_name }}/deploy/app.sock;
+        proxy_pass http://unix:/{{ deploy_base }}/app.sock;
     }
 }

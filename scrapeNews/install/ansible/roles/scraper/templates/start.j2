@@ -10,10 +10,10 @@
 # - tmux                                                                               #
 ########################################################################################
 
-deploy_path=/home/{{ user_name }}/deploy
+deploy_path={{ deploy_base }}
 
 cd "$deploy_path";
 
-source $deploy_path/venv/bin/activate; source $deploy_path/env.sh; python scheduler.py &
-source $deploy_path/venv/bin/activate; source $deploy_path/env.sh; scrapyd &
-cd web; source $deploy_path/venv/bin/activate; source $deploy_path/env.sh; gunicorn --workers 3 --bind unix:$deploy_path/app.sock -u www-data -g www-data -m 007 web_app.wsgi:application &
+source $deploy_path/venv/bin/activate && source $deploy_path/env.sh && python scheduler.py &
+source $deploy_path/venv/bin/activate && source $deploy_path/env.sh && scrapyd &
+cd $deploy_path/web && source $deploy_path/venv/bin/activate && source $deploy_path/env.sh && gunicorn --workers 3 --bind unix:$deploy_path/app.sock -m 007 web_app.wsgi:application;

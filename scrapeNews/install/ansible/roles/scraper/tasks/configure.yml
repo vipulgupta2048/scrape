@@ -1,7 +1,5 @@
 ---
 - name: clone repo
-  become_user: "{{ user_name }}"
-  become: yes
   git: 
     repo: "{{ repo_url }}"
     clone: yes
@@ -9,52 +7,38 @@
     update: no
 
 - name: create deploy base
-  become_user: "{{ user_name }}"
-  become: yes
   file:
     path: "{{ deploy_base }}"
     state: directory
 
 - name: create web deploy base
-  become_user: "{{ user_name }}"
-  become: yes
   file:
     path: "{{ deploy_base }}/web"
     state: directory
   
 - name: create directory stucture
-  become_user: "{{ user_name }}"
-  become: yes
   file:
     path: "{{ deploy_base }}/web/scrapeNews"
     state: directory
 
 - name: create logs base
-  become_user: "{{ user_name }}"
-  become: yes
   file:
     path: "{{ deploy_base }}/logs"
     state: directory
 
 - name: create virtualenv and install requirements
-  become_user: "{{ user_name }}"
-  become: yes
   pip:
     requirements: "{{ path_base }}/scrape/requirements.txt"
     virtualenv: "{{ deploy_base}}/venv"
     virtualenv_python: python3
 
 - name: install scrapyd-client for easy deployment
-  become_user: "{{ user_name }}"
-  become: yes
   pip:
     name: git+https://github.com/scrapy/scrapyd-client#egg=scrapyd-client
     virtualenv: "{{ deploy_base }}/venv"
     virtualenv_python: python3
 
 - name: create web directory structure
-  become_user: "{{ user_name }}"
-  become: yes
   command: cp -r -f {{ path_base }}/scrape/scrapeNews/{{ item }} {{ deploy_base }}/web/{{ item }}
   with_items:
     - "scrapeNews/db.py"
@@ -62,29 +46,28 @@
     - "web_app/"
 
 - name: copy scheduler script
-  become_user: "{{ user_name }}"
-  become: yes
   command: cp -f {{ path_base }}/scrape/scrapeNews/scheduler.py  {{ deploy_base }}/
 
 - name: initialise the python package
-  become_user: "{{ user_name }}"
-  become: yes
   file:
     path: "{{ deploy_base }}/web/__init_.py"
     state: touch
 
 - name: install start script
-  become_user: "{{ user_name }}"
-  become: yes
   template:
     src: start.j2
     dest: "{{ deploy_base }}/start"
     mode:  u=rwx,g=rwx,o=rx
 
 - name: install environment variables script
-  become_user: "{{ user_name }}"
-  become: yes
   template:
     src: env.sh.j2
     dest: "{{ deploy_base }}/env.sh"
     mode:  u=rwx,g=rwx,o=rx
+
+- name: chown all directories
+  file:
+    path: "{{ path_base }}"
+    recurse: yes
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"

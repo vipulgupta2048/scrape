@@ -2,8 +2,8 @@
   user_name: scrapeuser
   user_pass: scraper.123
   repo_url: http://github.com/vipulgupta2048/scrape
-  path_base: "~"
-  deploy_base: "~/deploy"
+  path_base: "/opt/scraper"
+  deploy_base: "/opt/scraper/deploy"
   db_host: localhost
   db_name: scrape_news
   db_root_pass: scraper.123
