@@ -1,0 +1,13 @@
+---
+- name: check scraper service is running
+  service:
+    name: scraper
+    state: started
+
+- name: deploy spiders using scrapyd-deploy
+  become_user: "{{ user_name }}"
+  become: yes
+  command: source {{ deploy_base }}/venv/bin/activate && source {{ deploy_base }}/env.sh && cd {{ path_base }}/scrape/scrapeNews/ && scrapyd-deploy
+
+- name: sleep for few seconds
+  command: sleep 30

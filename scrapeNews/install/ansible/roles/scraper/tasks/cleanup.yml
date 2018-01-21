@@ -1,0 +1,5 @@
+---
+- name: remove scrape folder
+  file:
+    path: "{{ path_base }}/scrape"
+    state: absent

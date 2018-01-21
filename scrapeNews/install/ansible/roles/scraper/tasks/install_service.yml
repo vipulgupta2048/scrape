@@ -1,0 +1,12 @@
+---
+- name: install systemd service
+  template:
+    src: scraper.service.j2
+    dest: /etc/systemd/system/scraper.service
+  notify: enable systemd service
+
+- name: install nginx site
+  template:
+    src: scraper-nginx.j2
+    dest: /etc/nginx/sites-available/scraper
+  notify: activate nginx site

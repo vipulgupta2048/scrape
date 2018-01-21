@@ -1,0 +1,22 @@
+#!/bin/bash
+
+########################################################################################
+#                                                                                      #
+# This Script Activates the VirtualEnv, configures env, and start the gunicorn server  #
+#                                                                                      #
+# P.S. File Permissions must be set to: u+r+w+x g+r+w+x o+r+x                          #
+# Requires:                                                                            #
+# - env.sh (Environment Variables Setter)                                              #
+# - tmux                                                                               #
+########################################################################################
+
+deploy_path = ~/deploy
+
+cd $deploy_path
+
+tmux new -s scraper -n main
+tmux split-window -h 'source $deploy_path/venv/bin/activate; source ~/env.sh; scrapyd';
+tmux split-window -v 'source $deploy_path/venv/bin/activate; source ~/env.sh; python scheduler.py'
+
+#Start Gunicorn Server at current path
+gunicorn --workers 3 --bind unix:web_app.sock -m 007 wsgi:application

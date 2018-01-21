@@ -1,0 +1,32 @@
+---
+- name: enable systemd service
+  service:
+    name: scraper
+    enabled: yes
+    state: reloaded
+  notify:
+    - start systemd service
+
+- name: start systemd service
+  service:
+    name: scraper
+    enabled: yes
+    state: restarted
+
+- name: activate nginx site
+  file:
+    src: /etc/nginx/sites-available/scraper
+    dest: /etc/nginx/sites-enabled/scraper
+    state: link
+  notify:
+    - restart nginx
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: restart postgresql
+  service:
+    name: postgresql
+    state: restarted

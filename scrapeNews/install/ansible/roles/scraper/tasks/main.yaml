@@ -1,0 +1,12 @@
+---
+- name: create user
+  user:
+    name: "{{ user_name }}"
+    state: present
+    update_password: always
+    password: "{{ user_pass }}"
+- include: install_dependencies.yml
+- include: configure.yml
+- include: install_service.yml
+- include: deploy-spiders.yml
+- include: cleanup.yml

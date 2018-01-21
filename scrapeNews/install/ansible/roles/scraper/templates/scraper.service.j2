@@ -1,0 +1,12 @@
+[Unit]
+Description=Scraper Service
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/home/{{ user_name }}/deploy
+ExecStart=/home/{{ user_name }}/deploy/start
+
+[Install]
+WantedBy=multi-user.target

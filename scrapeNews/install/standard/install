@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Deployment Script
+
+root_path=~/
+deploy_path="~/deploy"
+
+repo="https://github.com/vipulgupta2048/scrape"
+
+# Install Dependencies
+
+echo "Installing Required Softwares"
+sudo apt install git tmux postgresql python3 python3-dev python3-venv -y
+
+# Configure Postgres
+printf "\n\n==== Configuring Database ===="
+printf "\n - Enter Details for Root Database Password:"
+read -s root_db_pass
+
+sudo -u postgres psql --command "ALTER USER postgres WITH PASSWORD '$root_db_pass';"
+printf "-- Root Password Updated!"
+
+printf "\n - Enter Database Name: "
+read db_name
+sudo -u postgres psql --command "CREATE DATABASE $db_name;"
+
+printf "\n - Enter Database User: "
+read postgres_db_user
+
+printf "\n - Enter Password for user $postgres_db_user: "
+read -s postgres_db_pass
+printf "\n"
+sudo -u postgres psql --command "CREATE ROLE $postgres_db_user LOGIN PASSWORD '$postgres_db_pass'; GRANT ALL PRIVILEGES ON DATABASE $db_name TO $postgres_db_user;"
+
+printf "\n\n ==== Database Configuration Complete ==="
+printf "\n Cloning Repository"
+
+cd $root_path
+git clone https://github.com/vipulgupta2048/scrape
+
+printf "\n Working on Pre-requisites"
+
+mkdir $deploy_path
+cd $deploy_path
+
+python3 -m venv venv
+source venv/bin/activate

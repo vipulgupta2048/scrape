@@ -9,7 +9,6 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 import logging
-import envConfig
 import os
 
 BOT_NAME = 'scrapeNews'

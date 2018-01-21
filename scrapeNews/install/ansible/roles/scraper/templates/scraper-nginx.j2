@@ -1,0 +1,24 @@
+server {
+    listen 5009;
+    server_name {{ nginx_server_addr }};
+    
+    location /static {
+        alias /home/{{ user_name }}/deploy/web/web_app/static;
+        autoindex on;
+        expires max;
+    }
+
+    location /logfiles {
+        alias /home/{{ user_name }}/deploy/logs;
+        autoindex on;
+        
+        location ~* \.log{
+            add_header Content-Type text/plain;
+        }
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/{{ user_name }}/deploy/app.sock;
+    }
+}
