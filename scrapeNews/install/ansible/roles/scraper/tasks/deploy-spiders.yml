@@ -4,6 +4,9 @@
     name: scraper
     state: started
 
+- name: wait for services to boot
+  command: sleep 15
+
 - name: deploy spiders using scrapyd-deploy
   become_user: "{{ user_name }}"
   become: yes

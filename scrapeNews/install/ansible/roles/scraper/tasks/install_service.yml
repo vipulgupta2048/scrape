@@ -10,3 +10,11 @@
     src: scraper-nginx.j2
     dest: /etc/nginx/sites-available/scraper
   notify: activate nginx site
+
+- name: activate privoxy for tor
+  blockinfile:
+    dest: /etc/privoxy/config
+    block: |
+      forward-socks5  / 127.0.0.1:9050 .
+      forward-socks4a / 127.0.0.1:9050 .
+      forward-socks5t / 127.0.0.1:9050 .

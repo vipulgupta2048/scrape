@@ -16,7 +16,11 @@
     - "python3-dev"
     - "virtualenv"
     - "nginx"
+    - "privoxy"
+    - "tor"
   notify:
     - restart postgresql
     - restart nginx
+    - restart tor
+    - restart privoxy
   

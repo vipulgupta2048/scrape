@@ -30,3 +30,13 @@
   service:
     name: postgresql
     state: restarted
+
+- name: restart privoxy
+  service:
+    name: privoxy
+    state: restarted
+
+- name: restart tor
+  service:
+    name: tor
+    state: restarted
