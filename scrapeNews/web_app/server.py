@@ -51,7 +51,7 @@ def statsView():
 def resetSpider():
     data = str(request.stream.read().decode('utf-8'))
     connection = postgresSQL()
-    command = "UPDATE " + connection.site_table_name + " SET status_check=NOW() WHERE id= %s;"
+    command = "UPDATE " + DB_INFO['SITE_TABLE'] + " SET status_check=NOW() WHERE id= %s;"
     connection.cursor.execute(command, (data,))
     return str({"status": "ok"})
 
@@ -74,8 +74,8 @@ def get_items(resource):
 
     if resource == "logs":
        sql = "WITH res_main AS ( \
-                   SELECT s.site_name, s.spider_name, l.* FROM log_table \
-                   AS l JOIN site_table AS s ON l.site = s.id \
+                   SELECT s.site_name, s.spider_name, l.* FROM " + DB_INFO['LOG_TABLE'] + " \
+                   AS l JOIN " + DB_INFO['SITE_TABLE'] + " AS s ON l.site = s.id \
                    WHERE LOWER(s.site_name) LIKE %s OR LOWER(l.shutdown_reason) LIKE %s OR l.id::text LIKE %s \
                ), res_count AS ( \
                    SELECT COUNT(*) AS total FROM res_main \
@@ -86,8 +86,8 @@ def get_items(resource):
 
     elif resource == "items":
        sql = "WITH res_main AS ( \
-                  SELECT s.site_name, s.spider_name, i.* FROM item_table \
-                  AS i JOIN site_table AS s ON i.site_id = s.id \
+                  SELECT s.site_name, s.spider_name, i.* FROM " + DB_INFO['NEWS_TABLE'] + " \
+                  AS i JOIN " + DB_INFO['SITE_TABLE'] + " AS s ON i.site_id = s.id \
                   WHERE LOWER(s.site_name) LIKE %s OR LOWER(i.title) LIKE %s OR LOWER(i.link) LIKE %s OR LOWER(i.content) LIKE %s \
                   OR i.id::text LIKE %s \
               ), res_count AS ( \
