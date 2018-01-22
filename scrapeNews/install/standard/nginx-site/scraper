@@ -1,9 +1,9 @@
 server {
     listen 5009;
-    server_name 101.53.136.82;
+    server_name 0.0.0.0;
     
     location /static {
-        alias /path/to/web_app/static;
+        alias /path/to/deploy/web/web_app/static;
         autoindex on;
         expires max;
     }
@@ -19,6 +19,6 @@ server {
 
     location / {
         include proxy_params;
-        proxy_pass http://unix:/path/to/web_app/web_app.sock;
+        proxy_pass http://unix:/path/to/deploy/app.sock;
     }
 }

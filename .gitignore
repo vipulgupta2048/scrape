@@ -13,8 +13,5 @@ scrapeNews/envConfig.py
 #ignore any __pycache__
 **/__pycache__/
 
-#ignore .sh files
-*.sh
-
 #ignore vscode files
 **/.vscode
