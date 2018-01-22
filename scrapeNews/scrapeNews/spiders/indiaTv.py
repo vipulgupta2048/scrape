@@ -33,7 +33,7 @@ class IndiatvSpider(scrapy.Spider):
                 if not self.postgres.checkUrlExists(link):
                     self.urls_parsed += 1
                     yield scrapy.Request(url=link, callback=self.parse_article, errback=self.errorRequestHandler)
-                else
+                else:
                     self.urls_dropped += 1
         except Exception as e:
             logger.error(__name__ + " [UNHANDLED] : " + str(e) + " : " + response.url)
