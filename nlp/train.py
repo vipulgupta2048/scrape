@@ -54,6 +54,7 @@ def clean(document):
 
 
 # Iterating through the different categories of text in sample data
+print("Reading data from the following categories: ")
 for category, category_id in news_categories.items():
     print('Category: ' + category + ' ' + str(category_id))
     # Iterating through each news article in a category
@@ -68,18 +69,18 @@ print('Corpus Size: ' + str(len(newsX)))
 
 # For Tagged Documents refer:
 # https://radimrehurek.com/gensim/models/doc2vec.html#gensim.models.doc2vec.TaggedDocument
-print('Creating Tagged Documents')
+print('\nCreating Tagged Documents')
 tagged_documents = []
 for i, document in enumerate(newsX):
     tagged_documents.append(TaggedDocument(document.split(' '), [i]))
 
 
-print('Training Doc2Vec')
+print('\nTraining Doc2Vec')
 # Refer: https://radimrehurek.com/gensim/models/doc2vec.html
 doc2vec_model = Doc2Vec(documents=tagged_documents, size=50, window=3,
                         min_count=2, iter=30, workers=mp.cpu_count())
 
-print('Creating vectors')
+print('\nCreating vectors')
 # Using the doc2vec model to convert each news article into a vector
 news_vectors = []
 for document in newsX:
@@ -89,13 +90,13 @@ for document in newsX:
 X_train, X_test, Y_train, Y_test = train_test_split(news_vectors, newsY,
                                                     test_size=0.25)
 
-print('Training a SVM')
+print('\nTraining a SVM')
 # Training an SVM with default hyperparameters
 # Refer: http://scikit-learn.org/stable/modules/svm
 model = svm.SVC()
 model.fit(X_train, Y_train)
 
-print('Accuracy: ', svm.score(X_test, Y_test))
+print('\nAccuracy: ', model.score(X_test, Y_test))
 print('Saving models...')
 joblib.dump(model, './models/svm.model')
 doc2vec_model.save('./models/doc2vec.model')

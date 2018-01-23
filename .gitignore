@@ -18,3 +18,7 @@ scrapeNews/envConfig.py
 
 #ignore vscode files
 **/.vscode
+
+#ignore NLP data
+data/
+models/
