@@ -120,7 +120,7 @@ def get_logs_or_items(sql, sort, order, queries):
         conn = postgresSQL()
         conn.cursor.execute(sql, queries)
 
-        data = conn.cursor.fetchall()
+        data = conn.RealDictCursor.fetchall()
         for row in data:
             item = {}
             for column in row:

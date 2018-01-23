@@ -1,7 +1,7 @@
 import psycopg2
 from scrapeNews.settings import DB_INFO
 from scrapeNews.settings import logger
-from psycopg2.extras import DictCursor
+from psycopg2.extras import DictCursor, RealDictCursor as rdc
 
 class postgresSQL(object):
     # postgresSQL class will be the class that has connection when the with postgresSQL
@@ -65,6 +65,7 @@ class postgresSQL(object):
             self.connection.autocommit = True
             # Set Cursor to DictCursor
             self.cursor = self.connection.cursor(cursor_factory = psycopg2.extras.DictCursor)
+            self.RealDictCursor = self.connection.cursor(cursor_factory = rdc)
 
             logger.debug(__name__+" Connected to Database")
             
