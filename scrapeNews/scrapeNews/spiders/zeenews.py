@@ -27,8 +27,8 @@ class zeespider(scrapy.Spider):
             #For scraping the links on the next page of the website
             next_page = response.xpath('//link[@rel = "next"]/@href').extract_first()
             if next_page is not None:
-            logger.info(__name__ + " ==============Switching Page======================")
-            yield response.follow(next_page, callback = self.parse)
+                logger.info(__name__ + " ==============Switching Page======================")
+                yield response.follow(next_page, callback = self.parse)
         except Exception as e:
             logger.error(__name__ + " [UNHANDLED] " + str(e) + " for response url " + response.url)
 
@@ -95,7 +95,7 @@ class zeespider(scrapy.Spider):
         try:
             data = response.xpath('//div[contains(@class, "field-item")]/img/@src').extract_first() #scrapes image url
             if (data is None):
-                logger.error(__name__ + " Unable to Extract Image : " + str(e) + " : " + response.url)
+                logger.error(__name__ + " Unable to Extract Image : " + response.url)
                 data = 'Error'
         except Exception as e:
             logger.error(__name__ + " [UNHANDLED] Unable to Extract Image : " + str(e) + " : " + response.url)

@@ -1,0 +1,25 @@
+---
+
+- name: deploys scraper
+  hosts: all
+  remote_user: root
+  become: yes
+  roles: 
+    - db
+    - scraper
+
+  gather_facts: False
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python python-apt)
+      register: output
+      changed_when: output.stdout != ""
+      tags: always
+    - name: install database pre-requisites
+      apt:
+        name: "{{ item }}"
+        state: installed
+      with_items:
+        - python-psycopg2
+      when: not remote_db
+    - setup: # aka gather_facts

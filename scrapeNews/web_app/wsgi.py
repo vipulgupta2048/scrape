@@ -1,4 +1,4 @@
-from server import application
+from web_app.server import application
 
 if __name__ == "__main__":
     application.run()

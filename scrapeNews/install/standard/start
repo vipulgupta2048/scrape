@@ -1,0 +1,19 @@
+#!/bin/bash
+
+########################################################################################
+#                                                                                      #
+# This Script Starts Scheuler, Scrapyd and Gunicorn Server                             #
+#                                                                                      #
+# P.S. File Permissions must be set to: u+r+w+x g+r+w+x o+r+x                          #
+# Requires:                                                                            #
+# - env.sh (Environment Variables Setter)                                              #
+# - tmux                                                                               #
+########################################################################################
+
+deploy_path=/path/to/deploy
+
+cd "$deploy_path";
+
+source $deploy_path/venv/bin/activate && source $deploy_path/env.sh && python scheduler.py &
+source $deploy_path/venv/bin/activate && source $deploy_path/env.sh && scrapyd &
+cd $deploy_path/web && source $deploy_path/venv/bin/activate && source $deploy_path/env.sh && gunicorn --workers 3 --bind unix:$deploy_path/app.sock -m 007 web_app.wsgi:application;

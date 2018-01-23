@@ -1,0 +1,5 @@
+[webservers]
+127.0.0.1 ansible_port=2222 ansible_user=ubuntu
+
+[dbservers]
+127.0.0.1 ansible_port=2222 ansible_user=ubuntu

@@ -1,0 +1,45 @@
+---
+# Install and Configure Postgres Database Server
+
+- name: Install Postgresql Database
+  apt:
+    name: postgresql
+    state: latest
+  when: not remote_db
+  notify: start postgresql service
+
+- name: Set Root DB Password
+  become_user: postgres
+  become: yes
+  postgresql_user:
+    name: postgres
+    password: "{{ db_root_pass }}"
+    state: present
+  when: not remote_db
+
+- name: Create Database
+  become_user: postgres
+  become: yes
+  postgresql_db: 
+    name:  "{{ db_name }}"
+  when: not remote_db
+
+- name: Create DB USER
+  become_user: postgres
+  become: yes
+  postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_pass }}"
+    role_attr_flags: LOGIN
+    state: present
+
+- name: GRANT PRIVILEGES
+  become_user: postgres
+  become: yes
+  postgresql_privs:
+    db: "{{ db_name }}"
+    privs: ALL
+    role: "{{ db_user }}"
+    grant_option: no
+    state: present
+    type: database

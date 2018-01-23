@@ -82,7 +82,7 @@ class nation(scrapy.Spider):
             if not data:
                 data = response.xpath('//div[@itemprop ="articleBody"]//span/text()').extract()
             if not data or data is None:    
-                logger.error(__name__ + " Unable to Extract Content : " response.url)
+                logger.error(__name__ + " Unable to Extract Content : " + response.url)
                 data = 'Error'
         except Exception as e:
             logger.error(__name__ + " [UNHANDLED] Unable to Extract Content : " + str(e) + " : " + response.url)
@@ -107,7 +107,7 @@ class nation(scrapy.Spider):
     def getlink(self,response):
         try: 
             data = response.url
-            if data == start_urls:
+            if data == self.start_urls:
                 logger.error(__name__+ " Unable to Extract Link : " + response.url)
                 data = 'Error'
         except Exception as e:

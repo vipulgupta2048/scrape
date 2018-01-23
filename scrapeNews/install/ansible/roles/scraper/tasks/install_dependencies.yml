@@ -1,0 +1,26 @@
+---
+
+- name: update cache
+  apt:
+    update_cache: yes
+
+- name: Install/Update Dependencies
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - "gcc"
+    - "git"
+    - "tmux"
+    - "python3"
+    - "python3-dev"
+    - "virtualenv"
+    - "nginx"
+    - "privoxy"
+    - "tor"
+  notify:
+    - restart postgresql
+    - restart nginx
+    - restart tor
+    - restart privoxy
+  

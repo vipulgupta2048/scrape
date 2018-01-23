@@ -1,0 +1,20 @@
+---
+- name: install systemd service
+  template:
+    src: scraper.service.j2
+    dest: /etc/systemd/system/scraper.service
+  notify: enable systemd service
+
+- name: install nginx site
+  template:
+    src: scraper-nginx.j2
+    dest: /etc/nginx/sites-available/scraper
+  notify: activate nginx site
+
+- name: activate privoxy for tor
+  blockinfile:
+    dest: /etc/privoxy/config
+    block: |
+      forward-socks5  / 127.0.0.1:9050 .
+      forward-socks4a / 127.0.0.1:9050 .
+      forward-socks5t / 127.0.0.1:9050 .

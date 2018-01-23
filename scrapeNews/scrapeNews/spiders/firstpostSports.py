@@ -68,10 +68,10 @@ class FirstpostsportsSpider(scrapy.Spider):
             if (data is None):
                 data = response.xpath('//h1[@class="page-title article-title"]/text()').extract_first()
             if (data is None):
-                logger.error(__name__ + " Unable to Extract Title " + str(Error) + " : " response.url)
+                logger.error(__name__ + " Unable to Extract Title " + str(Error) + " : " + response.url)
                 data = 'Error'
         except Exception as Error:
-            logger.error(__name__ + " Unable to Extract Title " + str(Error) + " : " response.url)
+            logger.error(__name__ + " Unable to Extract Title " + str(Error) + " : " + response.url)
             data = 'Error'
         
         return data
@@ -80,10 +80,10 @@ class FirstpostsportsSpider(scrapy.Spider):
         try:
             data = response.xpath("/html/head/meta[@property='og:image']/@content").extract_first()
             if (data is None):
-                logger.error(__name__ + " Unable to Extract Title : " response.url)
+                logger.error(__name__ + " Unable to Extract Title : " + response.url)
                 data = 'Error'
         except Exception as e:
-            logger.error(__name__ + " Unable to Extract Image " + str(e) + " : " response.url)
+            logger.error(__name__ + " Unable to Extract Image " + str(e) + " : " + response.url)
             data = 'Error'
         return data
 
@@ -92,7 +92,7 @@ class FirstpostsportsSpider(scrapy.Spider):
             # split & rsplit Used to Spit Data in Correct format!
             data = (response.xpath("//head/meta[@property='article:published_time']/@content").extract_first()).rsplit('+',1)[0]
         except Exception as Error:
-            logger.error(__name__ + " Unable to Extract Date " + str(Error) + " : " response.url)
+            logger.error(__name__ + " Unable to Extract Date " + str(Error) + " : " + response.url)
             data = 'Error'
         return data
 
@@ -112,9 +112,9 @@ class FirstpostsportsSpider(scrapy.Spider):
             if not data:
                 data = ' '.join(response.xpath("//div[@class='consumption']/p//text()").extract())
             if not data:
-                logger.error(__name__ + " Unable to Extract Content : " response.url)
+                logger.error(__name__ + " Unable to Extract Content : " + response.url)
                 data = 'Error'
         except Exception as e:
-            logger.error(__name__ + " Unable to Extract Content " + str(e) + " : " response.url)
+            logger.error(__name__ + " Unable to Extract Content " + str(e) + " : " + response.url)
             data = 'Error'
         return data

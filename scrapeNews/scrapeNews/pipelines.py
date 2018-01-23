@@ -5,6 +5,7 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import logging
+import os
 from scrapy import signals
 from scrapeNews.settings import DB_INFO, logger
 from scrapeNews.db import postgresSQL, createDatabase
