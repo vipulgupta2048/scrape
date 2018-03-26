@@ -9,6 +9,8 @@ This repository holds the code for scrapers built under the project "Scrape the 
 ## Automatic Installation
 Modify Hosts File ```scrapeNews/install/ansible/hosts``` and use ```ansible-playbook install.yaml -i hosts``` to automatically deploy the complete application on server.
 
+For customising other vars like username, deploy_base, etc, edit the ```scrapeNews/install/ansible/group_vars/all``` file.
+
 ## Manual Installation
 Clone the repository (or download it). Then, follow the installation steps to run the spiders.
 
