@@ -3,7 +3,7 @@
   service:
     name: scraper
     enabled: yes
-    state: reloaded
+    state: restarted
   notify:
     - start systemd service
 

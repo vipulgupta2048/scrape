@@ -50,7 +50,7 @@
 
 - name: initialise the python package
   file:
-    path: "{{ deploy_base }}/web/__init_.py"
+    path: "{{ deploy_base }}/web/__init__.py"
     state: touch
 
 - name: install start script
