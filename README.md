@@ -38,7 +38,7 @@ python3 -m venv VENV_NAME
 ### Activate the venv
 Windows: `VENV_NAME/Scripts/activate`
 Linux: `source VENV_NAME/bin/activate`
-### Install the requirements
+### Install the following requirements
 Navigate to repository: `pip install -r requirements.txt`
 - Requirements(For scraping):
     - scrapy
@@ -100,7 +100,7 @@ export SCRAPER_DB_TABLE_LOG="ENTER_VALUE_HERE"
 export FLASK_APP="ROOT/deploy/web/web_app/server.py"
 ```
 
-### Install Web App
+### Install the Web App
 
 #### Copy Required Files
 Copy ```ROOT/scrape/scrapeNews/web_app/*``` to ```ROOT/deploy/web/web_app/*```
