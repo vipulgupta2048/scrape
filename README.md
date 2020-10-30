@@ -1,8 +1,8 @@
 # On Your Mark, Get Set, Scrape !!
 
 This repository holds the code for scrapers built under the project "Scrape the Planet"  
-- Methods used for scraping : Scrapy   
-- Language used for scraping : Python3.X.X
+- Methods used for scraping: Scrapy   
+- Language used for scraping: Python3.X.X
 
 **Minutes of the meeting:** http://bit.ly/scrapeThePlanet
 
