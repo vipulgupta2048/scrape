@@ -18,7 +18,7 @@ incremental==17.5.0
 ipaddress==1.0.18
 itsdangerous==0.24
 Jinja2==2.10
-lxml==4.1.1
+lxml==4.6.2
 MarkupSafe==1.0
 parsel==1.2.0
 pi==0.1.2
