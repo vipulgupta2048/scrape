@@ -49,6 +49,6 @@ system-service==0.3
 thin-client-config-agent==0.8
 ubuntu-drivers-common==0.0.0
 ufw==0.35
-urllib3==1.13.1
+urllib3==1.26.5
 virtkey==0.63.0
 xkit==0.0.0
